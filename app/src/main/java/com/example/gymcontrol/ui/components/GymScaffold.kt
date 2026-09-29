@@ -10,6 +10,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.ui.theme.GymColors
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,6 +21,7 @@ fun GymScaffold(
     content: @Composable () -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -28,7 +30,10 @@ fun GymScaffold(
                 GymSidebar(
                     currentSection = currentSection,
                     sections = sections,
-                    onNavigate = onNavigate
+                    onNavigate = {
+                        onNavigate(it)
+                        scope.launch { drawerState.close() }
+                    }
                 )
             }
         }
