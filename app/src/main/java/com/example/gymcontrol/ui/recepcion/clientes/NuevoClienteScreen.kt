@@ -61,7 +61,7 @@ fun ClientFormDialog(
                 Text(
                     text = if (isEditing) "Editar cliente" else "Nuevo cliente",
                     color = GymColors.TextPrimary,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onDismiss) {

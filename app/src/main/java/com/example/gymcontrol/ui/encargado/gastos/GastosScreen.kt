@@ -247,7 +247,7 @@ private fun ExpenseFormDialog(
                 Text(
                     text = if (isEditing) "Editar gasto" else "Nuevo gasto",
                     color = GymColors.TextPrimary,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onDismiss) {

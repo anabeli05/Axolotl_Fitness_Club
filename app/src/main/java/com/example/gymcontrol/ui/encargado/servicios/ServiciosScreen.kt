@@ -231,7 +231,7 @@ private fun ServiceFormDialog(
                 Text(
                     text = if (isEditing) "Editar servicio" else "Nuevo servicio",
                     color = GymColors.TextPrimary,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onDismiss) {
