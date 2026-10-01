@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -24,7 +23,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,7 +67,7 @@ fun QrScannerScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            // ---------- Tarjeta: Escanear código ----------
+            // ---------- Tarjeta: Escanear código (cámara real) ----------
             GymCard {
                 Text(
                     "Escanear código",
@@ -82,28 +80,17 @@ fun QrScannerScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1f),
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    // TODO: aquí va tu CameraX PreviewView (AndroidView) o ML Kit
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(0.75f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(GymColors.Background),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                Icons.Default.QrCodeScanner,
-                                contentDescription = null,
-                                tint = GymColors.TextSecondary,
-                                modifier = Modifier.size(64.dp)
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Text("Apunta al código QR", color = GymColors.TextSecondary, fontSize = 13.sp)
+                    QrCameraPreview(
+                        modifier = Modifier.fillMaxSize(),
+                        onQrDetected = { qrText ->
+                            // TODO: con Supabase ya conectado, aquí consultas
+                            // la tabla de clientes usando qrText (número de membresía)
                         }
-                    }
+                    )
                     ScannerCorners(Modifier.fillMaxSize())
                 }
             }
