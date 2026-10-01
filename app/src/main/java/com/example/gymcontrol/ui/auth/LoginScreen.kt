@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.data.model.UserRole
+import com.example.gymcontrol.data.remote.AuthRepository
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -14,6 +17,9 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
     var identifier by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf(UserRole.CLIENTE) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -60,15 +66,28 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
         )
         Spacer(Modifier.height(20.dp))
         Button(
-            onClick = { onLogin(selectedRole) },
+            onClick = {
+                scope.launch {
+                    loading = true
+                    error = null
+                    try {
+                        val user = AuthRepository.login(identifier.trim(), password, selectedRole)
+                        if (user != null) onLogin(selectedRole)
+                        else error = "Usuario o contraseña incorrectos"
+                    } catch (e: Exception) {
+                        error = "Error de conexión: ${e.message}"
+                    }
+                    loading = false
+                }
+            },
+            enabled = !loading,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Entrar")
+            Text(if (loading) "Entrando..." else "Entrar")
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            "Demo: el login todavía no valida credenciales. Aquí conectarás tu API.",
-            style = MaterialTheme.typography.bodySmall
-        )
+        error?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, color = Color.Red, style = MaterialTheme.typography.bodySmall)
+        }
     }
 }
