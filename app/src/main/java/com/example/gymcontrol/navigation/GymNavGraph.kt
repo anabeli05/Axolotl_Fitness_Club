@@ -33,7 +33,6 @@ import com.example.gymcontrol.ui.encargado.usuarios.UsuariosScreen
 import com.example.gymcontrol.ui.instructor.clientes.MisClientesScreen
 import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
 import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
-import com.example.gymcontrol.ui.recepcion.clientes.NuevoClienteScreen
 import com.example.gymcontrol.ui.recepcion.scanner.QrScannerScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
 import com.example.gymcontrol.ui.theme.GymColors
@@ -66,10 +65,7 @@ fun GymNavGraph() {
 
             composable(Routes.RECEPTION_SCANNER) { QrScannerScreen() }
             composable(Routes.RECEPTION_CLIENTS) {
-                ClientesScreen { navController.navigate(Routes.RECEPTION_NEW_CLIENT) }
-            }
-            composable(Routes.RECEPTION_NEW_CLIENT) {
-                NuevoClienteScreen { navController.popBackStack() }
+                ClientesScreen()
             }
             composable(Routes.RECEPTION_REQUESTS) { SolicitudesScreen() }
 
