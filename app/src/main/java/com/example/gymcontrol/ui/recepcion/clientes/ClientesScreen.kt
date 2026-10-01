@@ -165,9 +165,9 @@ private fun ClientCard(
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
-            Text("Membresía: $membership", color = GymColors.TextSecondary, fontSize = 16.sp)
+            Text("Membresía: $membership", color = GymColors.TextSecondary, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Registro: $registrationDate", color = GymColors.TextSecondary, fontSize = 16.sp)
+            Text("Registro: $registrationDate", color = GymColors.TextSecondary, fontSize = 17.sp)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -193,7 +193,7 @@ private fun ClientCard(
                     modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("Renovar", fontSize = 15.sp)
+                    Text("Renovar", fontSize = 17.sp)
                 }
             }
         }
@@ -233,7 +233,7 @@ private fun StatusBadge(isActive: Boolean) {
         Text(
             text = label,
             color = color,
-            fontSize = 14.sp,
+            fontSize = 17.sp,
             fontWeight = FontWeight.Bold
         )
     }
