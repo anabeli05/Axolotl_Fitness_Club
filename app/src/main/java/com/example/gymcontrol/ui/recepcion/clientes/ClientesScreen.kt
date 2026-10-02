@@ -109,7 +109,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 if (clients.isEmpty()) {
                     item {
                         Text(
-                            text = "No se encontraron clientes",
+                            text = "No se encontraron com.example.gymcontrol.ui.encargado.clientes",
                             color = GymColors.TextSecondary,
                             fontSize = 14.sp,
                             modifier = Modifier

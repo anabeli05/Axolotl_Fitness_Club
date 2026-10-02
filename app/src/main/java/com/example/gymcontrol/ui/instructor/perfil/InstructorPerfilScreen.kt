@@ -17,7 +17,7 @@ fun InstructorPerfilScreen() {
         OutlinedTextField(
             capacity,
             { capacity = it.filter(Char::isDigit) },
-            label = { Text("Capacidad máxima de clientes") },
+            label = { Text("Capacidad máxima de com.example.gymcontrol.ui.encargado.clientes") },
             modifier = Modifier.fillMaxWidth()
         )
         Button(onClick = {}) { Text("Guardar") }

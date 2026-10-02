@@ -24,6 +24,7 @@ import com.example.gymcontrol.ui.auth.LoginScreen
 import com.example.gymcontrol.ui.cliente.asesorias.AsesoriasScreen
 import com.example.gymcontrol.ui.cliente.home.ClienteHomeScreen
 import com.example.gymcontrol.ui.cliente.perfil.ClientePerfilScreen
+import com.example.gymcontrol.ui.encargado.clientes.ClientesScreen as AdminClientesScreen
 import com.example.gymcontrol.ui.encargado.dashboard.DashboardScreen
 import com.example.gymcontrol.ui.encargado.gastos.GastosScreen
 import com.example.gymcontrol.ui.encargado.reportes.ReportesScreen
@@ -75,6 +76,9 @@ fun GymNavGraph() {
             composable(Routes.ADMIN_DASHBOARD) {
                 DashboardScreen(onNavigate = { section -> navigateAdmin(navController, section) })
             }
+            composable(Routes.ADMIN_CLIENTS) {
+                AdminClientesScreen(onNavigate = { section -> navigateAdmin(navController, section) })
+            }
             composable(Routes.ADMIN_USERS) {
                 UsuariosScreen(
                     onNewUser = { navController.navigate(Routes.ADMIN_NEW_USER) },
@@ -103,11 +107,12 @@ fun GymNavGraph() {
 private fun navigateAdmin(navController: NavHostController, section: String) {
     val route = when (section) {
         "Dashboard" -> Routes.ADMIN_DASHBOARD
+        "Clientes" -> Routes.ADMIN_CLIENTS
         "Personal" -> Routes.ADMIN_USERS
         "Servicios" -> Routes.ADMIN_SERVICES
         "Gastos" -> Routes.ADMIN_EXPENSES
         "Reportes" -> Routes.ADMIN_REPORTS
-        else -> null // "Clientes" aún no tiene ruta de encargado
+        else -> null
     }
     if (route != null) {
         navController.navigate(route) { launchSingleTop = true }
@@ -177,6 +182,7 @@ private fun RoleDevMenu(navController: NavHostController) {
             "Instructor · Clientes" to Routes.INSTRUCTOR_CLIENTS,
             "Instructor · Perfil" to Routes.INSTRUCTOR_PROFILE,
             "Dueño · Dashboard" to Routes.ADMIN_DASHBOARD,
+            "Dueño · Clientes" to Routes.ADMIN_CLIENTS,
             "Dueño · Usuarios" to Routes.ADMIN_USERS,
             "Dueño · Servicios" to Routes.ADMIN_SERVICES,
             "Dueño · Gastos" to Routes.ADMIN_EXPENSES,

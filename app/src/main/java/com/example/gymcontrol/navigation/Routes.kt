@@ -16,6 +16,7 @@ object Routes {
     const val INSTRUCTOR_PROFILE = "instructor_profile"
 
     const val ADMIN_DASHBOARD = "admin_dashboard"
+    const val ADMIN_CLIENTS = "admin_clients"
     const val ADMIN_USERS = "admin_users"
     const val ADMIN_NEW_USER = "admin_new_user"
     const val ADMIN_SERVICES = "admin_services"

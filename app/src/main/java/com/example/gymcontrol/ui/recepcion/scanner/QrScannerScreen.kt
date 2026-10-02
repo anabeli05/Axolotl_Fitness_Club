@@ -88,7 +88,7 @@ fun QrScannerScreen(
                         modifier = Modifier.fillMaxSize(),
                         onQrDetected = { qrText ->
                             // TODO: con Supabase ya conectado, aquí consultas
-                            // la tabla de clientes usando qrText (número de membresía)
+                            // la tabla de com.example.gymcontrol.ui.encargado.clientes usando qrText (número de membresía)
                         }
                     )
                     ScannerCorners(Modifier.fillMaxSize())
