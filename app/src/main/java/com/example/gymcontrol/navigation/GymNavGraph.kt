@@ -66,9 +66,14 @@ fun GymNavGraph() {
             composable(Routes.INSTRUCTOR_CLIENTS) { MisClientesScreen() }
             composable(Routes.INSTRUCTOR_PROFILE) { InstructorPerfilScreen() }
 
-            composable(Routes.ADMIN_DASHBOARD) { DashboardScreen() }
+            composable(Routes.ADMIN_DASHBOARD) {
+                DashboardScreen(onNavigate = { section -> navigateAdmin(navController, section) })
+            }
             composable(Routes.ADMIN_USERS) {
-                UsuariosScreen { navController.navigate(Routes.ADMIN_NEW_USER) }
+                UsuariosScreen(
+                    onNewUser = { navController.navigate(Routes.ADMIN_NEW_USER) },
+                    onNavigate = { section -> navigateAdmin(navController, section) }
+                )
             }
             composable(Routes.ADMIN_NEW_USER) {
                 NuevoUsuarioScreen { navController.popBackStack() }
@@ -85,6 +90,21 @@ fun GymNavGraph() {
         ) {
             RoleDevMenu(navController)
         }
+    }
+}
+
+// Convierte el nombre de la sección del menú del encargado en su ruta
+private fun navigateAdmin(navController: NavHostController, section: String) {
+    val route = when (section) {
+        "Dashboard" -> Routes.ADMIN_DASHBOARD
+        "Personal" -> Routes.ADMIN_USERS
+        "Servicios" -> Routes.ADMIN_SERVICES
+        "Gastos" -> Routes.ADMIN_EXPENSES
+        "Reportes" -> Routes.ADMIN_REPORTS
+        else -> null // "Clientes" aún no tiene ruta de encargado
+    }
+    if (route != null) {
+        navController.navigate(route) { launchSingleTop = true }
     }
 }
 
