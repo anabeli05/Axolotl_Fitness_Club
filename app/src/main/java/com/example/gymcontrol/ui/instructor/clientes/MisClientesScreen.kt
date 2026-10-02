@@ -17,7 +17,7 @@ fun MisClientesScreen() {
         it.active && (it.clientName.contains(search, true) || it.goal.contains(search, true))
     }
 
-    ScreenContainer("Mis clientes") {
+    ScreenContainer("Mis com.example.gymcontrol.ui.encargado.clientes") {
         OutlinedTextField(search, { search = it }, label = { Text("Buscar") }, modifier = Modifier.fillMaxWidth())
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(clients) { client ->

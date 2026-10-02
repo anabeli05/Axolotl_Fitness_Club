@@ -68,7 +68,7 @@ fun UsuariosScreen(
             role = target.role,
             status = target.status,
             onBack = { editing = null },
-            onSave = { editing = null }
+            onSave = { _, _, _, _ -> editing = null }
         )
         return
     }
