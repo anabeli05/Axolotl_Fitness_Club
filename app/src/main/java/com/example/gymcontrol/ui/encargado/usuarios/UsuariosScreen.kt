@@ -32,14 +32,12 @@ import com.example.gymcontrol.ui.theme.GymColors
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
-// Colores tomados del mockup. Si ya los tienes en GymColors, cámbialos por esos.
 private val Purple = Color(0xFFA54FD9)
 private val CardBackground = Color(0xFF1E1F20)
 private val CardBorder = Color(0xFF4A4B4D)
 private val TextPrimary = Color.White
 private val TextSecondary = Color(0xFFB5B5B5)
 
-// Datos mínimos de la persona seleccionada para editar o eliminar
 private class StaffItem(
     val name: String,
     val email: String,
@@ -54,13 +52,12 @@ fun UsuariosScreen(
 ) {
     var editing by remember { mutableStateOf<StaffItem?>(null) }
     var deleting by remember { mutableStateOf<StaffItem?>(null) }
-    // Solo para la demo: oculta de la lista a quien se "elimina". TODO: quitar cuando haya validación real
     val removed = remember { mutableStateListOf<String>() }
 
     val personal = GymApp.repository.users()
         .filter { it.membershipNumber == null && "${it.email}" !in removed }
 
-    // Formulario de edición (reemplaza la lista mientras está abierto)
+    //Formulario de edición
     editing?.let { target ->
         EditarUsuarioScreen(
             name = target.name,
@@ -135,7 +132,7 @@ fun UsuariosScreen(
                         verticalAlignment = Alignment.Top,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Avatar (alineado arriba, junto al nombre)
+                        // Avatar
                         Box(
                             modifier = Modifier
                                 .padding(top = 2.dp)
@@ -153,12 +150,11 @@ fun UsuariosScreen(
                             )
                         }
 
-                        // Info compacta
+                        //Info
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(1.dp)
                         ) {
-                            // Nombre + acciones en la misma fila
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
@@ -219,7 +215,6 @@ fun UsuariosScreen(
 
                             Spacer(Modifier.height(6.dp))
 
-                            // Chip de estado
                             Box(
                                 modifier = Modifier
                                     .border(1.dp, statusColor, RoundedCornerShape(50))
@@ -240,7 +235,7 @@ fun UsuariosScreen(
         }
     }
 
-    // Cuadro de confirmación para eliminar
+    //Cuadro para confirmación de eliminar
     deleting?.let { target ->
         AlertDialog(
             onDismissRequest = { deleting = null },

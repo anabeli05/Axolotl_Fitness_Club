@@ -93,7 +93,6 @@ fun GymNavGraph() {
     }
 }
 
-// Convierte el nombre de la sección del menú del encargado en su ruta
 private fun navigateAdmin(navController: NavHostController, section: String) {
     val route = when (section) {
         "Dashboard" -> Routes.ADMIN_DASHBOARD
@@ -101,7 +100,7 @@ private fun navigateAdmin(navController: NavHostController, section: String) {
         "Servicios" -> Routes.ADMIN_SERVICES
         "Gastos" -> Routes.ADMIN_EXPENSES
         "Reportes" -> Routes.ADMIN_REPORTS
-        else -> null // "Clientes" aún no tiene ruta de encargado
+        else -> null
     }
     if (route != null) {
         navController.navigate(route) { launchSingleTop = true }
