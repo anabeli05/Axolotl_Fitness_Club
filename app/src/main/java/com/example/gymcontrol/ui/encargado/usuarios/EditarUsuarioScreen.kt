@@ -83,6 +83,7 @@ private fun SectionCard(title: String, content: @Composable ColumnScope.() -> Un
         }
     }
 }
+
 @Composable
 fun EditarUsuarioScreen(
     name: String,
