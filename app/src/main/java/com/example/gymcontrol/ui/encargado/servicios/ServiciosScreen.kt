@@ -4,6 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.input.KeyboardType
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -99,7 +105,7 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                         onEdit = {
                             editingIndex = index
                             name = service.name
-                            duration = "${service.duration}"
+                            duration = "${service.duration}".filter { it.isDigit() }
                             price = "${service.price}"
                             showForm = true
                         },
@@ -157,10 +163,21 @@ private fun DeleteConfirmDialog(
         shape = RoundedCornerShape(16.dp),
         icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
         title = {
-            Text(title, color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
+            Text(
+                title,
+                color = GymColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         text = {
-            Text(message, color = GymColors.TextSecondary)
+            Text(
+                message,
+                color = GymColors.TextSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         confirmButton = {
             Button(
@@ -289,6 +306,7 @@ private fun ServiceFormDialog(
                 .background(GymColors.Surface, RoundedCornerShape(16.dp))
                 .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
                 .padding(20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -308,17 +326,50 @@ private fun ServiceFormDialog(
 
             Spacer(Modifier.height(12.dp))
 
-            GymTextField(value = name, onValueChange = onNameChange, label = "Nombre")
+            RestrictedField(
+                value = name,
+                onValueChange = onNameChange,
+                label = "Nombre",
+                accept = { s -> s.all { it.isLetterOrDigit() || it == ' ' } },
+                maxLength = 30,
+                warningText = "Solo se permiten letras y números"
+            )
             Spacer(Modifier.height(10.dp))
-            GymTextField(value = duration, onValueChange = onDurationChange, label = "Duración")
+            RestrictedField(
+                value = duration,
+                onValueChange = onDurationChange,
+                label = "Duración (días)",
+                accept = { s -> s.all { it in '0'..'9' } },
+                maxLength = 3,
+                warningText = "Solo se permiten números",
+                keyboardType = KeyboardType.Number,
+                errorText = if (duration.isNotEmpty() && duration.toInt() == 0) "Debe ser mayor a 0" else null
+            )
             Spacer(Modifier.height(10.dp))
-            GymTextField(value = price, onValueChange = onPriceChange, label = "Costo")
+            RestrictedField(
+                value = price,
+                onValueChange = onPriceChange,
+                label = "Costo",
+                accept = { s -> MONEY_REGEX.matches(s) },
+                maxLength = 9,
+                warningText = "Solo números (máx. 2 decimales)",
+                keyboardType = KeyboardType.Decimal,
+                prefix = "$"
+            )
 
             Spacer(Modifier.height(18.dp))
 
             Button(
                 onClick = onSave,
-                colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
+                enabled = name.isNotBlank() &&
+                        (duration.toIntOrNull() ?: 0) > 0 &&
+                        (price.toDoubleOrNull() ?: 0.0) > 0.0,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GymColors.Purple,
+                    contentColor = GymColors.TextPrimary,
+                    disabledContainerColor = GymColors.Purple.copy(alpha = 0.45f),
+                    disabledContentColor = GymColors.TextPrimary.copy(alpha = 0.7f)
+                ),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -329,23 +380,69 @@ private fun ServiceFormDialog(
 }
 
 @Composable
-private fun GymTextField(
+private fun fieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = GymColors.Purple,
+    unfocusedBorderColor = GymColors.Border,
+    focusedTextColor = GymColors.TextPrimary,
+    unfocusedTextColor = GymColors.TextPrimary,
+    focusedLabelColor = GymColors.Purple,
+    cursorColor = GymColors.Gold,
+    errorBorderColor = GymColors.Red,
+    errorTextColor = GymColors.TextPrimary,
+    errorLabelColor = GymColors.Red,
+    errorCursorColor = GymColors.Red,
+    errorSupportingTextColor = GymColors.Red
+)
+
+// Campo que rechaza lo que no cumple `accept` (muestra un aviso unos segundos)
+// y limita la longitud. `errorText` es un error fijo (ej. "faltan dígitos").
+@Composable
+private fun RestrictedField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String
+    label: String,
+    accept: (String) -> Boolean,
+    maxLength: Int,
+    warningText: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    errorText: String? = null,
+    prefix: String? = null
 ) {
+    var warning by remember { mutableStateOf(false) }
+    var tick by remember { mutableStateOf(0) }
+
+    LaunchedEffect(tick) {
+        if (tick > 0) {
+            warning = true
+            delay(2500)
+            warning = false
+        }
+    }
+
+    val shownError = if (warning) warningText else errorText
+
     OutlinedTextField(
         value = value,
-        onValueChange = onValueChange,
-        label = { Text(label, color = GymColors.TextSecondary) },
+        onValueChange = { new ->
+            when {
+                !accept(new) -> tick++
+                new.length <= maxLength -> onValueChange(new)
+            }
+        },
+        label = { Text(label, color = if (shownError != null) GymColors.Red else GymColors.TextSecondary) },
+        singleLine = true,
+        isError = shownError != null,
+        supportingText = if (shownError != null) {
+            { Text(shownError) }
+        } else null,
+        prefix = if (prefix != null) {
+            { Text(prefix, color = GymColors.TextPrimary) }
+        } else null,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GymColors.Purple,
-            unfocusedBorderColor = GymColors.Border,
-            focusedTextColor = GymColors.TextPrimary,
-            unfocusedTextColor = GymColors.TextPrimary,
-            cursorColor = GymColors.Gold
-        ),
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(10.dp),
+        colors = fieldColors()
     )
 }
+
+private val MONEY_REGEX = Regex("^\\d{0,6}(\\.\\d{0,2})?$")
