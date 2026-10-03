@@ -1,5 +1,6 @@
 package com.example.gymcontrol.ui.encargado.gastos
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -11,12 +12,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +31,14 @@ import com.example.gymcontrol.ui.theme.GymColors
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
+// Borde degradado en tonos rojos para el cuadro de eliminar
+private val DeleteBorder = Brush.linearGradient(
+    listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
+)
+
+// Gasto seleccionado para eliminar: clave única para ocultarlo y concepto para mostrarlo en el aviso
+private class DeleteTarget(val key: String, val concept: String)
+
 @Composable
 fun GastosScreen(onNavigate: (String) -> Unit = {}) {
     var showForm by remember { mutableStateOf(false) }
@@ -37,7 +48,12 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
     var amount by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
 
+    var deleting by remember { mutableStateOf<DeleteTarget?>(null) }
+    // Solo para la demo: oculta de la lista lo que se "elimina". TODO: quitar cuando haya validación real
+    val removed = remember { mutableStateListOf<String>() }
+
     val allExpenses = GymApp.repository.expenses()
+        .filter { "${it.concept}|${it.date}|${it.amount}" !in removed }
 
     fun closeForm() {
         showForm = false
@@ -95,7 +111,12 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                             date = expense.date
                             showForm = true
                         },
-                        onDelete = { /* TODO: eliminar gasto */ }
+                        onDelete = {
+                            deleting = DeleteTarget(
+                                key = "${expense.concept}|${expense.date}|${expense.amount}",
+                                concept = expense.concept
+                            )
+                        }
                     )
                 }
             }
@@ -121,6 +142,60 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
             }
         }
     }
+
+    // Cuadro de confirmación para eliminar
+    deleting?.let { target ->
+        DeleteConfirmDialog(
+            title = "¿Eliminar gasto?",
+            message = "Se eliminará el gasto ${target.concept}. Esta acción no se puede deshacer.",
+            onConfirm = {
+                // TODO: eliminar el gasto en GymApp.repository
+                removed.add(target.key)
+                deleting = null
+            },
+            onDismiss = { deleting = null }
+        )
+    }
+}
+
+@Composable
+private fun DeleteConfirmDialog(
+    title: String,
+    message: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
+        containerColor = GymColors.Surface,
+        shape = RoundedCornerShape(16.dp),
+        icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
+        title = {
+            Text(title, color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
+        },
+        text = {
+            Text(message, color = GymColors.TextSecondary)
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GymColors.Red,
+                    contentColor = Color.White
+                )
+            ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, GymColors.Border),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+            ) { Text("Cancelar") }
+        }
+    )
 }
 
 @Composable
