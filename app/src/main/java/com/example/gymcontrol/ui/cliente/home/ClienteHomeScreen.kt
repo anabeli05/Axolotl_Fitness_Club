@@ -93,6 +93,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 }
+
 @Composable
 private fun QrCard() {
     Box(

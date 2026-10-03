@@ -35,6 +35,7 @@ private val TextSecondary = Color(0xFFB5B5B5)
 private fun formatPrice(cost: Double): String =
     if (cost % 1.0 == 0.0) "$${"%.0f".format(cost)}" else "$${"%.2f".format(cost)}"
 
+
 @Composable
 fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
     val instructors = GymApp.repository.instructors()
