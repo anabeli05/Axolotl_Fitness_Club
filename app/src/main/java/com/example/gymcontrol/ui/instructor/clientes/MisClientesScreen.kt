@@ -1,355 +1,320 @@
-package com.example.gymcontrol.ui.instructor.perfil
+package com.example.gymcontrol.ui.instructor.clientes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 
 // =========================
-// COLORES DEL DISEÑO
+// COLORES
 // =========================
 
-private val Negro = Color(0xFF000000)
-private val GrisOscuro = Color(0xFF202121)
-private val GrisBorde = Color(0xFF494A4A)
-private val Morado = Color(0xFFA655E5)
-private val Dorado = Color(0xFFA68A00)
-private val Blanco = Color(0xFFFFFFFF)
-private val GrisTexto = Color(0xFFBDBDBD)
-private val Verde = Color(0xFF5DBB63)
-private val Rojo = Color(0xFFE53935)
+private val McNegro = Color(0xFF000000)
+private val McGrisOscuro = Color(0xFF202121)
+private val McGrisBorde = Color(0xFF494A4A)
+private val McMorado = Color(0xFFA655E5)
+private val McDorado = Color(0xFFA68A00)
+private val McBlanco = Color(0xFFFFFFFF)
+private val McGrisTexto = Color(0xFFBDBDBD)
 
 // =========================
-// TAMAÑOS DE ICONOS (cámbialos aquí)
+// MODELO
 // =========================
 
-private val IconoFoto = 68.dp
-private val IconoEditar = 28.dp
-private val IconoFlecha = 30.dp
-private val IconoDato = 28.dp
-private val IconoBarra = 40.dp
+private data class McCliente(
+    val nombre: String,
+    val dias: String,
+    val objetivo: String
+)
+
+// =========================
+// PANTALLA
+// (el nombre MisClientesScreen es el que ya usa GymNavGraph)
+// =========================
 
 @Composable
-fun InstructorPerfilScreen() {
+fun MisClientesScreen(
+    onIrAPerfil: () -> Unit = {}   // opcional: para navegar a Perfil desde la barra inferior
+) {
 
-    var capacity by remember { mutableStateOf("3") }
+    val clientes = remember {
+        mutableStateListOf(
+            McCliente("Ana López", "Lun, Mié, Vie", "Ganar fuerza"),
+            McCliente("Luis Gómez", "Mar, Jue, Sáb", "Bajar grasa"),
+            McCliente("Mariana Silva", "Lun a Vie", "Acondicionamiento")
+        )
+    }
+
+    // null = modal cerrado, número = índice del cliente que se edita
+    var indiceEditando by remember { mutableStateOf<Int?>(null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Negro)
+            .background(McNegro)
     ) {
 
-        // =========================
         // ENCABEZADO
-        // =========================
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 6.dp, vertical = 10.dp)
         ) {
-
             Text(
                 text = "AXOLOTL",
-                color = Dorado,
+                color = McDorado,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
-            HorizontalDivider(color = Dorado, thickness = 1.dp)
+            HorizontalDivider(color = McDorado, thickness = 1.dp)
         }
 
-        // =========================
-        // CONTENIDO
-        // =========================
-
+        // LISTA
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(horizontal = 6.dp)
+                .padding(horizontal = 10.dp)
         ) {
-
             Text(
-                text = "Mi Perfil",
-                color = Blanco,
+                text = "Usuarios asignados",
+                color = McBlanco,
                 fontSize = 27.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
             )
 
-            // =========================
-            // TARJETA PRINCIPAL
-            // =========================
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        width = 2.dp,
-                        color = Morado,
-                        shape = RoundedCornerShape(20.dp)
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                itemsIndexed(clientes) { index, cliente ->
+                    McClienteCard(
+                        cliente = cliente,
+                        onEditar = { indiceEditando = index }
                     )
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                // FOTO
-                Box(
-                    modifier = Modifier
-                        .size(115.dp)
-                        .background(color = GrisOscuro, shape = CircleShape)
-                        .border(width = 2.dp, color = Blanco, shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Foto de perfil",
-                        tint = GrisTexto,
-                        modifier = Modifier.size(IconoFoto)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // NOMBRE
-                Text(
-                    text = "Maclovin Ramiez",
-                    color = Blanco,
-                    fontSize = 21.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // ESTADO
-                Row(verticalAlignment = Alignment.CenterVertically) {
-
-                    Text(text = "Estado:", color = GrisTexto, fontSize = 15.sp)
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = "Activo",
-                        color = Blanco,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .background(color = Verde, shape = RoundedCornerShape(6.dp))
-                            .padding(horizontal = 12.dp, vertical = 5.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // BOTÓN EDITAR
-                Button(
-                    onClick = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(58.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    shape = RoundedCornerShape(9.dp)
-                ) {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = null,
-                            tint = Blanco,
-                            modifier = Modifier.size(IconoEditar)
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            text = "Editar datos",
-                            color = Blanco,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        Icon(
-                            imageVector = Icons.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = Blanco,
-                            modifier = Modifier.size(IconoFlecha)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // =========================
-                // DATOS PERSONALES
-                // =========================
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = Color.Black, shape = RoundedCornerShape(9.dp))
-                        .border(
-                            width = 1.dp,
-                            color = GrisBorde,
-                            shape = RoundedCornerShape(9.dp)
-                        )
-                        .padding(16.dp)
-                ) {
-
-                    Text(
-                        text = "Datos Personales",
-                        color = Blanco,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    HorizontalDivider(
-                        color = GrisBorde,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = 9.dp)
-                    )
-
-                    DatoFila(Icons.Outlined.Person, "Nombre:", "Maclovin Ramiez")
-
-                    Spacer(modifier = Modifier.height(13.dp))
-
-                    DatoFila(Icons.Outlined.Phone, "Teléfono:", "+52 248 769 3720")
-
-                    Spacer(modifier = Modifier.height(13.dp))
-
-                    DatoFila(Icons.Outlined.Email, "Correo:", "loxd@hotmail.com")
-
-                    Spacer(modifier = Modifier.height(13.dp))
-
-                    // Capacidad
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-
-                        Icon(
-                            imageVector = Icons.Outlined.Person,
-                            contentDescription = null,
-                            tint = GrisTexto,
-                            modifier = Modifier.size(IconoDato)
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        Text(text = "Capacidad máx:", color = GrisTexto, fontSize = 15.sp)
-
-                        Spacer(modifier = Modifier.width(7.dp))
-
-                        Text(text = capacity, color = Blanco, fontSize = 15.sp)
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        Text(
-                            text = "Lleno",
-                            color = Blanco,
-                            fontSize = 13.sp,
-                            modifier = Modifier
-                                .background(color = Rojo, shape = RoundedCornerShape(6.dp))
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
-                    }
                 }
             }
         }
 
-        // =========================
         // BARRA INFERIOR
-        // =========================
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(84.dp)
-                .border(width = 1.dp, color = GrisBorde)
-                .background(Negro),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+                .border(width = 1.dp, color = McGrisBorde)
+                .background(McNegro),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            McBarraItem(
+                modifier = Modifier.weight(1f),
+                icono = Icons.Filled.Person,
+                texto = "Mis clientes",
+                color = McMorado,
+                onClick = {}
+            )
+            McBarraItem(
+                modifier = Modifier.weight(1f),
+                icono = Icons.Outlined.Person,
+                texto = "Perfil",
+                color = McGrisTexto,
+                onClick = onIrAPerfil
+            )
+        }
+    }
 
-            // MIS CLIENTES
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = "Mis clientes",
-                    tint = GrisTexto,
-                    modifier = Modifier.size(IconoBarra)
-                )
-                Text(text = "Mis clientes", color = GrisTexto, fontSize = 15.sp)
-            }
+    // MODAL DE EDICIÓN
+    indiceEditando?.let { indice ->
+        val cliente = clientes[indice]
 
-            // PERFIL
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = "Perfil",
-                    tint = Morado,
-                    modifier = Modifier.size(IconoBarra)
+        McEditarDialog(
+            diasInicial = cliente.dias,
+            objetivoInicial = cliente.objetivo,
+            onDismiss = { indiceEditando = null },
+            onGuardar = { nuevosDias, nuevoObjetivo ->
+                clientes[indice] = cliente.copy(
+                    dias = nuevosDias,
+                    objetivo = nuevoObjetivo
                 )
-                Text(text = "Perfil", color = Morado, fontSize = 15.sp)
+                indiceEditando = null
             }
+        )
+    }
+}
+
+// =========================
+// TARJETA
+// =========================
+
+@Composable
+private fun McClienteCard(cliente: McCliente, onEditar: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(McGrisOscuro, RoundedCornerShape(16.dp))
+            .border(2.dp, McGrisBorde, RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(46.dp)
+                .background(McNegro, CircleShape)
+                .border(1.dp, McGrisBorde, CircleShape)
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = cliente.nombre,
+                color = McBlanco,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = cliente.dias, color = McGrisTexto, fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Objetivo: ${cliente.objetivo}",
+                color = McGrisTexto,
+                fontSize = 12.sp
+            )
+        }
+
+        Button(
+            onClick = onEditar,
+            colors = ButtonDefaults.buttonColors(containerColor = McMorado),
+            shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(text = "Editar", color = McNegro, fontSize = 13.sp)
         }
     }
 }
 
 // =========================
-// FILA DE DATO CON ICONO
+// MODAL
 // =========================
 
 @Composable
-private fun DatoFila(icono: ImageVector, etiqueta: String, valor: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun McEditarDialog(
+    diasInicial: String,
+    objetivoInicial: String,
+    onDismiss: () -> Unit,
+    onGuardar: (dias: String, objetivo: String) -> Unit
+) {
+    var dias by remember { mutableStateOf(diasInicial) }
+    var objetivo by remember { mutableStateOf(objetivoInicial) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(McGrisBorde, RoundedCornerShape(8.dp))
+                .border(2.dp, McDorado, RoundedCornerShape(8.dp))
+                .padding(horizontal = 24.dp, vertical = 28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Text(
+                text = "Días que asistirá",
+                color = McBlanco,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            McCampo(valor = dias, onCambio = { dias = it })
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            Text(
+                text = "Objetivo",
+                color = McBlanco,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            McCampo(valor = objetivo, onCambio = { objetivo = it })
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Button(
+                onClick = { onGuardar(dias.trim(), objetivo.trim()) },
+                colors = ButtonDefaults.buttonColors(containerColor = McMorado),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 10.dp)
+            ) {
+                Text(text = "Guardar", color = McNegro, fontWeight = FontWeight.Medium)
+            }
+        }
+    }
+}
+
+@Composable
+private fun McCampo(valor: String, onCambio: (String) -> Unit) {
+    OutlinedTextField(
+        value = valor,
+        onValueChange = onCambio,
+        singleLine = true,
+        shape = RoundedCornerShape(50),
+        textStyle = TextStyle(color = McBlanco, fontSize = 15.sp, textAlign = TextAlign.Center),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = McMorado,
+            unfocusedBorderColor = McMorado,
+            focusedTextColor = McBlanco,
+            unfocusedTextColor = McBlanco,
+            cursorColor = McMorado,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent
+        ),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+// =========================
+// ITEM BARRA INFERIOR
+// =========================
+
+@Composable
+private fun McBarraItem(
+    modifier: Modifier,
+    icono: ImageVector,
+    texto: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxHeight()
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
         Icon(
             imageVector = icono,
-            contentDescription = null,
-            tint = GrisTexto,
-            modifier = Modifier.size(IconoDato)
+            contentDescription = texto,
+            tint = color,
+            modifier = Modifier.size(40.dp)
         )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = etiqueta,
-            color = GrisTexto,
-            fontSize = 15.sp,
-            modifier = Modifier.width(90.dp)
-        )
-        Text(text = valor, color = Blanco, fontSize = 15.sp)
+        Text(text = texto, color = color, fontSize = 15.sp)
     }
 }
