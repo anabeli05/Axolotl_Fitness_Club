@@ -19,12 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.ui.theme.GymColors
 
-private data class ClienteTab(val label: String, val icon: ImageVector)
+data class ScaffoldTab(val label: String, val icon: ImageVector)
 
 private val CLIENTE_TABS = listOf(
-    ClienteTab("Inicio", Icons.Filled.Home),
-    ClienteTab("Asesorías", Icons.Filled.FitnessCenter),
-    ClienteTab("Perfil", Icons.Filled.Person)
+    ScaffoldTab("Inicio", Icons.Filled.Home),
+    ScaffoldTab("Asesorías", Icons.Filled.FitnessCenter),
+    ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
 // Cambia este color por el fondo que uses en el resto de la app
@@ -35,6 +35,7 @@ fun ClienteScaffold(
     currentSection: String,
     onNavigate: (String) -> Unit,
     @DrawableRes logoRes: Int,
+    tabs: List<ScaffoldTab> = CLIENTE_TABS,
     content: @Composable () -> Unit
 ) {
     Column(
@@ -75,7 +76,7 @@ fun ClienteScaffold(
             containerColor = PageBackground,
             tonalElevation = 0.dp
         ) {
-            CLIENTE_TABS.forEach { tab ->
+            tabs.forEach { tab ->
                 val selected = tab.label == currentSection
                 NavigationBarItem(
                     selected = selected,

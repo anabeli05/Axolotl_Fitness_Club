@@ -1,337 +1,669 @@
 package com.example.gymcontrol.ui.instructor.perfil
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
+import com.example.gymcontrol.R
+import com.example.gymcontrol.ui.components.ClienteScaffold
+import com.example.gymcontrol.ui.components.ScaffoldTab
+import com.example.gymcontrol.ui.theme.GymColors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-// =========================
-// COLORES DEL DISEÑO
-// =========================
+private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
+private val InnerBackground = Color.Black.copy(alpha = 0.35f)
 
-private val Negro = Color(0xFF000000)
-private val GrisOscuro = Color(0xFF202121)
-private val GrisBorde = Color(0xFF494A4A)
-private val Morado = Color(0xFFA655E5)
-private val Dorado = Color(0xFFA68A00)
-private val Blanco = Color(0xFFFFFFFF)
-private val GrisTexto = Color(0xFFBDBDBD)
-private val Verde = Color(0xFF5DBB63)
-private val Rojo = Color(0xFFE53935)
-
-// =========================
-// TAMAÑOS DE ICONOS (cámbialos aquí)
-// =========================
-
-private val IconoFoto = 68.dp
-private val IconoEditar = 28.dp
-private val IconoFlecha = 30.dp
-private val IconoDato = 28.dp
-private val IconoBarra = 40.dp
+private val INSTRUCTOR_TABS = listOf(
+    ScaffoldTab("Mis clientes", Icons.Filled.Group),
+    ScaffoldTab("Perfil", Icons.Filled.Person)
+)
 
 @Composable
-fun InstructorPerfilScreen() {
+fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
-    var capacity by remember { mutableStateOf("3") }
+    var name by remember { mutableStateOf("Maclovin Ramiez") }
+    var phone by remember { mutableStateOf("2487693720") }
+    var email by remember { mutableStateOf("loxd@hotmail.com") }
+    var photo by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Negro)
-    ) {
+    // TODO: tomar la capacidad y los clientes activos desde Supabase
+    val capacity = 3
+    val activeClients = 3
 
-        // ENCABEZADO
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 10.dp)
-        ) {
-            Text(
-                text = "AXOLOTL",
-                color = Dorado,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(color = Dorado, thickness = 1.dp)
+    var showEditDialog by remember { mutableStateOf(false) }
+    var showPhotoDialog by remember { mutableStateOf(false) }
+
+    // Galería (selector de fotos del sistema, no necesita permisos)
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val bitmap = withContext(Dispatchers.IO) { loadBitmap(context, uri) }
+                if (bitmap != null) photo = bitmap.asImageBitmap()
+                else Toast.makeText(context, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
 
-        // CONTENIDO
-        Column(
+    // Cámara (toma la foto en el momento)
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) photo = bitmap.asImageBitmap()
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) cameraLauncher.launch(null)
+        else Toast.makeText(context, "Se necesita permiso de cámara para tomar la foto", Toast.LENGTH_SHORT).show()
+    }
+
+    ClienteScaffold(
+        currentSection = "Perfil",
+        onNavigate = onNavigate,
+        logoRes = R.drawable.logo_axolotl,
+        tabs = INSTRUCTOR_TABS
+    ) {
+        LazyColumn(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(top = 20.dp, bottom = 16.dp)
         ) {
-
-            Text(
-                text = "Mi Perfil",
-                color = Blanco,
-                fontSize = 27.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-            )
-
-            // TARJETA PRINCIPAL
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(
-                        width = 2.dp,
-                        color = Morado,
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                // FOTO
-                Box(
-                    modifier = Modifier
-                        .size(115.dp)
-                        .background(color = GrisOscuro, shape = CircleShape)
-                        .border(width = 2.dp, color = Blanco, shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Person,
-                        contentDescription = "Foto de perfil",
-                        tint = GrisTexto,
-                        modifier = Modifier.size(IconoFoto)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // NOMBRE
+            item {
                 Text(
-                    text = "Maclovin Ramiez",
-                    color = Blanco,
-                    fontSize = 21.sp,
+                    text = "Mi perfil",
+                    color = GymColors.TextPrimary,
+                    fontSize = 26.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // ESTADO
-                Row(verticalAlignment = Alignment.CenterVertically) {
-
-                    Text(text = "Estado:", color = GrisTexto, fontSize = 15.sp)
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = "Activo",
-                        color = Blanco,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .background(color = Verde, shape = RoundedCornerShape(6.dp))
-                            .padding(horizontal = 12.dp, vertical = 5.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // BOTÓN EDITAR
-                Button(
-                    onClick = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(58.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    shape = RoundedCornerShape(9.dp)
-                ) {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = null,
-                            tint = Blanco,
-                            modifier = Modifier.size(IconoEditar)
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            text = "Editar datos",
-                            color = Blanco,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        Icon(
-                            imageVector = Icons.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = Blanco,
-                            modifier = Modifier.size(IconoFlecha)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // DATOS PERSONALES
+            item {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color.Black, shape = RoundedCornerShape(9.dp))
-                        .border(
-                            width = 1.dp,
-                            color = GrisBorde,
-                            shape = RoundedCornerShape(9.dp)
-                        )
-                        .padding(16.dp)
+                        .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                        .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    ProfileAvatar(
+                        name = name,
+                        photo = photo,
+                        onEditPhoto = { showPhotoDialog = true }
+                    )
+
+                    Spacer(Modifier.height(14.dp))
 
                     Text(
-                        text = "Datos Personales",
-                        color = Blanco,
-                        fontSize = 17.sp,
+                        text = name,
+                        color = GymColors.TextPrimary,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Estado:",
+                            color = GymColors.TextSecondary,
+                            fontSize = 16.sp
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Chip(text = "Activo", color = GymColors.Green, width = 84.dp, height = 30.dp)
+                    }
 
-                    HorizontalDivider(
-                        color = GrisBorde,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(vertical = 9.dp)
+                    Spacer(Modifier.height(18.dp))
+
+                    ActionRow(
+                        icon = Icons.Filled.Edit,
+                        label = "Editar datos",
+                        onClick = { showEditDialog = true }
                     )
 
-                    DatoFila(Icons.Outlined.Person, "Nombre:", "Maclovin Ramiez")
+                    Spacer(Modifier.height(14.dp))
 
-                    Spacer(modifier = Modifier.height(13.dp))
-
-                    DatoFila(Icons.Outlined.Phone, "Teléfono:", "+52 248 769 3720")
-
-                    Spacer(modifier = Modifier.height(13.dp))
-
-                    DatoFila(Icons.Outlined.Email, "Correo:", "loxd@hotmail.com")
-
-                    Spacer(modifier = Modifier.height(13.dp))
-
-                    // Capacidad
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-
-                        Icon(
-                            imageVector = Icons.Outlined.Person,
-                            contentDescription = null,
-                            tint = GrisTexto,
-                            modifier = Modifier.size(IconoDato)
-                        )
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        Text(text = "Capacidad máx:", color = GrisTexto, fontSize = 15.sp)
-
-                        Spacer(modifier = Modifier.width(7.dp))
-
-                        Text(text = capacity, color = Blanco, fontSize = 15.sp)
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
+                    // Datos personales
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(InnerBackground, RoundedCornerShape(10.dp))
+                            .padding(16.dp)
+                    ) {
                         Text(
-                            text = "Lleno",
-                            color = Blanco,
-                            fontSize = 13.sp,
-                            modifier = Modifier
-                                .background(color = Rojo, shape = RoundedCornerShape(6.dp))
-                                .padding(horizontal = 10.dp, vertical = 5.dp)
+                            text = "Datos Personales",
+                            color = GymColors.TextPrimary,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold
                         )
+                        Spacer(Modifier.height(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(GymColors.Border)
+                        )
+                        Spacer(Modifier.height(12.dp))
+
+                        InfoRow(icon = Icons.Filled.Person, label = "Nombre:", value = name)
+                        Spacer(Modifier.height(14.dp))
+                        InfoRow(icon = Icons.Filled.Phone, label = "Teléfono:", value = formatPhone(phone))
+                        Spacer(Modifier.height(14.dp))
+                        InfoRow(icon = Icons.Filled.Email, label = "Correo:", value = email)
+                        Spacer(Modifier.height(14.dp))
+
+                        // Capacidad máxima de clientes
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Filled.Group,
+                                contentDescription = null,
+                                tint = GymColors.TextSecondary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = "Capacidad máx:",
+                                color = GymColors.TextSecondary,
+                                fontSize = 16.sp
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = capacity.toString(),
+                                color = GymColors.TextPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            if (activeClients >= capacity) {
+                                Chip(text = "Lleno", color = GymColors.Red, width = 64.dp, height = 28.dp)
+                            } else {
+                                Chip(text = "Cupo libre", color = GymColors.Green, width = 90.dp, height = 28.dp)
+                            }
+                        }
                     }
                 }
             }
         }
+    }
 
-        // BARRA INFERIOR
-        Row(
+    if (showPhotoDialog) {
+        PhotoDialog(
+            hasPhoto = photo != null,
+            onDismiss = { showPhotoDialog = false },
+            onCamera = {
+                showPhotoDialog = false
+                val granted = ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED
+                if (granted) cameraLauncher.launch(null)
+                else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+            },
+            onGallery = {
+                showPhotoDialog = false
+                galleryLauncher.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            onRemove = {
+                showPhotoDialog = false
+                photo = null
+            }
+        )
+    }
+
+    if (showEditDialog) {
+        EditDataDialog(
+            initialName = name,
+            initialPhone = phone,
+            initialEmail = email,
+            onDismiss = { showEditDialog = false },
+            onSave = { newName, newPhone, newEmail ->
+                // TODO: guardar cambios en Supabase
+                name = newName
+                phone = newPhone
+                email = newEmail
+                showEditDialog = false
+            }
+        )
+    }
+}
+
+// "2487693720" -> "+52 248 769 3720"
+private fun formatPhone(phone: String): String =
+    if (phone.length == 10) {
+        "+52 ${phone.substring(0, 3)} ${phone.substring(3, 6)} ${phone.substring(6)}"
+    } else phone
+
+// Lee la imagen reduciendo su tamaño y corrigiendo la rotación
+private fun loadBitmap(context: Context, uri: Uri, maxSize: Int = 600): Bitmap? = try {
+    val resolver = context.contentResolver
+
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+
+    var sample = 1
+    while (bounds.outWidth / sample > maxSize * 2 || bounds.outHeight / sample > maxSize * 2) {
+        sample *= 2
+    }
+
+    val options = BitmapFactory.Options().apply { inSampleSize = sample }
+    val bitmap = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+
+    val orientation = resolver.openInputStream(uri)?.use {
+        ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+    } ?: ExifInterface.ORIENTATION_NORMAL
+
+    val degrees = when (orientation) {
+        ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+        ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+        ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+        else -> 0f
+    }
+
+    if (bitmap != null && degrees != 0f) {
+        Bitmap.createBitmap(
+            bitmap, 0, 0, bitmap.width, bitmap.height,
+            Matrix().apply { postRotate(degrees) }, true
+        )
+    } else bitmap
+} catch (e: Exception) {
+    null
+}
+
+// Foto (o iniciales si no hay foto) con el lápiz para cambiarla
+@Composable
+private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> Unit) {
+    Box(modifier = Modifier.size(124.dp)) {
+        Box(
+            modifier = Modifier
+                .size(116.dp)
+                .align(Alignment.BottomStart)
+                .clip(CircleShape)
+                .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
+                .border(3.dp, CardBorder, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            if (photo != null) {
+                Image(
+                    bitmap = photo,
+                    contentDescription = "Foto de perfil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Text(
+                    text = initials(name),
+                    color = GymColors.TextPrimary,
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .align(Alignment.TopEnd)
+                .background(GymColors.Border, CircleShape)
+                .clickable(onClick = onEditPhoto),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = "Cambiar foto",
+                tint = GymColors.TextPrimary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+private fun initials(name: String): String =
+    name.split(" ")
+        .filter { it.isNotBlank() }
+        .take(2)
+        .joinToString("") { it.first().uppercase() }
+
+@Composable
+private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(InnerBackground)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = GymColors.TextPrimary, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(14.dp))
+        Text(
+            text = label,
+            color = GymColors.TextPrimary,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = GymColors.TextSecondary,
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Composable
+private fun InfoRow(icon: ImageVector, label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = GymColors.TextSecondary, modifier = Modifier.size(24.dp))
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = label,
+            color = GymColors.TextSecondary,
+            fontSize = 16.sp,
+            modifier = Modifier.width(88.dp)
+        )
+        Text(
+            text = value,
+            color = GymColors.TextPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+// Chip de estado con fondo tintado y borde del mismo color
+@Composable
+private fun Chip(
+    text: String,
+    color: Color,
+    width: androidx.compose.ui.unit.Dp,
+    height: androidx.compose.ui.unit.Dp
+) {
+    Box(
+        modifier = Modifier
+            .size(width, height)
+            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+            .border(1.dp, color, RoundedCornerShape(10.dp)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = color,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+// ---------- Diálogos con el mismo estilo de las tarjetas (borde degradado) ----------
+
+@Composable
+private fun GymDialog(
+    title: String,
+    onDismiss: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(84.dp)
-                .border(width = 1.dp, color = GrisBorde)
-                .background(Negro),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+                .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
         ) {
-
-            // MIS CLIENTES
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = "Mis clientes",
-                    tint = GrisTexto,
-                    modifier = Modifier.size(IconoBarra)
+                Text(
+                    text = title,
+                    color = GymColors.TextPrimary,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(end = 36.dp)
                 )
-                Text(text = "Mis clientes", color = GrisTexto, fontSize = 15.sp)
+                content()
             }
 
-            // PERFIL
-            Column(
+            // X para cerrar
+            IconButton(
+                onClick = onDismiss,
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(36.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = "Perfil",
-                    tint = Morado,
-                    modifier = Modifier.size(IconoBarra)
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Cerrar",
+                    tint = GymColors.TextSecondary,
+                    modifier = Modifier.size(24.dp)
                 )
-                Text(text = "Perfil", color = Morado, fontSize = 15.sp)
             }
         }
     }
 }
 
-// =========================
-// FILA DE DATO CON ICONO
-// =========================
+@Composable
+private fun PhotoDialog(
+    hasPhoto: Boolean,
+    onDismiss: () -> Unit,
+    onCamera: () -> Unit,
+    onGallery: () -> Unit,
+    onRemove: () -> Unit
+) {
+    GymDialog(title = "Foto de perfil", onDismiss = onDismiss) {
+        ActionRow(icon = Icons.Filled.PhotoCamera, label = "Tomar foto", onClick = onCamera)
+        ActionRow(icon = Icons.Filled.PhotoLibrary, label = "Elegir de la galería", onClick = onGallery)
+        if (hasPhoto) {
+            ActionRow(icon = Icons.Filled.Delete, label = "Quitar foto", onClick = onRemove)
+        }
+    }
+}
 
 @Composable
-private fun DatoFila(icono: ImageVector, etiqueta: String, valor: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icono,
-            contentDescription = null,
-            tint = GrisTexto,
-            modifier = Modifier.size(IconoDato)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = etiqueta,
-            color = GrisTexto,
-            fontSize = 15.sp,
-            modifier = Modifier.width(90.dp)
-        )
-        Text(text = valor, color = Blanco, fontSize = 15.sp)
+private fun EditDataDialog(
+    initialName: String,
+    initialPhone: String,
+    initialEmail: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var email by remember { mutableStateOf(initialEmail) }
+
+    // Avisos que aparecen unos segundos cuando se intenta escribir un carácter no permitido
+    var nameWarning by remember { mutableStateOf(false) }
+    var nameTick by remember { mutableStateOf(0) }
+    var phoneWarning by remember { mutableStateOf(false) }
+    var phoneTick by remember { mutableStateOf(0) }
+
+    LaunchedEffect(nameTick) {
+        if (nameTick > 0) {
+            nameWarning = true
+            delay(2500)
+            nameWarning = false
+        }
     }
+    LaunchedEffect(phoneTick) {
+        if (phoneTick > 0) {
+            phoneWarning = true
+            delay(2500)
+            phoneWarning = false
+        }
+    }
+
+    // Reglas: nombre solo letras y espacios; teléfono exactamente 10 dígitos
+    val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
+    val isValid = name.isNotBlank() && phone.length == 10
+
+    GymDialog(title = "Editar datos", onDismiss = onDismiss) {
+        GymTextField(
+            value = name,
+            onValueChange = { new ->
+                when {
+                    !new.all { it.isLetter() || it == ' ' } -> nameTick++
+                    new.length <= 40 -> name = new
+                }
+            },
+            label = "Nombre",
+            isError = nameWarning,
+            errorText = "Solo se permiten letras"
+        )
+        GymTextField(
+            value = phone,
+            onValueChange = { new ->
+                when {
+                    !new.all { it in '0'..'9' } -> phoneTick++
+                    new.length <= 10 -> phone = new
+                }
+            },
+            label = "Teléfono",
+            keyboardType = KeyboardType.Number,
+            isError = phoneWarning || phoneIncomplete,
+            errorText = if (phoneWarning) "Solo se permiten números"
+            else "Deben ser 10 dígitos (${phone.length}/10)"
+        )
+        GymTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = "Correo",
+            keyboardType = KeyboardType.Email
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.Red),
+                border = BorderStroke(1.dp, GymColors.Red)
+            ) {
+                Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            Button(
+                onClick = { onSave(name.trim(), phone, email) },
+                enabled = isValid,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = GymColors.Purple,
+                    contentColor = GymColors.TextPrimary
+                )
+            ) {
+                Text("Guardar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun GymTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isError: Boolean = false,
+    errorText: String? = null
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        singleLine = true,
+        isError = isError,
+        supportingText = if (isError && errorText != null) {
+            { Text(errorText) }
+        } else null,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(10.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = GymColors.Purple,
+            unfocusedBorderColor = GymColors.Border,
+            focusedTextColor = GymColors.TextPrimary,
+            unfocusedTextColor = GymColors.TextPrimary,
+            focusedLabelColor = GymColors.Purple,
+            unfocusedLabelColor = GymColors.TextSecondary,
+            cursorColor = GymColors.Gold,
+            errorBorderColor = GymColors.Red,
+            errorTextColor = GymColors.TextPrimary,
+            errorLabelColor = GymColors.Red,
+            errorCursorColor = GymColors.Red,
+            errorSupportingTextColor = GymColors.Red
+        )
+    )
 }

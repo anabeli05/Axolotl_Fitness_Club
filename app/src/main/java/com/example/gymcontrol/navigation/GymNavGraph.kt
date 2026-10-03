@@ -80,8 +80,14 @@ fun GymNavGraph() {
                 SolicitudesScreen(onNavigate = { section -> navigateReception(navController, section) })
             }
 
-            composable(Routes.INSTRUCTOR_CLIENTS) { MisClientesScreen() }
-            composable(Routes.INSTRUCTOR_PROFILE) { InstructorPerfilScreen() }
+            // Instructor: la barra inferior cambia entre Mis clientes y Perfil
+            composable(Routes.INSTRUCTOR_CLIENTS) {
+                MisClientesScreen(onNavigate = { section -> navigateInstructor(navController, section) })
+            }
+            composable(Routes.INSTRUCTOR_PROFILE) {
+                // Antes estaba sin parámetros, por eso la barra no navegaba desde Perfil
+                InstructorPerfilScreen(onNavigate = { section -> navigateInstructor(navController, section) })
+            }
 
             composable(Routes.ADMIN_DASHBOARD) {
                 DashboardScreen(onNavigate = { section -> navigateAdmin(navController, section) })
@@ -136,6 +142,22 @@ private fun navigateReception(navController: NavHostController, section: String)
     }
     if (route != null) {
         navController.navigate(route) { launchSingleTop = true }
+    }
+}
+
+// Convierte la sección de la barra inferior del instructor en su ruta.
+// "Mis clientes" queda como base de la pila para que la barra se comporte como pestañas.
+private fun navigateInstructor(navController: NavHostController, section: String) {
+    val route = when (section) {
+        "Mis clientes" -> Routes.INSTRUCTOR_CLIENTS
+        "Perfil" -> Routes.INSTRUCTOR_PROFILE
+        else -> null
+    }
+    if (route != null) {
+        navController.navigate(route) {
+            popUpTo(Routes.INSTRUCTOR_CLIENTS) { inclusive = false }
+            launchSingleTop = true
+        }
     }
 }
 
