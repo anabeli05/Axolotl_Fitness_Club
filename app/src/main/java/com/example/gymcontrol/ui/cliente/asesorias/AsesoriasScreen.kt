@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -198,12 +199,20 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             shape = RoundedCornerShape(16.dp),
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
             title = {
-                Text("¿Cancelar solicitud?", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
+                Text(
+                    "¿Cancelar solicitud?",
+                    color = GymColors.TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             },
             text = {
                 Text(
                     "Se cancelará tu solicitud de asesoría con ${target.instructorName}.",
-                    color = GymColors.TextSecondary
+                    color = GymColors.TextSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             },
             confirmButton = {

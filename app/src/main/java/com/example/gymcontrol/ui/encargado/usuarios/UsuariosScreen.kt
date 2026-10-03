@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -139,12 +140,20 @@ fun UsuariosScreen(
             shape = RoundedCornerShape(16.dp),
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
             title = {
-                Text("¿Eliminar personal?", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
+                Text(
+                    "¿Eliminar personal?",
+                    color = GymColors.TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             },
             text = {
                 Text(
                     "Se eliminará a ${target.name}. Esta acción no se puede deshacer.",
-                    color = GymColors.TextSecondary
+                    color = GymColors.TextSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             },
             confirmButton = {
