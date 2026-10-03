@@ -2,221 +2,188 @@ package com.example.gymcontrol.ui.instructor.clientes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.R
+import com.example.gymcontrol.ui.components.ClienteScaffold
+import com.example.gymcontrol.ui.components.ScaffoldTab
+import com.example.gymcontrol.ui.theme.GymColors
 
-// =========================
-// COLORES
-// =========================
+private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
 
-private val McNegro = Color(0xFF000000)
-private val McGrisOscuro = Color(0xFF202121)
-private val McGrisBorde = Color(0xFF494A4A)
-private val McMorado = Color(0xFFA655E5)
-private val McDorado = Color(0xFFA68A00)
-private val McBlanco = Color(0xFFFFFFFF)
-private val McGrisTexto = Color(0xFFBDBDBD)
+private val INSTRUCTOR_TABS = listOf(
+    ScaffoldTab("Mis clientes", Icons.Filled.Group),
+    ScaffoldTab("Perfil", Icons.Filled.Person)
+)
 
-// =========================
-// MODELO
-// =========================
-
-private data class McCliente(
+private data class ClienteAsignado(
     val nombre: String,
     val dias: String,
     val objetivo: String
 )
 
-// =========================
-// PANTALLA
-// (el nombre MisClientesScreen es el que ya usa GymNavGraph)
-// =========================
-
 @Composable
-fun MisClientesScreen(
-    onIrAPerfil: () -> Unit = {}   // opcional: para navegar a Perfil desde la barra inferior
-) {
-
+fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
     val clientes = remember {
         mutableStateListOf(
-            McCliente("Ana López", "Lun, Mié, Vie", "Ganar fuerza"),
-            McCliente("Luis Gómez", "Mar, Jue, Sáb", "Bajar grasa"),
-            McCliente("Mariana Silva", "Lun a Vie", "Acondicionamiento")
+            ClienteAsignado("Ana López", "Lun, Mié, Vie", "Ganar fuerza"),
+            ClienteAsignado("Luis Gómez", "Mar, Jue, Sáb", "Bajar grasa"),
+            ClienteAsignado("Mariana Silva", "Lun a Vie", "Acondicionamiento")
         )
     }
 
-    // null = modal cerrado, número = índice del cliente que se edita
+    // null = formulario cerrado, número = índice del cliente que se edita
     var indiceEditando by remember { mutableStateOf<Int?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(McNegro)
+    ClienteScaffold(
+        currentSection = "Mis clientes",
+        onNavigate = onNavigate,
+        logoRes = R.drawable.logo_axolotl,
+        tabs = INSTRUCTOR_TABS
     ) {
-
-        // ENCABEZADO
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 10.dp)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(top = 20.dp, bottom = 16.dp)
         ) {
-            Text(
-                text = "AXOLOTL",
-                color = McDorado,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            HorizontalDivider(color = McDorado, thickness = 1.dp)
-        }
+            item {
+                Text(
+                    text = "Usuarios asignados",
+                    color = GymColors.TextPrimary,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-        // LISTA
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp)
-        ) {
-            Text(
-                text = "Usuarios asignados",
-                color = McBlanco,
-                fontSize = 27.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-            )
+            itemsIndexed(clientes) { index, cliente ->
+                ClienteCard(
+                    cliente = cliente,
+                    onEditar = { indiceEditando = index }
+                )
+            }
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                itemsIndexed(clientes) { index, cliente ->
-                    McClienteCard(
-                        cliente = cliente,
-                        onEditar = { indiceEditando = index }
+            if (clientes.isEmpty()) {
+                item {
+                    Text(
+                        text = "No tienes clientes asignados",
+                        color = GymColors.TextSecondary,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 24.dp),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
         }
-
-        // BARRA INFERIOR
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(84.dp)
-                .border(width = 1.dp, color = McGrisBorde)
-                .background(McNegro),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            McBarraItem(
-                modifier = Modifier.weight(1f),
-                icono = Icons.Filled.Person,
-                texto = "Mis clientes",
-                color = McMorado,
-                onClick = {}
-            )
-            McBarraItem(
-                modifier = Modifier.weight(1f),
-                icono = Icons.Outlined.Person,
-                texto = "Perfil",
-                color = McGrisTexto,
-                onClick = onIrAPerfil
-            )
-        }
     }
 
-    // MODAL DE EDICIÓN
     indiceEditando?.let { indice ->
         val cliente = clientes[indice]
 
-        McEditarDialog(
+        EditarClienteDialog(
             diasInicial = cliente.dias,
             objetivoInicial = cliente.objetivo,
             onDismiss = { indiceEditando = null },
             onGuardar = { nuevosDias, nuevoObjetivo ->
-                clientes[indice] = cliente.copy(
-                    dias = nuevosDias,
-                    objetivo = nuevoObjetivo
-                )
+                // TODO: guardar cambios en Supabase
+                clientes[indice] = cliente.copy(dias = nuevosDias, objetivo = nuevoObjetivo)
                 indiceEditando = null
             }
         )
     }
 }
 
-// =========================
-// TARJETA
-// =========================
-
 @Composable
-private fun McClienteCard(cliente: McCliente, onEditar: () -> Unit) {
+private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(McGrisOscuro, RoundedCornerShape(16.dp))
-            .border(2.dp, McGrisBorde, RoundedCornerShape(16.dp))
-            .padding(14.dp),
+            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+            .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Círculo con iniciales (luego se puede reemplazar por la foto del cliente)
         Box(
             modifier = Modifier
-                .size(46.dp)
-                .background(McNegro, CircleShape)
-                .border(1.dp, McGrisBorde, CircleShape)
-        )
+                .size(60.dp)
+                .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
+                .border(2.dp, CardBorder, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = iniciales(cliente.nombre),
+                color = GymColors.TextPrimary,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(Modifier.width(14.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = cliente.nombre,
-                color = McBlanco,
-                fontSize = 16.sp,
+                color = GymColors.TextPrimary,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = cliente.dias, color = McGrisTexto, fontSize = 12.sp)
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
+            Text(text = cliente.dias, color = GymColors.TextSecondary, fontSize = 15.sp)
+            Spacer(Modifier.height(2.dp))
             Text(
                 text = "Objetivo: ${cliente.objetivo}",
-                color = McGrisTexto,
-                fontSize = 12.sp
+                color = GymColors.TextSecondary,
+                fontSize = 15.sp
             )
         }
 
+        Spacer(Modifier.width(10.dp))
+
         Button(
             onClick = onEditar,
-            colors = ButtonDefaults.buttonColors(containerColor = McMorado),
-            shape = RoundedCornerShape(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.size(width = 88.dp, height = 40.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = GymColors.Purple,
+                contentColor = GymColors.TextPrimary
+            ),
+            shape = RoundedCornerShape(10.dp),
+            contentPadding = PaddingValues(0.dp)
         ) {
-            Text(text = "Editar", color = McNegro, fontSize = 13.sp)
+            Text("Editar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
 
-// =========================
-// MODAL
-// =========================
+private fun iniciales(nombre: String): String =
+    nombre.split(" ")
+        .filter { it.isNotBlank() }
+        .take(2)
+        .joinToString("") { it.first().uppercase() }
 
 @Composable
-private fun McEditarDialog(
+private fun EditarClienteDialog(
     diasInicial: String,
     objetivoInicial: String,
     onDismiss: () -> Unit,
@@ -224,97 +191,95 @@ private fun McEditarDialog(
 ) {
     var dias by remember { mutableStateOf(diasInicial) }
     var objetivo by remember { mutableStateOf(objetivoInicial) }
+    val esValido = dias.isNotBlank() && objetivo.isNotBlank()
 
     Dialog(onDismissRequest = onDismiss) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(McGrisBorde, RoundedCornerShape(8.dp))
-                .border(2.dp, McDorado, RoundedCornerShape(8.dp))
-                .padding(horizontal = 24.dp, vertical = 28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
         ) {
-
-            Text(
-                text = "Días que asistirá",
-                color = McBlanco,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            McCampo(valor = dias, onCambio = { dias = it })
-
-            Spacer(modifier = Modifier.height(22.dp))
-
-            Text(
-                text = "Objetivo",
-                color = McBlanco,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            McCampo(valor = objetivo, onCambio = { objetivo = it })
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            Button(
-                onClick = { onGuardar(dias.trim(), objetivo.trim()) },
-                colors = ButtonDefaults.buttonColors(containerColor = McMorado),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 10.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, top = 44.dp, bottom = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Guardar", color = McNegro, fontWeight = FontWeight.Medium)
+                Text(
+                    text = "Días que asistirá",
+                    color = GymColors.TextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(10.dp))
+                CampoPill(valor = dias, onCambio = { dias = it })
+
+                Spacer(Modifier.height(22.dp))
+
+                Text(
+                    text = "Objetivo",
+                    color = GymColors.TextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(10.dp))
+                CampoPill(valor = objetivo, onCambio = { objetivo = it })
+
+                Spacer(Modifier.height(28.dp))
+
+                Button(
+                    onClick = { onGuardar(dias.trim(), objetivo.trim()) },
+                    enabled = esValido,
+                    modifier = Modifier.size(width = 160.dp, height = 44.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GymColors.Purple,
+                        contentColor = GymColors.TextPrimary
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Guardar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // X para cerrar el formulario
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Cerrar",
+                    tint = GymColors.TextSecondary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun McCampo(valor: String, onCambio: (String) -> Unit) {
+private fun CampoPill(valor: String, onCambio: (String) -> Unit) {
     OutlinedTextField(
         value = valor,
         onValueChange = onCambio,
         singleLine = true,
         shape = RoundedCornerShape(50),
-        textStyle = TextStyle(color = McBlanco, fontSize = 15.sp, textAlign = TextAlign.Center),
+        textStyle = TextStyle(
+            color = GymColors.TextPrimary,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = McMorado,
-            unfocusedBorderColor = McMorado,
-            focusedTextColor = McBlanco,
-            unfocusedTextColor = McBlanco,
-            cursorColor = McMorado,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
+            focusedBorderColor = GymColors.Purple,
+            unfocusedBorderColor = GymColors.Purple,
+            focusedTextColor = GymColors.TextPrimary,
+            unfocusedTextColor = GymColors.TextPrimary,
+            cursorColor = GymColors.Gold
         ),
         modifier = Modifier.fillMaxWidth()
     )
-}
-
-// =========================
-// ITEM BARRA INFERIOR
-// =========================
-
-@Composable
-private fun McBarraItem(
-    modifier: Modifier,
-    icono: ImageVector,
-    texto: String,
-    color: Color,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = icono,
-            contentDescription = texto,
-            tint = color,
-            modifier = Modifier.size(40.dp)
-        )
-        Text(text = texto, color = color, fontSize = 15.sp)
-    }
 }
