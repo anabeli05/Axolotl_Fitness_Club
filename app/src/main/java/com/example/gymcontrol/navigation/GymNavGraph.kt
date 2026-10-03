@@ -60,15 +60,25 @@ fun GymNavGraph() {
                 }
             }
 
-            composable(Routes.CLIENT_HOME) { ClienteHomeScreen() }
-            composable(Routes.CLIENT_ADVISORIES) { AsesoriasScreen() }
-            composable(Routes.CLIENT_PROFILE) { ClientePerfilScreen() }
+            // Cliente: la barra inferior cambia entre Inicio, Asesorías y Perfil
+            composable(Routes.CLIENT_HOME) {
+                ClienteHomeScreen(onNavigate = { section -> navigateClient(navController, section) })
+            }
+            composable(Routes.CLIENT_ADVISORIES) {
+                AsesoriasScreen(onNavigate = { section -> navigateClient(navController, section) })
+            }
+            composable(Routes.CLIENT_PROFILE) {
+                ClientePerfilScreen(onNavigate = { section -> navigateClient(navController, section) })
+            }
 
+            // Recepción
             composable(Routes.RECEPTION_SCANNER) { QrScannerScreen() }
             composable(Routes.RECEPTION_CLIENTS) {
-                ClientesScreen()
+                ClientesScreen(onNavigate = { section -> navigateReception(navController, section) })
             }
-            composable(Routes.RECEPTION_REQUESTS) { SolicitudesScreen() }
+            composable(Routes.RECEPTION_REQUESTS) {
+                SolicitudesScreen(onNavigate = { section -> navigateReception(navController, section) })
+            }
 
             composable(Routes.INSTRUCTOR_CLIENTS) { MisClientesScreen() }
             composable(Routes.INSTRUCTOR_PROFILE) { InstructorPerfilScreen() }
@@ -100,6 +110,32 @@ fun GymNavGraph() {
         ) {
             RoleDevMenu(navController)
         }
+    }
+}
+
+// Convierte la sección de la barra inferior del cliente en su ruta
+private fun navigateClient(navController: NavHostController, section: String) {
+    val route = when (section) {
+        "Inicio" -> Routes.CLIENT_HOME
+        "Asesorías" -> Routes.CLIENT_ADVISORIES
+        "Perfil" -> Routes.CLIENT_PROFILE
+        else -> null
+    }
+    if (route != null) {
+        navController.navigate(route) { launchSingleTop = true }
+    }
+}
+
+// Convierte la sección del menú de recepción en su ruta
+private fun navigateReception(navController: NavHostController, section: String) {
+    val route = when (section) {
+        "Home" -> Routes.RECEPTION_SCANNER
+        "Clientes" -> Routes.RECEPTION_CLIENTS
+        "Solicitudes" -> Routes.RECEPTION_REQUESTS
+        else -> null
+    }
+    if (route != null) {
+        navController.navigate(route) { launchSingleTop = true }
     }
 }
 

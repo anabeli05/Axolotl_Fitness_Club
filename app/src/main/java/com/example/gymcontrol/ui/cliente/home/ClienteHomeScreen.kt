@@ -4,15 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCode2
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.Canvas
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -21,12 +22,15 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.BarEntry
-import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.SimpleBarChart
 import com.example.gymcontrol.ui.theme.GymColors
-
-private val CLIENT_SECTIONS = listOf("Inicio", "Asesorías", "Perfil")
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 
 private val Purple = Color(0xFFA54FD9)
 private val CardBackground = Color(0xFF1E1F20)
@@ -35,10 +39,12 @@ private val TextSecondary = Color(0xFFB5B5B5)
 
 @Composable
 fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
-    GymScaffold(
+    val membership = "M-1001" // TODO: tomar la membresía del cliente en sesión
+
+    ClienteScaffold(
         currentSection = "Inicio",
-        sections = CLIENT_SECTIONS,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
+        logoRes = R.drawable.logo_axolotl
     ) {
         LazyColumn(
             modifier = Modifier
@@ -59,10 +65,11 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    QrCard()
+                    // Un contenido más largo genera un QR más denso (como el del mockup)
+                    QrCard(content = "AXOLOTL-GYM|ACCESO|$membership")
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "QR de acceso · M-1001",
+                        text = "QR de acceso · $membership",
                         color = TextSecondary,
                         fontSize = 13.sp
                     )
@@ -95,10 +102,10 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 }
 
 @Composable
-private fun QrCard() {
+private fun QrCard(content: String) {
     Box(
         modifier = Modifier
-            .size(220.dp)
+            .size(250.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(CardBackground)
             .drawBehind { drawCornerBrackets() },
@@ -106,17 +113,40 @@ private fun QrCard() {
     ) {
         Box(
             modifier = Modifier
-                .size(150.dp)
+                .size(184.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color.White),
+                .background(Color.White)
+                .padding(6.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.QrCode2,
-                contentDescription = "QR de acceso",
-                tint = Color.Black,
-                modifier = Modifier.size(136.dp)
-            )
+            QrCode(content = content, modifier = Modifier.fillMaxSize())
+        }
+    }
+}
+
+// Dibuja un QR real (escaneable) a partir del texto recibido
+@Composable
+private fun QrCode(content: String, modifier: Modifier = Modifier) {
+    val matrix = remember(content) {
+        val hints = mapOf(
+            EncodeHintType.MARGIN to 0,
+            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M
+        )
+        QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, 0, 0, hints)
+    }
+
+    Canvas(modifier = modifier) {
+        val cell = size.width / matrix.width
+        for (x in 0 until matrix.width) {
+            for (y in 0 until matrix.height) {
+                if (matrix.get(x, y)) {
+                    drawRect(
+                        color = Color.Black,
+                        topLeft = Offset(x * cell, y * cell),
+                        size = Size(cell + 0.5f, cell + 0.5f) // +0.5 evita líneas finas entre módulos
+                    )
+                }
+            }
         }
     }
 }

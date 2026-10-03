@@ -1,6 +1,5 @@
 package com.example.gymcontrol.ui.cliente.asesorias
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -8,43 +7,44 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.BorderStroke
 import com.example.gymcontrol.GymApp
-import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.R
+import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.theme.GymColors
 
-private val CLIENT_SECTIONS = listOf("Inicio", "Asesorías", "Perfil")
+private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
 
-private val Purple = Color(0xFFA54FD9)
-private val CardBackground = Color(0xFF1E1F20)
-private val CardBorder = Color(0xFF4A4B4D)
-private val TextPrimary = Color.White
-private val TextSecondary = Color(0xFFB5B5B5)
+private val ButtonHeight = 44.dp
 
 private fun formatPrice(cost: Double): String =
     if (cost % 1.0 == 0.0) "$${"%.0f".format(cost)}" else "$${"%.2f".format(cost)}"
 
+// "Marco Díaz" -> "MD"
+private fun initials(name: String): String =
+    name.split(" ")
+        .filter { it.isNotBlank() }
+        .take(2)
+        .joinToString("") { it.first().uppercase() }
 
 @Composable
 fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
     val instructors = GymApp.repository.instructors()
     val pending = remember { mutableStateMapOf<Int, Boolean>() }
 
-    GymScaffold(
+    ClienteScaffold(
         currentSection = "Asesorías",
-        sections = CLIENT_SECTIONS,
-        onNavigate = onNavigate
+        onNavigate = onNavigate,
+        logoRes = R.drawable.logo_axolotl
     ) {
         LazyColumn(
             modifier = Modifier
@@ -57,14 +57,14 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Asesorías",
-                        color = TextPrimary,
+                        color = GymColors.TextPrimary,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Elige tu instructor",
-                        color = TextSecondary,
-                        fontSize = 14.sp
+                        color = GymColors.TextSecondary,
+                        fontSize = 16.sp
                     )
                 }
             }
@@ -72,99 +72,125 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             items(instructors) { instructor ->
                 val isPending = pending[instructor.id] == true
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = CardBackground),
-                    border = BorderStroke(1.dp, CardBorder)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                        .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+                        .padding(20.dp)
                 ) {
+                    // Avatar + datos del instructor
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        //Avatar
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black)
-                                .border(1.dp, CardBorder, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                tint = TextSecondary,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+                        InstructorAvatar(name = instructor.name)
 
-                        //Datos del instructor
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(1.dp)
-                        ) {
+                        Spacer(Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = instructor.name,
-                                color = TextPrimary,
-                                fontSize = 15.sp,
-                                lineHeight = 19.sp,
+                                color = GymColors.TextPrimary,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            Spacer(Modifier.height(6.dp))
                             Text(
                                 text = "Cupo: ${instructor.activeClients}/${instructor.maxClients}",
-                                color = Purple,
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp
+                                color = GymColors.Purple,
+                                fontSize = 16.sp
                             )
+                            Spacer(Modifier.height(2.dp))
                             Text(
                                 text = "${formatPrice(instructor.cost)} /mes",
-                                color = TextSecondary,
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp
+                                color = GymColors.Gold,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
+                    }
 
-                        if (isPending) {
+                    Spacer(Modifier.height(16.dp))
+
+                    // Botones
+                    if (isPending) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Estado pendiente
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(ButtonHeight)
+                                    .background(GymColors.Gold.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                                    .border(1.dp, GymColors.Gold, RoundedCornerShape(10.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Pendiente",
+                                    color = GymColors.Gold,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            // Cancelar la solicitud: vuelve a mostrar "Solicitar"
                             OutlinedButton(
-                                onClick = {},
-                                enabled = false,
+                                onClick = { pending[instructor.id] = false },
                                 modifier = Modifier
-                                    .width(96.dp)
-                                    .height(36.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                                border = BorderStroke(1.dp, GymColors.Gold),
+                                    .weight(1f)
+                                    .height(ButtonHeight),
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                border = BorderStroke(1.dp, GymColors.Red),
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    disabledContentColor = TextPrimary
+                                    containerColor = GymColors.Red.copy(alpha = 0.1f),
+                                    contentColor = GymColors.Red
                                 )
                             ) {
-                                Text("Pendiente", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                                Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
-                        } else {
-                            Button(
-                                onClick = { pending[instructor.id] = true },
-                                modifier = Modifier
-                                    .width(96.dp)
-                                    .height(36.dp),
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Purple,
-                                    contentColor = Color.Black
-                                )
-                            ) {
-                                Text("Solicitar", fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { pending[instructor.id] = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(ButtonHeight),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = GymColors.Purple,
+                                contentColor = GymColors.TextPrimary
+                            )
+                        ) {
+                            Text("Solicitar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+// Círculo con las iniciales del instructor (más adelante se puede reemplazar por su foto)
+@Composable
+private fun InstructorAvatar(name: String) {
+    Box(
+        modifier = Modifier
+            .size(68.dp)
+            .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
+            .border(2.dp, CardBorder, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = initials(name),
+            color = GymColors.TextPrimary,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
