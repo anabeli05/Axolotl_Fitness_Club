@@ -1,5 +1,6 @@
 package com.example.gymcontrol.ui.cliente.asesorias
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -7,22 +8,29 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.BorderStroke
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.theme.GymColors
 
 private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
+
+// Borde degradado en tonos rojos para el cuadro de confirmación
+private val DeleteBorder = Brush.linearGradient(
+    listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
+)
 
 private val ButtonHeight = 44.dp
 
@@ -36,10 +44,14 @@ private fun initials(name: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
 
+// Solicitud que se quiere cancelar
+private class CancelTarget(val instructorId: Int, val instructorName: String)
+
 @Composable
 fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
     val instructors = GymApp.repository.instructors()
     val pending = remember { mutableStateMapOf<Int, Boolean>() }
+    var cancelling by remember { mutableStateOf<CancelTarget?>(null) }
 
     ClienteScaffold(
         currentSection = "Asesorías",
@@ -138,9 +150,11 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                 )
                             }
 
-                            // Cancelar la solicitud: vuelve a mostrar "Solicitar"
+                            // Pide confirmación antes de cancelar la solicitud
                             OutlinedButton(
-                                onClick = { pending[instructor.id] = false },
+                                onClick = {
+                                    cancelling = CancelTarget(instructor.id, instructor.name)
+                                },
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(ButtonHeight),
@@ -173,6 +187,48 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 }
             }
         }
+    }
+
+    // Cuadro de confirmación para cancelar la solicitud
+    cancelling?.let { target ->
+        AlertDialog(
+            onDismissRequest = { cancelling = null },
+            modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
+            containerColor = GymColors.Surface,
+            shape = RoundedCornerShape(16.dp),
+            icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
+            title = {
+                Text("¿Cancelar solicitud?", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text(
+                    "Se cancelará tu solicitud de asesoría con ${target.instructorName}.",
+                    color = GymColors.TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // TODO: cancelar la solicitud en Supabase
+                        pending[target.instructorId] = false
+                        cancelling = null
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GymColors.Red,
+                        contentColor = Color.White
+                    )
+                ) { Text("Sí, cancelar", fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { cancelling = null },
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, GymColors.Border),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+                ) { Text("Volver") }
+            }
+        )
     }
 }
 

@@ -37,10 +37,15 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var search by remember { mutableStateOf("") }
     var showForm by remember { mutableStateOf(false) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
+    // Solo para la demo: clientes renovados en esta sesión. TODO: quitar cuando se guarde en Supabase
+    val renewed = remember { mutableStateListOf<String>() }
 
     val clients = GymApp.repository.users()
         .filter { it.role == UserRole.CLIENTE }
         .filter { it.name.contains(search, true) || (it.membershipNumber ?: "").contains(search, true) }
+
+    // Cliente que se está editando (null cuando se crea uno nuevo)
+    val editingClient = editingIndex?.let { clients.getOrNull(it) }
 
     GymScaffold(
         currentSection = "Clientes",
@@ -93,23 +98,29 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 }
 
                 itemsIndexed(clients) { index, client ->
+                    // Identifica al cliente: su membresía, o su nombre si no tiene
+                    val clientKey = client.membershipNumber ?: client.name
+
                     ClientCard(
                         name = client.name,
                         membership = client.membershipNumber ?: "—",
                         registrationDate = client.registrationDate,
-                        isActive = client.status.name == "ACTIVO",
+                        isActive = client.status.name == "ACTIVO" || clientKey in renewed,
                         onEdit = {
                             editingIndex = index
                             showForm = true
                         },
-                        onRenovar = { /* TODO: lógica de renovación */ }
+                        onRenovar = {
+                            // TODO: registrar la renovación y el pago en Supabase
+                            if (clientKey !in renewed) renewed.add(clientKey)
+                        }
                     )
                 }
 
                 if (clients.isEmpty()) {
                     item {
                         Text(
-                            text = "No se encontraron com.example.gymcontrol.ui.encargado.clientes",
+                            text = "No se encontraron clientes",
                             color = GymColors.TextSecondary,
                             fontSize = 14.sp,
                             modifier = Modifier
@@ -122,8 +133,17 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             }
 
             if (showForm) {
+                // Separa "Ana López" en nombre y apellido para llenar el formulario
+                val nameParts = (editingClient?.name ?: "").trim().split(" ", limit = 2)
+
                 ClientFormDialog(
                     isEditing = editingIndex != null,
+                    initialName = nameParts.getOrElse(0) { "" },
+                    initialLastName = nameParts.getOrElse(1) { "" },
+                    // TODO: pasar el teléfono y el plan del cliente cuando el modelo los tenga
+                    initialPhone = "",
+                    initialEmail = editingClient?.let { "${it.email}" } ?: "",
+                    initialPlan = null,
                     onDismiss = {
                         showForm = false
                         editingIndex = null

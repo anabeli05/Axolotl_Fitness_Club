@@ -25,13 +25,19 @@ import com.example.gymcontrol.ui.theme.GymColors
 fun ClientFormDialog(
     isEditing: Boolean,
     onDismiss: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    // Datos con los que arranca el formulario (vacíos al crear, con los del cliente al editar)
+    initialName: String = "",
+    initialLastName: String = "",
+    initialPhone: String = "",
+    initialEmail: String = "",
+    initialPlan: String? = null
 ) {
-    var name by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var selectedPlan by remember { mutableStateOf<String?>(null) }
+    var name by remember { mutableStateOf(initialName) }
+    var lastName by remember { mutableStateOf(initialLastName) }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var email by remember { mutableStateOf(initialEmail) }
+    var selectedPlan by remember { mutableStateOf(initialPlan) }
     var planMenuExpanded by remember { mutableStateOf(false) }
 
     val plans = GymApp.repository.services().map { it.name }
