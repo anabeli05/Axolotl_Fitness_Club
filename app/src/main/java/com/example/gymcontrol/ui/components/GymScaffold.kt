@@ -2,6 +2,7 @@ package com.example.gymcontrol.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,9 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.launch
@@ -75,70 +81,104 @@ fun GymScaffold(
     if (rolConSidebar == null) {
         scaffold()
     } else {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier.width(290.dp),
-                    drawerContainerColor = GymColors.Surface,
-                    drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
-                ) {
-                    GymSidebar(
-                        secciones = seccionesPara(rolConSidebar),
-                        titulo = rolConSidebar.etiqueta(),
-                        currentSection = currentSection,
-                        onNavigate = {
-                            onNavigate(it)
-                            scope.launch { drawerState.close() }
-                        },
-                        onLogout = {
-                            scope.launch { drawerState.close() }
-                            confirmarLogout = true
+        // El menú se abre desde la derecha, donde está el botón de hamburguesa.
+        // Se invierte la dirección solo para el cajón; el contenido y el menú se dibujan normal.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                drawerContent = {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        ModalDrawerSheet(
+                            modifier = Modifier.width(290.dp),
+                            drawerContainerColor = GymColors.Surface,
+                            drawerShape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)
+                        ) {
+                            GymSidebar(
+                                secciones = seccionesPara(rolConSidebar),
+                                titulo = rolConSidebar.etiqueta(),
+                                currentSection = currentSection,
+                                onNavigate = {
+                                    onNavigate(it)
+                                    scope.launch { drawerState.close() }
+                                },
+                                onLogout = {
+                                    scope.launch { drawerState.close() }
+                                    confirmarLogout = true
+                                }
+                            )
                         }
-                    )
+                    }
+                },
+                content = {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        scaffold()
+                    }
                 }
-            },
-            content = scaffold
-        )
+            )
+        }
     }
 
     if (confirmarLogout) {
-        AlertDialog(
-            onDismissRequest = { confirmarLogout = false },
-            modifier = Modifier.border(1.5.dp, LogoutBorder, RoundedCornerShape(20.dp)),
-            containerColor = GymColors.Surface,
-            shape = RoundedCornerShape(20.dp),
-            icon = {
+        Dialog(onDismissRequest = { confirmarLogout = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(GymColors.Surface, RoundedCornerShape(20.dp))
+                    .border(1.5.dp, LogoutBorder, RoundedCornerShape(20.dp))
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = null,
                     tint = GymColors.Gold
                 )
-            },
-            title = {
-                Text("Cerrar sesión", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
-            },
-            text = {
-                Text("¿Seguro que quieres salir?", color = GymColors.TextSecondary)
-            },
-            confirmButton = {
-                Button(
-                    onClick = { confirmarLogout = false; onLogout() },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = GymColors.Red,
-                        contentColor = Color.White
-                    )
-                ) { Text("Salir", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { confirmarLogout = false },
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, GymColors.Purple),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
-                ) { Text("Cancelar") }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "Cerrar sesión",
+                    color = GymColors.TextPrimary,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "¿Seguro que quieres salir?",
+                    color = GymColors.TextSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(24.dp))
+
+                // Los dos botones miden lo mismo y quedan centrados y a la misma altura
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { confirmarLogout = false },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, GymColors.Purple),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+                    ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
+
+                    Button(
+                        onClick = { confirmarLogout = false; onLogout() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GymColors.Red,
+                            contentColor = Color.White
+                        )
+                    ) { Text("Salir", fontWeight = FontWeight.Bold) }
+                }
             }
-        )
+        }
     }
 }
