@@ -6,16 +6,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,7 +31,6 @@ import com.example.gymcontrol.ui.theme.GymColors
 private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
 private val RECEPCION_SECTIONS = listOf("Home", "Clientes", "Solicitudes")
 
-// Tamaño compartido por el badge (Activo/Inactivo), el lápiz y el botón "Renovar"
 private val ActionButtonWidth = 96.dp
 private val ActionButtonHeight = 36.dp
 
@@ -37,14 +39,12 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var search by remember { mutableStateOf("") }
     var showForm by remember { mutableStateOf(false) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
-    // Solo para la demo: clientes renovados en esta sesión. TODO: quitar cuando se guarde en Supabase
     val renewed = remember { mutableStateListOf<String>() }
 
     val clients = GymApp.repository.users()
         .filter { it.role == UserRole.CLIENTE }
         .filter { it.name.contains(search, true) || (it.membershipNumber ?: "").contains(search, true) }
 
-    // Cliente que se está editando (null cuando se crea uno nuevo)
     val editingClient = editingIndex?.let { clients.getOrNull(it) }
 
     GymScaffold(
@@ -98,7 +98,6 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 }
 
                 itemsIndexed(clients) { index, client ->
-                    // Identifica al cliente: su membresía, o su nombre si no tiene
                     val clientKey = client.membershipNumber ?: client.name
 
                     ClientCard(
@@ -177,6 +176,24 @@ private fun ClientCard(
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Espacio para la foto del cliente (círculo de relleno por ahora)
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .background(Color.Black, CircleShape)
+                .border(1.dp, GymColors.Border, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = null,
+                tint = GymColors.TextSecondary,
+                modifier = Modifier.size(34.dp)
+            )
+        }
+
+        Spacer(Modifier.width(12.dp))
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,
