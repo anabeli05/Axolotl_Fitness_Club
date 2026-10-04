@@ -43,20 +43,29 @@ fun ClienteScaffold(
             .fillMaxSize()
             .background(PageBackground)
     ) {
-        // Encabezado: logo centrado + línea dorada (sin hamburguesa)
+        // Encabezado: logo centrado + botón de cerrar sesión a la derecha + línea dorada
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .statusBarsPadding()
         ) {
-            Image(
-                painter = painterResource(logoRes),
-                contentDescription = "Axolotl Fitness Club",
-                modifier = Modifier
-                    .padding(vertical = 10.dp)
-                    .height(95.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(logoRes),
+                    contentDescription = "Axolotl Fitness Club",
+                    modifier = Modifier
+                        .padding(vertical = 10.dp)
+                        .height(95.dp)
+                )
+                BotonCerrarSesion(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 8.dp)
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
