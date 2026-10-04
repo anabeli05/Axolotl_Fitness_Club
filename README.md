@@ -18,11 +18,11 @@ Proyecto base para Android Studio creado en Kotlin + Jetpack Compose.
 - Solicitudes de asesoría con aprobación/rechazo.
 
 ### Instructor
-- Mis clientes: asesorías activas, días, objetivo y editar.
+- Mis com.example.gymcontrol.ui.encargado.clientes: asesorías activas, días, objetivo y editar.
 - Perfil y capacidad máxima.
 
 ### Encargado / Dueño
-- Dashboard con clientes activos, inactivos, ingresos y gráficas base.
+- Dashboard con com.example.gymcontrol.ui.encargado.clientes activos, inactivos, ingresos y gráficas base.
 - Usuarios: listado, editar/eliminar y formulario para alta.
 - Campos extra de costo/capacidad cuando el rol es Instructor.
 - Servicios.
@@ -82,7 +82,7 @@ Backend API
 MySQL / PostgreSQL
 ```
 
-Si usas Firebase/Supabase, la integración es distinta porque cuentan con SDK/API para clientes.
+Si usas Firebase/Supabase, la integración es distinta porque cuentan con SDK/API para com.example.gymcontrol.ui.encargado.clientes.
 
 ## Navegación de desarrollo
 
@@ -106,5 +106,5 @@ Cuando termines la app, elimina `RoleDevMenu()` de `GymNavGraph.kt` y crea la na
 3. Definir contrato real del backend.
 4. Implementar autenticación.
 5. Implementar QR/cámara.
-6. Conectar CRUD de clientes, usuarios, servicios y gastos.
+6. Conectar CRUD de com.example.gymcontrol.ui.encargado.clientes, usuarios, servicios y gastos.
 7. Implementar solicitudes y reportes.

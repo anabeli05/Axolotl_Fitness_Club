@@ -12,4 +12,6 @@ object GymColors {
     val Red = Color(0xFFA80B01)
     val TextPrimary = Color(0xFFF5F5F5)
     val TextSecondary = Color(0xFFA0A0AA)
+
+    val Orange = Color(0xFFF56408)
 }
