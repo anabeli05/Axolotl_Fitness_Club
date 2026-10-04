@@ -131,7 +131,7 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
                 }
             }
 
-            // Acceso
+            //Acceso
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -148,7 +148,7 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
                 }
             }
 
-            // Rol
+            //Rol
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -210,7 +210,6 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
 
             Button(
                 onClick = {
-                    // TODO: aquí va el guardado en el repositorio, si ya existe esa función
                     onBack()
                 },
                 enabled = canSave,

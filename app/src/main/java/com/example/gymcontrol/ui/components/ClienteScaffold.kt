@@ -55,7 +55,7 @@ fun ClienteScaffold(
                 contentDescription = "Axolotl Fitness Club",
                 modifier = Modifier
                     .padding(vertical = 10.dp)
-                    .height(56.dp)
+                    .height(95.dp)
             )
             Box(
                 modifier = Modifier
