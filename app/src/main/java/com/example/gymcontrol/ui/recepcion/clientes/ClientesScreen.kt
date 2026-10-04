@@ -31,7 +31,6 @@ import com.example.gymcontrol.ui.theme.GymColors
 private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
 private val RECEPCION_SECTIONS = listOf("Home", "Clientes", "Solicitudes")
 
-// Tamaño compartido por el badge (Activo/Inactivo), el lápiz y el botón "Renovar"
 private val ActionButtonWidth = 96.dp
 private val ActionButtonHeight = 36.dp
 
@@ -40,14 +39,12 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var search by remember { mutableStateOf("") }
     var showForm by remember { mutableStateOf(false) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
-    // Solo para la demo: clientes renovados en esta sesión. TODO: quitar cuando se guarde en Supabase
     val renewed = remember { mutableStateListOf<String>() }
 
     val clients = GymApp.repository.users()
         .filter { it.role == UserRole.CLIENTE }
         .filter { it.name.contains(search, true) || (it.membershipNumber ?: "").contains(search, true) }
 
-    // Cliente que se está editando (null cuando se crea uno nuevo)
     val editingClient = editingIndex?.let { clients.getOrNull(it) }
 
     GymScaffold(
@@ -101,7 +98,6 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 }
 
                 itemsIndexed(clients) { index, client ->
-                    // Identifica al cliente: su membresía, o su nombre si no tiene
                     val clientKey = client.membershipNumber ?: client.name
 
                     ClientCard(

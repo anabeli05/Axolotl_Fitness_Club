@@ -81,8 +81,6 @@ fun GymScaffold(
     if (rolConSidebar == null) {
         scaffold()
     } else {
-        // El menú se abre desde la derecha, donde está el botón de hamburguesa.
-        // Se invierte la dirección solo para el cajón; el contenido y el menú se dibujan normal.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             ModalNavigationDrawer(
                 drawerState = drawerState,
