@@ -34,6 +34,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.theme.GymColors
+import kotlinx.coroutines.launch
+import com.example.gymcontrol.data.remote.ServicioRow
+import com.example.gymcontrol.data.remote.ServiciosRepository
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
@@ -44,18 +47,32 @@ private val DeleteBorder = Brush.linearGradient(
 
 @Composable
 fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
+    val scope = rememberCoroutineScope()
+    var servicios by remember { mutableStateOf<List<ServicioRow>>(emptyList()) }
+    var cargando by remember { mutableStateOf(true) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+
     var showForm by remember { mutableStateOf(false) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
     var name by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var deleting by remember { mutableStateOf<ServicioRow?>(null) }
 
-    // Nombre del servicio que se quiere eliminar (null = cuadro cerrado)
-    var deleting by remember { mutableStateOf<String?>(null) }
-    // Solo para la demo: oculta de la lista lo que se "elimina". TODO: quitar cuando haya validación real
-    val removed = remember { mutableStateListOf<String>() }
+    fun recargar() {
+        scope.launch {
+            cargando = true
+            try {
+                servicios = ServiciosRepository.listar()
+                errorMsg = null
+            } catch (e: Exception) {
+                errorMsg = "No se pudo cargar: ${e.message}"
+            }
+            cargando = false
+        }
+    }
 
-    val allServices = GymApp.repository.services().filter { it.name !in removed }
+    LaunchedEffect(Unit) { recargar() }
 
     fun closeForm() {
         showForm = false
@@ -97,19 +114,26 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                     }
                 }
 
-                itemsIndexed(allServices) { index, service ->
+                if (cargando) {
+                    item { Text("Cargando...", color = GymColors.TextSecondary) }
+                }
+                errorMsg?.let { msg ->
+                    item { Text(msg, color = GymColors.Red) }
+                }
+
+                itemsIndexed(servicios) { index, service ->
                     ServiceCard(
-                        name = service.name,
-                        duration = "${service.duration}",
-                        price = "$${service.price}",
+                        name = service.nombre,
+                        duration = service.duracion,
+                        price = "$${service.precio}",
                         onEdit = {
                             editingIndex = index
-                            name = service.name
-                            duration = "${service.duration}".filter { it.isDigit() }
-                            price = "${service.price}"
+                            name = service.nombre
+                            duration = service.duracion.filter { it.isDigit() }
+                            price = service.precio.toString()
                             showForm = true
                         },
-                        onDelete = { deleting = service.name }
+                        onDelete = { deleting = service }
                     )
                 }
             }
@@ -125,8 +149,24 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                     onPriceChange = { price = it },
                     onDismiss = { closeForm() },
                     onSave = {
-                        // TODO: si editingIndex != null, actualizar ese servicio en GymApp.repository
-                        // TODO: si editingIndex == null, crear uno nuevo en GymApp.repository
+                        val nombre = name.trim()
+                        val dias = duration.toInt()
+                        val dur = if (dias == 1) "1 día" else "$dias días"
+                        val precio = price.toDouble()
+                        val idx = editingIndex
+                        scope.launch {
+                            try {
+                                if (idx != null) {
+                                    ServiciosRepository.actualizar(servicios[idx].id, nombre, dur, precio)
+                                } else {
+                                    ServiciosRepository.crear(nombre, dur, precio)
+                                }
+                                errorMsg = null
+                            } catch (e: Exception) {
+                                errorMsg = "No se pudo guardar: ${e.message}"
+                            }
+                            recargar()
+                        }
                         closeForm()
                     }
                 )
@@ -134,21 +174,26 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 
-    // Cuadro de confirmación para eliminar
     deleting?.let { target ->
         DeleteConfirmDialog(
             title = "¿Eliminar servicio?",
-            message = "Se eliminará el servicio $target. Esta acción no se puede deshacer.",
+            message = "Se eliminará el servicio ${target.nombre}. Esta acción no se puede deshacer.",
             onConfirm = {
-                // TODO: eliminar el servicio en GymApp.repository
-                removed.add(target)
+                scope.launch {
+                    try {
+                        ServiciosRepository.eliminar(target.id)
+                        errorMsg = null
+                    } catch (e: Exception) {
+                        errorMsg = "No se pudo eliminar: ${e.message}"
+                    }
+                    recargar()
+                }
                 deleting = null
             },
             onDismiss = { deleting = null }
         )
     }
 }
-
 @Composable
 private fun DeleteConfirmDialog(
     title: String,

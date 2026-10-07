@@ -2,12 +2,15 @@ package com.example.gymcontrol.ui.encargado.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.gymcontrol.GymApp
-import com.example.gymcontrol.data.model.Status
-import com.example.gymcontrol.data.model.UserRole
+import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.data.remote.OcupacionRepository
+import com.example.gymcontrol.data.remote.OcupacionRow
+import com.example.gymcontrol.data.remote.ResumenRepository
+import com.example.gymcontrol.data.remote.ResumenRow
 import com.example.gymcontrol.ui.components.BarEntry
 import com.example.gymcontrol.ui.components.GroupedBarChart
 import com.example.gymcontrol.ui.components.GroupedBarEntry
@@ -16,14 +19,53 @@ import com.example.gymcontrol.ui.components.SimpleBarChart
 import com.example.gymcontrol.ui.components.StatCard
 import com.example.gymcontrol.ui.components.StatIconType
 import com.example.gymcontrol.ui.theme.GymColors
+import kotlinx.coroutines.delay
+import java.util.Locale
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
 @Composable
 fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
-    val users = GymApp.repository.users()
-    val active = users.count { it.role == UserRole.CLIENTE && it.status == Status.ACTIVO }
-    val inactive = users.count { it.role == UserRole.CLIENTE && it.status == Status.INACTIVO }
+    var ocupacion by remember { mutableStateOf<List<OcupacionRow>>(emptyList()) }
+    var resumen by remember { mutableStateOf<ResumenRow?>(null) }
+
+    // Se actualiza cada 30 segundos
+    LaunchedEffect(Unit) {
+        while (true) {
+            try {
+                ocupacion = OcupacionRepository.hoy()
+            } catch (e: Exception) {
+                // si falla, se conserva lo último que se cargó
+            }
+            try {
+                resumen = ResumenRepository.obtener()
+            } catch (e: Exception) {
+                // si falla, se conserva lo último que se cargó
+            }
+            delay(30_000)
+        }
+    }
+
+    val activos = resumen?.activos ?: 0
+    val inactivos = resumen?.inactivos ?: 0
+    val ingresosTexto = "$" + "%,.2f".format(Locale.US, resumen?.ingresosMes ?: 0.0)
+
+    // Todas las horas del gimnasio (6:00 a 21:00), con 0 donde no hubo entradas
+    val conteo = ocupacion.associate { it.hora to it.personas }
+    val datos = (6..21).map { h ->
+        val hora = "%02d:00".format(h)
+        hora to (conteo[hora] ?: 0)
+    }
+    val maximo = datos.maxOfOrNull { it.second } ?: 0
+    val pico = datos.maxByOrNull { it.second }?.takeIf { it.second > 0 }
+    val colores = datos.map { (_, n) ->
+        when {
+            maximo == 0 -> GymColors.Gold
+            n * 3 >= maximo * 2 -> GymColors.Red
+            n * 3 >= maximo -> GymColors.Gold
+            else -> GymColors.Green
+        }
+    }
 
     GymScaffold(
         currentSection = "Dashboard",
@@ -40,7 +82,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 StatCard(
                     title = "Clientes Activos",
-                    value = "$active",
+                    value = "$activos",
                     valueColor = GymColors.Green,
                     iconType = StatIconType.PERSON,
                     iconColor = GymColors.Green,
@@ -51,7 +93,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 StatCard(
                     title = "Clientes Inactivos",
-                    value = "$inactive",
+                    value = "$inactivos",
                     valueColor = GymColors.Red,
                     iconType = StatIconType.PERSON,
                     iconColor = GymColors.Red,
@@ -62,7 +104,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 StatCard(
                     title = "Ingresos del mes",
-                    value = "$58,400",
+                    value = ingresosTexto,
                     valueColor = GymColors.Gold,
                     iconType = StatIconType.MONEY,
                     iconColor = GymColors.Gold,
@@ -72,16 +114,21 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 SimpleBarChart(
-                    title = "Clientes en Tiempo Real",
-                    entries = listOf(
-                        BarEntry("6am", 25f), BarEntry("8am", 35f), BarEntry("10am", 30f),
-                        BarEntry("12pm", 15f), BarEntry("2pm", 27f), BarEntry("4pm", 42f),
-                        BarEntry("6pm", 47f), BarEntry("8pm", 55f), BarEntry("10pm", 63f),
-                        BarEntry("12am", 30f)
-                    ),
-                    barColor = GymColors.Gold,
+                    title = "Personas por hora (hoy)",
+                    entries = datos.map { BarEntry(it.first.take(2), it.second.toFloat()) },
+                    barColors = colores,
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+
+            if (pico != null) {
+                item {
+                    Text(
+                        text = "Hora pico: ${pico.first} (${pico.second} personas). Entradas de hoy: ${datos.sumOf { it.second }}",
+                        color = GymColors.TextSecondary,
+                        fontSize = 13.sp
+                    )
+                }
             }
 
             item {

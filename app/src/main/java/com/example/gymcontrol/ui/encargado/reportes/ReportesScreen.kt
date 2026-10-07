@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.*
+import com.example.gymcontrol.data.remote.ReporteRow
+import com.example.gymcontrol.data.remote.ReportesRepository
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.theme.GymColors
@@ -22,6 +25,20 @@ private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servic
 @Composable
 fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
     val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+
+    var reportes by remember { mutableStateOf<List<ReporteRow>>(emptyList()) }
+    var cargando by remember { mutableStateOf(true) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        try {
+            reportes = ReportesRepository.listar()
+            errorMsg = null
+        } catch (e: Exception) {
+            errorMsg = "No se pudo cargar: ${e.message}"
+        }
+        cargando = false
+    }
 
     GymScaffold(
         currentSection = "Reportes",
@@ -41,6 +58,15 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
             )
 
             Spacer(Modifier.height(16.dp))
+
+            if (cargando) {
+                Text("Cargando...", color = GymColors.TextSecondary)
+                Spacer(Modifier.height(8.dp))
+            }
+            errorMsg?.let { msg ->
+                Text(msg, color = GymColors.Red)
+                Spacer(Modifier.height(8.dp))
+            }
 
             Column(
                 modifier = Modifier
@@ -62,7 +88,8 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                         HeaderCell("Total", 110)
                     }
 
-                    GymApp.repository.reports().forEachIndexed { index, report ->
+                    reportes.forEachIndexed { index, r ->
+                        val total = r.servicios + r.asesorias - r.gastos
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -70,11 +97,11 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                                     if (index % 2 == 0) GymColors.Surface else GymColors.Background.copy(alpha = 0.4f)
                                 )
                         ) {
-                            BodyCell(report.period, 130)
-                            BodyCell("$${report.services}", 110)
-                            BodyCell("$${report.advisories}", 110)
-                            BodyCell("$${report.expenses}", 110)
-                            BodyCell("$${report.total}", 110, highlight = true)
+                            BodyCell(ReportesRepository.nombrePeriodo(r.periodo), 130)
+                            BodyCell("$${r.servicios}", 110)
+                            BodyCell("$${r.asesorias}", 110)
+                            BodyCell("$${r.gastos}", 110)
+                            BodyCell("$$total", 110, highlight = true)
                         }
                     }
                 }
@@ -82,7 +109,6 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 }
-
 @Composable
 private fun HeaderCell(text: String, width: Int) {
     Text(
