@@ -98,7 +98,7 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
             OutlinedTextField(
                 value = identifier,
                 onValueChange = { identifier = it },
-                label = { Text("Correo o número de membresía") },
+                label = { Text("Correo") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 shape = campoShape,

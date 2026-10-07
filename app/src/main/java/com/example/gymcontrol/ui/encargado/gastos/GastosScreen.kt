@@ -34,6 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.launch
+import com.example.gymcontrol.data.remote.GastoRow
+import com.example.gymcontrol.data.remote.GastosRepository
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.theme.GymColors
@@ -54,19 +57,33 @@ private class DeleteTarget(val key: String, val concept: String)
 
 @Composable
 fun GastosScreen(onNavigate: (String) -> Unit = {}) {
+    val scope = rememberCoroutineScope()
+    var gastos by remember { mutableStateOf<List<GastoRow>>(emptyList()) }
+    var cargando by remember { mutableStateOf(true) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+
     var showForm by remember { mutableStateOf(false) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
     var concept by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
+    var deleting by remember { mutableStateOf<GastoRow?>(null) }
 
-    var deleting by remember { mutableStateOf<DeleteTarget?>(null) }
-    // Solo para la demo: oculta de la lista lo que se "elimina". TODO: quitar cuando haya validación real
-    val removed = remember { mutableStateListOf<String>() }
+    fun recargar() {
+        scope.launch {
+            cargando = true
+            try {
+                gastos = GastosRepository.listar()
+                errorMsg = null
+            } catch (e: Exception) {
+                errorMsg = "No se pudo cargar: ${e.message}"
+            }
+            cargando = false
+        }
+    }
 
-    val allExpenses = GymApp.repository.expenses()
-        .filter { "${it.concept}|${it.date}|${it.amount}" !in removed }
+    LaunchedEffect(Unit) { recargar() }
 
     fun closeForm() {
         showForm = false
@@ -110,26 +127,28 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                     }
                 }
 
-                itemsIndexed(allExpenses) { index, expense ->
+                if (cargando) {
+                    item { Text("Cargando...", color = GymColors.TextSecondary) }
+                }
+                errorMsg?.let { msg ->
+                    item { Text(msg, color = GymColors.Red) }
+                }
+
+                itemsIndexed(gastos) { index, g ->
                     ExpenseCard(
-                        concept = expense.concept,
-                        category = expense.category,
-                        amount = "$${expense.amount}",
-                        date = expense.date,
+                        concept = g.concepto,
+                        category = g.categoria,
+                        amount = "$${g.monto}",
+                        date = GastosRepository.deBd(g.fecha),
                         onEdit = {
                             editingIndex = index
-                            concept = expense.concept
-                            category = expense.category
-                            amount = "${expense.amount}"
-                            date = expense.date
+                            concept = g.concepto
+                            category = g.categoria
+                            amount = g.monto.toString()
+                            date = GastosRepository.deBd(g.fecha)
                             showForm = true
                         },
-                        onDelete = {
-                            deleting = DeleteTarget(
-                                key = "${expense.concept}|${expense.date}|${expense.amount}",
-                                concept = expense.concept
-                            )
-                        }
+                        onDelete = { deleting = g }
                     )
                 }
             }
@@ -147,8 +166,24 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                     onDateChange = { date = it },
                     onDismiss = { closeForm() },
                     onSave = {
-                        // TODO: si editingIndex != null, actualizar ese gasto en GymApp.repository
-                        // TODO: si editingIndex == null, crear uno nuevo en GymApp.repository
+                        val c = concept.trim()
+                        val cat = category.trim()
+                        val m = amount.toDoubleOrNull() ?: 0.0
+                        val f = date
+                        val idx = editingIndex
+                        scope.launch {
+                            try {
+                                if (idx != null) {
+                                    GastosRepository.actualizar(gastos[idx].id, c, cat, m, f)
+                                } else {
+                                    GastosRepository.crear(c, cat, m, f)
+                                }
+                                errorMsg = null
+                            } catch (e: Exception) {
+                                errorMsg = "No se pudo guardar: ${e.message}"
+                            }
+                            recargar()
+                        }
                         closeForm()
                     }
                 )
@@ -156,14 +191,20 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 
-    // Cuadro de confirmación para eliminar
     deleting?.let { target ->
         DeleteConfirmDialog(
             title = "¿Eliminar gasto?",
-            message = "Se eliminará el gasto ${target.concept}. Esta acción no se puede deshacer.",
+            message = "Se eliminará el gasto ${target.concepto}. Esta acción no se puede deshacer.",
             onConfirm = {
-                // TODO: eliminar el gasto en GymApp.repository
-                removed.add(target.key)
+                scope.launch {
+                    try {
+                        GastosRepository.eliminar(target.id)
+                        errorMsg = null
+                    } catch (e: Exception) {
+                        errorMsg = "No se pudo eliminar: ${e.message}"
+                    }
+                    recargar()
+                }
                 deleting = null
             },
             onDismiss = { deleting = null }

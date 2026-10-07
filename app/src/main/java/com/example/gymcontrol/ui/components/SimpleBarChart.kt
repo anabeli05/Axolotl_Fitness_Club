@@ -24,6 +24,7 @@ fun SimpleBarChart(
     title: String,
     entries: List<BarEntry>,
     barColor: Color = GymColors.Gold,
+    barColors: List<Color>? = null,
     modifier: Modifier = Modifier,
     chartHeight: Int = 180
 ) {
@@ -74,7 +75,7 @@ fun SimpleBarChart(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        entries.forEach { entry ->
+                        entries.forEachIndexed { index, entry ->
                             val fraction = (entry.value / niceMax).coerceIn(0.01f, 1f)
                             Canvas(
                                 modifier = Modifier
@@ -83,7 +84,7 @@ fun SimpleBarChart(
                                     .fillMaxHeight(fraction)
                             ) {
                                 drawRoundRect(
-                                    color = barColor,
+                                    color = barColors?.getOrNull(index) ?: barColor,
                                     cornerRadius = CornerRadius(6f, 6f)
                                 )
                             }
