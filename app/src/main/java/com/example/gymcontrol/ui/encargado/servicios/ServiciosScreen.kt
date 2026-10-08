@@ -45,6 +45,9 @@ private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
 )
 
+// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
+private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
+
 @Composable
 fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
     val scope = rememberCoroutineScope()
@@ -194,6 +197,7 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
         )
     }
 }
+
 @Composable
 private fun DeleteConfirmDialog(
     title: String,
@@ -335,6 +339,7 @@ private fun ServiceFormDialog(
     onSave: () -> Unit
 ) {
     val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val nameValid = nameHasMinLetters(name)
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -377,7 +382,8 @@ private fun ServiceFormDialog(
                 label = "Nombre",
                 accept = { s -> s.all { it.isLetterOrDigit() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras y números"
+                warningText = "Solo se permiten letras y números",
+                errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
@@ -406,7 +412,7 @@ private fun ServiceFormDialog(
 
             Button(
                 onClick = onSave,
-                enabled = name.isNotBlank() &&
+                enabled = nameValid &&
                         (duration.toIntOrNull() ?: 0) > 0 &&
                         (price.toDoubleOrNull() ?: 0.0) > 0.0,
                 colors = ButtonDefaults.buttonColors(

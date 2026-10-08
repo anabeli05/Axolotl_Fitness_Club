@@ -69,6 +69,9 @@ private val INSTRUCTOR_TABS = listOf(
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
+// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
+private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
+
 @Composable
 fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
@@ -557,9 +560,11 @@ private fun EditDataDialog(
         }
     }
 
-    // Reglas: nombre solo letras y espacios; teléfono exactamente 10 dígitos
+    // Reglas: nombre solo letras y espacios (mínimo 3 letras); teléfono exactamente 10 dígitos
+    val nameValid = nameHasMinLetters(name)
+    val nameShort = name.isNotEmpty() && !nameValid
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
-    val isValid = name.isNotBlank() && phone.length == 10
+    val isValid = nameValid && phone.length == 10
 
     GymDialog(title = "Editar datos", onDismiss = onDismiss) {
         GymTextField(
@@ -571,8 +576,8 @@ private fun EditDataDialog(
                 }
             },
             label = "Nombre",
-            isError = nameWarning,
-            errorText = "Solo se permiten letras"
+            isError = nameWarning || nameShort,
+            errorText = if (nameWarning) "Solo se permiten letras" else "Mínimo 3 letras"
         )
         GymTextField(
             value = phone,

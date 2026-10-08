@@ -52,6 +52,9 @@ private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
 )
 
+// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
+private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
+
 // Datos mínimos de la persona seleccionada para editar o eliminar
 private class StaffItem(
     val name: String,
@@ -335,7 +338,7 @@ private fun NewStaffDialog(onDismiss: () -> Unit, onSave: () -> Unit) {
     var capacity by remember { mutableStateOf("") }
 
     val isInstructor = role == UserRole.INSTRUCTOR
-    val canSave = name.isNotBlank() && phone.length == 10 &&
+    val canSave = nameHasMinLetters(name) && phone.length == 10 &&
             email.isNotBlank() && password.isNotBlank() &&
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
 
@@ -486,7 +489,7 @@ private fun EditStaffDialog(
 
         Button(
             onClick = { onSave(name.trim(), email.trim(), role, status) },
-            enabled = name.isNotBlank() && email.isNotBlank(),
+            enabled = nameHasMinLetters(name) && email.isNotBlank(),
             colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth()
@@ -511,7 +514,7 @@ private fun fieldColors() = OutlinedTextFieldDefaults.colors(
     errorSupportingTextColor = GymColors.Red
 )
 
-// Nombre: solo letras y espacios (acepta acentos y ñ), máximo 40 caracteres
+// Nombre: solo letras y espacios (acepta acentos y ñ), máximo 40 caracteres, mínimo 3 letras
 @Composable
 private fun NameField(value: String, onValueChange: (String) -> Unit) {
     var warning by remember { mutableStateOf(false) }
@@ -525,6 +528,8 @@ private fun NameField(value: String, onValueChange: (String) -> Unit) {
         }
     }
 
+    val tooShort = value.isNotEmpty() && !nameHasMinLetters(value)
+
     GymTextField(
         value = value,
         onValueChange = { new ->
@@ -534,8 +539,8 @@ private fun NameField(value: String, onValueChange: (String) -> Unit) {
             }
         },
         label = "Nombre",
-        isError = warning,
-        errorText = "Solo se permiten letras"
+        isError = warning || tooShort,
+        errorText = if (warning) "Solo se permiten letras" else "Mínimo 3 letras"
     )
 }
 
