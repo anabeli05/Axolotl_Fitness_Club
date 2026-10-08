@@ -26,6 +26,9 @@ import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.delay
 
+// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
+private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientFormDialog(
@@ -49,10 +52,12 @@ fun ClientFormDialog(
     val plans = GymApp.repository.services().map { it.name }
     val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
 
-    // Reglas: nombre y apellido solo letras, teléfono 10 dígitos, correo con formato válido, plan elegido
+    // Reglas: nombre y apellido solo letras (mínimo 3), teléfono 10 dígitos, correo con formato válido, plan elegido
+    val nameValid = nameHasMinLetters(name)
+    val lastNameValid = nameHasMinLetters(lastName)
     val emailValid = Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
-    val canSave = name.isNotBlank() &&
-            lastName.isNotBlank() &&
+    val canSave = nameValid &&
+            lastNameValid &&
             phone.length == 10 &&
             emailValid &&
             selectedPlan != null
@@ -98,7 +103,8 @@ fun ClientFormDialog(
                 label = "Nombre",
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras"
+                warningText = "Solo se permiten letras",
+                errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
@@ -107,7 +113,8 @@ fun ClientFormDialog(
                 label = "Apellido",
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras"
+                warningText = "Solo se permiten letras",
+                errorText = if (lastName.isNotEmpty() && !lastNameValid) "Mínimo 3 letras" else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(

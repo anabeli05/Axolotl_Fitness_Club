@@ -55,6 +55,9 @@ private val DeleteBorder = Brush.linearGradient(
 // Gasto seleccionado para eliminar: clave única para ocultarlo y concepto para mostrarlo en el aviso
 private class DeleteTarget(val key: String, val concept: String)
 
+// El texto debe tener al menos `min` letras (espacios y números no cuentan)
+private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
+
 @Composable
 fun GastosScreen(onNavigate: (String) -> Unit = {}) {
     val scope = rememberCoroutineScope()
@@ -362,6 +365,8 @@ private fun ExpenseFormDialog(
     onSave: () -> Unit
 ) {
     val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val conceptValid = nameHasMinLetters(concept)
+    val categoryValid = nameHasMinLetters(category)
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -404,7 +409,8 @@ private fun ExpenseFormDialog(
                 label = "Concepto",
                 accept = { s -> s.all { it.isLetterOrDigit() || it == ' ' } },
                 maxLength = 40,
-                warningText = "Solo se permiten letras y números"
+                warningText = "Solo se permiten letras y números",
+                errorText = if (concept.isNotEmpty() && !conceptValid) "Mínimo 3 letras" else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
@@ -413,7 +419,8 @@ private fun ExpenseFormDialog(
                 label = "Categoría",
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras"
+                warningText = "Solo se permiten letras",
+                errorText = if (category.isNotEmpty() && !categoryValid) "Mínimo 3 letras" else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
@@ -433,8 +440,8 @@ private fun ExpenseFormDialog(
 
             Button(
                 onClick = onSave,
-                enabled = concept.isNotBlank() &&
-                        category.isNotBlank() &&
+                enabled = conceptValid &&
+                        categoryValid &&
                         (amount.toDoubleOrNull() ?: 0.0) > 0.0 &&
                         date.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(

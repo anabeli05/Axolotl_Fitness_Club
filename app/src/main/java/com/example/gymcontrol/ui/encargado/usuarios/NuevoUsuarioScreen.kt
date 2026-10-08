@@ -28,6 +28,10 @@ private val CardBackground = Color(0xFF1E1F20)
 private val CardBorder = Color(0xFF4A4B4D)
 private val TextPrimary = Color.White
 private val TextSecondary = Color(0xFFB5B5B5)
+private val ErrorRed = Color(0xFFFF5252)
+
+// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
+private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 @Composable
 private fun formFieldColors() = OutlinedTextFieldDefaults.colors(
@@ -39,7 +43,13 @@ private fun formFieldColors() = OutlinedTextFieldDefaults.colors(
     unfocusedBorderColor = CardBorder,
     focusedLabelColor = Purple,
     unfocusedLabelColor = TextSecondary,
-    cursorColor = Purple
+    cursorColor = Purple,
+    errorBorderColor = ErrorRed,
+    errorLabelColor = ErrorRed,
+    errorTextColor = TextPrimary,
+    errorContainerColor = CardBackground,
+    errorCursorColor = ErrorRed,
+    errorSupportingTextColor = ErrorRed
 )
 
 @Composable
@@ -48,13 +58,16 @@ private fun FormField(
     onValueChange: (String) -> Unit,
     label: String,
     keyboardType: KeyboardType = KeyboardType.Text,
-    isPassword: Boolean = false
+    isPassword: Boolean = false,
+    errorText: String? = null
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = true,
+        isError = errorText != null,
+        supportingText = errorText?.let { { Text(it) } },
         shape = RoundedCornerShape(12.dp),
         colors = formFieldColors(),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -74,7 +87,8 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
     var capacity by remember { mutableStateOf("") }
 
     val isInstructor = role == UserRole.INSTRUCTOR
-    val canSave = name.isNotBlank() && email.isNotBlank() && password.isNotBlank() &&
+    val nameValid = nameHasMinLetters(name)
+    val canSave = nameValid && email.isNotBlank() && password.isNotBlank() &&
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
 
     Column(
@@ -126,7 +140,15 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text("Datos personales", color = TextPrimary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                    FormField(name, { name = it }, "Nombre")
+                    FormField(
+                        value = name,
+                        // Solo letras y espacios, máximo 40 caracteres
+                        onValueChange = { new ->
+                            if (new.all { it.isLetter() || it == ' ' } && new.length <= 40) name = new
+                        },
+                        label = "Nombre",
+                        errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
+                    )
                     FormField(phone, { phone = it }, "Teléfono", KeyboardType.Phone)
                 }
             }

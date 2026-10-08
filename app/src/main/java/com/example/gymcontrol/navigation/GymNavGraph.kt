@@ -53,7 +53,11 @@ fun GymNavGraph() {
     }
 
     CompositionLocalProvider(LocalOnLogout provides logout) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(GymColors.Background)
+        ) {
             NavHost(navController = navController, startDestination = Routes.LOGIN) {
                 composable(Routes.LOGIN) {
                     LoginScreen { role ->
@@ -129,17 +133,19 @@ fun GymNavGraph() {
 
             // Menú dev movido al centro-derecha para no tapar la hamburguesa del sidebar
             //Box(
-             //   modifier = Modifier
-             //       .align(Alignment.CenterEnd)
-             //       .padding(end = 4.dp)
+            //   modifier = Modifier
+            //       .align(Alignment.CenterEnd)
+            //       .padding(end = 4.dp)
             //) {
-             //   RoleDevMenu(navController)
+            //   RoleDevMenu(navController)
             //}
         }
     }
 }
 
 // Barra inferior del cliente
+// popUpTo + saveState + restoreState evita que se apilen instancias repetidas
+// de la misma pestaña (la causa de que las vistas se vieran sobrepuestas).
 private fun navigateClient(navController: NavHostController, section: String) {
     val route = when (section) {
         "Inicio" -> Routes.CLIENT_HOME
@@ -148,7 +154,13 @@ private fun navigateClient(navController: NavHostController, section: String) {
         else -> null
     }
     if (route != null) {
-        navController.navigate(route) { launchSingleTop = true }
+        navController.navigate(route) {
+            popUpTo(Routes.CLIENT_HOME) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 }
 
@@ -161,7 +173,13 @@ private fun navigateReception(navController: NavHostController, section: String)
         else -> null
     }
     if (route != null) {
-        navController.navigate(route) { launchSingleTop = true }
+        navController.navigate(route) {
+            popUpTo(Routes.RECEPTION_SCANNER) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 }
 
@@ -174,8 +192,11 @@ private fun navigateInstructor(navController: NavHostController, section: String
     }
     if (route != null) {
         navController.navigate(route) {
-            popUpTo(Routes.INSTRUCTOR_CLIENTS) { inclusive = false }
+            popUpTo(Routes.INSTRUCTOR_CLIENTS) {
+                saveState = true
+            }
             launchSingleTop = true
+            restoreState = true
         }
     }
 }
@@ -192,7 +213,13 @@ private fun navigateAdmin(navController: NavHostController, section: String) {
         else -> null
     }
     if (route != null) {
-        navController.navigate(route) { launchSingleTop = true }
+        navController.navigate(route) {
+            popUpTo(Routes.ADMIN_DASHBOARD) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
     }
 }
 
