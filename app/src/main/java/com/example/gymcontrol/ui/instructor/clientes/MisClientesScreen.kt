@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.InstructorRepository
+import com.example.gymcontrol.ui.components.SesionActual
+import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.ScaffoldTab
 import com.example.gymcontrol.ui.theme.GymColors
@@ -41,6 +44,7 @@ private val INSTRUCTOR_TABS = listOf(
 private val DIAS = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb")
 
 private data class ClienteAsignado(
+    val id: Long,
     val nombre: String,
     val dias: String,
     val objetivo: String
@@ -48,13 +52,22 @@ private data class ClienteAsignado(
 
 @Composable
 fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
-    val clientes = remember {
-        mutableStateListOf(
-            ClienteAsignado("Ana López", "Lun, Mié, Vie", "Ganar fuerza"),
-            ClienteAsignado("Luis Gómez", "Mar, Jue, Sáb", "Bajar grasa"),
-            ClienteAsignado("Mariana Silva", "Lun a Vie", "Acondicionamiento")
-        )
+    val scope = rememberCoroutineScope()
+    var clientes by remember { mutableStateOf<List<ClienteAsignado>>(emptyList()) }
+    var mensaje by remember { mutableStateOf<String?>(null) }
+    val correo = SesionActual.correo ?: ""
+
+    suspend fun recargar() {
+        try {
+            clientes = InstructorRepository.misClientes(correo)
+                .map { ClienteAsignado(it.id, it.nombre, it.dias, it.objetivo) }
+            mensaje = null
+        } catch (e: Exception) {
+            mensaje = "No se pudo cargar: ${e.message?.substringBefore("\nCode:")}"
+        }
     }
+
+    LaunchedEffect(Unit) { recargar() }
 
     // null = formulario cerrado, número = índice del cliente que se edita
     var indiceEditando by remember { mutableStateOf<Int?>(null) }
@@ -79,6 +92,10 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
+
+            mensaje?.let { msg ->
+                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
             }
 
             itemsIndexed(clientes) { index, cliente ->
@@ -112,9 +129,16 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
             objetivoInicial = cliente.objetivo,
             onDismiss = { indiceEditando = null },
             onGuardar = { nuevosDias, nuevoObjetivo ->
-                // TODO: guardar cambios en Supabase
-                clientes[indice] = cliente.copy(dias = nuevosDias, objetivo = nuevoObjetivo)
                 indiceEditando = null
+                scope.launch {
+                    try {
+                        InstructorRepository.guardar(correo, cliente.id, nuevosDias, nuevoObjetivo)
+                        mensaje = null
+                    } catch (e: Exception) {
+                        mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo guardar"
+                    }
+                    recargar()
+                }
             }
         )
     }
@@ -156,10 +180,14 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(6.dp))
-            Text(text = cliente.dias, color = GymColors.TextSecondary, fontSize = 15.sp)
+            Text(
+                text = cliente.dias.ifBlank { "Sin días asignados" },
+                color = GymColors.TextSecondary,
+                fontSize = 15.sp
+            )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = "Objetivo: ${cliente.objetivo}",
+                text = "Objetivo: ${cliente.objetivo.ifBlank { "—" }}",
                 color = GymColors.TextSecondary,
                 fontSize = 15.sp
             )

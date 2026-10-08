@@ -9,6 +9,13 @@ object SesionActual {
     var rol: UserRole? by mutableStateOf(null)
         private set
 
+    var correo: String? = null
+        private set
+
     fun iniciar(rol: UserRole?) { this.rol = rol }
-    fun cerrar() { rol = null }
+    fun fijarCorreo(correo: String) { this.correo = correo }
+    fun cerrar() {
+        rol = null
+        correo = null
+    }
 }

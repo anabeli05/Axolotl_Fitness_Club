@@ -29,6 +29,7 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.AuthRepository
 import kotlinx.coroutines.launch
+import com.example.gymcontrol.ui.components.SesionActual
 
 // Paleta tomada del diseño
 private val FondoNegro = Color(0xFF000000)
@@ -48,6 +49,8 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
     var passwordVisible by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var mostrarCambio by remember { mutableStateOf(false) }
+    var aviso by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     val campoShape = RoundedCornerShape(50)
@@ -139,20 +142,19 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
                         error = null
                         try {
                             val id = identifier.trim()
-                            // Sin selector: si parece correo se prueba primero el personal
-                            val roles = if (id.contains("@")) UserRole.entries.reversed()
-                            else UserRole.entries.toList()
-                            var rolEncontrado: UserRole? = null
-                            for (role in roles) {
-                                if (AuthRepository.login(id, password, role) != null) {
-                                    rolEncontrado = role
-                                    break
-                                }
+                            val fila = AuthRepository.loginAuto(id, password)
+                            val rolEncontrado = fila?.let {
+                                runCatching { UserRole.valueOf(it.rol) }.getOrNull()
                             }
-                            if (rolEncontrado != null) onLogin(rolEncontrado)
-                            else error = "Usuario o contraseña incorrectos"
+                            if (rolEncontrado != null) {
+                                SesionActual.fijarCorreo(id)
+                                onLogin(rolEncontrado)
+                            } else {
+                                error = "Usuario o contraseña incorrectos"
+                            }
                         } catch (e: Exception) {
-                            error = "Error de conexión: ${e.message}"
+                            val msg = e.message?.substringBefore("\nCode:") ?: ""
+                            error = if ("bloqueada" in msg) msg else "Error de conexión: $msg"
                         }
                         loading = false
                     }
@@ -174,6 +176,137 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 Text(it, color = RojoError, style = MaterialTheme.typography.bodySmall)
             }
+            aviso?.let {
+                Spacer(Modifier.height(12.dp))
+                Text(it, color = Dorado, style = MaterialTheme.typography.bodySmall)
+            }
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = { mostrarCambio = true; aviso = null }) {
+                Text("Cambiar contraseña", color = Dorado)
+            }
         }
     }
+
+    if (mostrarCambio) {
+        CambiarContrasenaDialog(
+            correoInicial = identifier.trim(),
+            onDismiss = { mostrarCambio = false },
+            onListo = {
+                mostrarCambio = false
+                password = ""
+                aviso = "Contraseña actualizada. Ya puedes iniciar sesión."
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CambiarContrasenaDialog(
+    correoInicial: String,
+    onDismiss: () -> Unit,
+    onListo: () -> Unit
+) {
+    var correo by remember { mutableStateOf(correoInicial) }
+    var actual by remember { mutableStateOf("") }
+    var nueva by remember { mutableStateOf("") }
+    var repetir by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var cargando by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val coincide = nueva == repetir
+    val puedeGuardar = !cargando && correo.isNotBlank() && actual.isNotBlank() &&
+            nueva.length >= 8 && coincide
+
+    @Composable
+    fun campo(valor: String, cambio: (String) -> Unit, etiqueta: String, clave: Boolean) {
+        var visible by remember { mutableStateOf(false) }
+        OutlinedTextField(
+            value = valor,
+            onValueChange = cambio,
+            label = { Text(etiqueta) },
+            singleLine = true,
+            visualTransformation = if (clave && !visible) PasswordVisualTransformation()
+            else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (clave) KeyboardType.Password else KeyboardType.Email
+            ),
+            trailingIcon = if (clave) {
+                {
+                    IconButton(onClick = { visible = !visible }) {
+                        Icon(
+                            imageVector = if (visible) Icons.Filled.VisibilityOff
+                            else Icons.Filled.Visibility,
+                            contentDescription = if (visible) "Ocultar contraseña"
+                            else "Mostrar contraseña"
+                        )
+                    }
+                }
+            } else null,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = BlancoTexto,
+                unfocusedTextColor = BlancoTexto,
+                focusedBorderColor = Dorado,
+                unfocusedBorderColor = DoradoBorde,
+                focusedLabelColor = Dorado,
+                unfocusedLabelColor = BlancoTexto,
+                cursorColor = Dorado,
+                focusedTrailingIconColor = Dorado,
+                unfocusedTrailingIconColor = BlancoTexto
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = TarjetaOscura,
+        title = { Text("Cambiar contraseña", color = BlancoTexto) },
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                campo(correo, { correo = it }, "Correo", false)
+                campo(actual, { actual = it }, "Contraseña actual", true)
+                campo(nueva, { nueva = it }, "Nueva contraseña", true)
+                campo(repetir, { repetir = it }, "Repetir nueva contraseña", true)
+                Text(
+                    "Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.",
+                    color = BlancoTexto.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (repetir.isNotEmpty() && !coincide) {
+                    Spacer(Modifier.height(6.dp))
+                    Text("Las contraseñas no coinciden", color = RojoError,
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                error?.let {
+                    Spacer(Modifier.height(6.dp))
+                    Text(it, color = RojoError, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = puedeGuardar,
+                onClick = {
+                    scope.launch {
+                        cargando = true
+                        error = null
+                        try {
+                            AuthRepository.cambiarContrasena(correo, actual, nueva)
+                            onListo()
+                        } catch (e: Exception) {
+                            error = e.message?.substringBefore("\nCode:") ?: "No se pudo cambiar"
+                        }
+                        cargando = false
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MoradoCampo, contentColor = BlancoTexto)
+            ) { Text(if (cargando) "Guardando..." else "Guardar") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancelar", color = BlancoTexto) }
+        }
+    )
 }

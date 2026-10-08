@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.delay
 
@@ -34,7 +33,9 @@ private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter()
 fun ClientFormDialog(
     isEditing: Boolean,
     onDismiss: () -> Unit,
-    onSave: () -> Unit,
+    onSave: (nombre: String, telefono: String, correo: String, plan: String?) -> Unit,
+    plans: List<String> = emptyList(),
+    error: String? = null,
     // Datos con los que arranca el formulario (vacíos al crear, con los del cliente al editar)
     initialName: String = "",
     initialLastName: String = "",
@@ -49,7 +50,6 @@ fun ClientFormDialog(
     var selectedPlan by remember { mutableStateOf(initialPlan) }
     var planMenuExpanded by remember { mutableStateOf(false) }
 
-    val plans = GymApp.repository.services().map { it.name }
     val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
 
     // Reglas: nombre y apellido solo letras (mínimo 3), teléfono 10 dígitos, correo con formato válido, plan elegido
@@ -60,7 +60,7 @@ fun ClientFormDialog(
             lastNameValid &&
             phone.length == 10 &&
             emailValid &&
-            selectedPlan != null
+            (isEditing || selectedPlan != null)
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -142,7 +142,7 @@ fun ClientFormDialog(
             )
             Spacer(Modifier.height(10.dp))
 
-            ExposedDropdownMenuBox(
+            if (!isEditing) ExposedDropdownMenuBox(
                 expanded = planMenuExpanded,
                 onExpandedChange = { planMenuExpanded = it }
             ) {
@@ -178,10 +178,22 @@ fun ClientFormDialog(
                 }
             }
 
+            error?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(it, color = GymColors.Red, fontSize = 13.sp)
+            }
+
             Spacer(Modifier.height(18.dp))
 
             Button(
-                onClick = onSave,
+                onClick = {
+                    onSave(
+                        "${name.trim()} ${lastName.trim()}".trim(),
+                        phone,
+                        email.trim(),
+                        selectedPlan
+                    )
+                },
                 enabled = canSave,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GymColors.Purple,

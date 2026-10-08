@@ -20,7 +20,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.GymApp
+import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.SolicitudAdminRow
+import com.example.gymcontrol.data.remote.SolicitudesRepository
+import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.theme.GymColors
 
@@ -32,11 +35,27 @@ private val ChipWidth = 96.dp
 private val ChipHeight = 36.dp
 private val ActionWidth = 44.dp // dos botones (44 + 8 + 44) = 96.dp
 
+// Resolución pendiente de confirmar
+private class Resolucion(val solicitud: SolicitudAdminRow, val estado: String)
+
 @Composable
 fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
-    val requests = GymApp.repository.requests()
-    val resolved = remember { mutableStateMapOf<Int, String>() }
-    val pendientes = requests.count { resolved[it.id] == null }
+    val scope = rememberCoroutineScope()
+    var requests by remember { mutableStateOf<List<SolicitudAdminRow>>(emptyList()) }
+    var mensaje by remember { mutableStateOf<String?>(null) }
+    var confirmar by remember { mutableStateOf<Resolucion?>(null) }
+
+    suspend fun recargar() {
+        try {
+            requests = SolicitudesRepository.listar()
+        } catch (e: Exception) {
+            mensaje = "No se pudo cargar: ${e.message?.substringBefore("\nCode:")}"
+        }
+    }
+
+    LaunchedEffect(Unit) { recargar() }
+
+    val pendientes = requests.count { it.estado == "PENDIENTE" }
 
     GymScaffold(
         currentSection = "Solicitudes",
@@ -59,20 +78,24 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
+            mensaje?.let { msg ->
+                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
+            }
+
             items(requests, key = { it.id }) { req ->
                 SolicitudCard(
-                    clientName = req.clientName,
-                    membership = req.membershipNumber.toString(),
-                    instructor = req.instructorName,
-                    cost = req.cost.toString(),
-                    date = req.requestDate.toString(),
-                    status = resolved[req.id] ?: "PENDIENTE",
-                    onApprove = { resolved[req.id] = "APROBADA" },
-                    onReject = { resolved[req.id] = "RECHAZADA" }
+                    clientName = req.cliente,
+                    membership = req.numeroMembresia.ifBlank { "—" },
+                    instructor = req.instructor,
+                    cost = if (req.costo % 1.0 == 0.0) "%.0f".format(req.costo) else "%.2f".format(req.costo),
+                    date = ClientesRepository.fechaApp(req.fecha),
+                    status = req.estado,
+                    onApprove = { confirmar = Resolucion(req, "APROBADA") },
+                    onReject = { confirmar = Resolucion(req, "RECHAZADA") }
                 )
             }
 
-            if (requests.isEmpty()) {
+            if (requests.isEmpty() && mensaje == null) {
                 item {
                     Text(
                         text = "No hay solicitudes",
@@ -86,6 +109,52 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                 }
             }
         }
+    }
+
+    confirmar?.let { r ->
+        val aprobar = r.estado == "APROBADA"
+        AlertDialog(
+            onDismissRequest = { confirmar = null },
+            containerColor = GymColors.Surface,
+            shape = RoundedCornerShape(16.dp),
+            title = { Text("Confirmar", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    "¿Estás seguro de ${if (aprobar) "aprobar" else "rechazar"} la solicitud de " +
+                            "${r.solicitud.cliente} con ${r.solicitud.instructor}?",
+                    color = GymColors.TextSecondary
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        confirmar = null
+                        scope.launch {
+                            try {
+                                SolicitudesRepository.resolver(r.solicitud.id, r.estado)
+                                mensaje = null
+                            } catch (e: Exception) {
+                                mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo guardar"
+                            }
+                            recargar()
+                        }
+                    },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (aprobar) GymColors.Green else GymColors.Red,
+                        contentColor = Color.White
+                    )
+                ) { Text(if (aprobar) "Aprobar" else "Rechazar", fontWeight = FontWeight.Bold) }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { confirmar = null },
+                    shape = RoundedCornerShape(10.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, GymColors.Border),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+                ) { Text("Cancelar") }
+            }
+        )
     }
 }
 

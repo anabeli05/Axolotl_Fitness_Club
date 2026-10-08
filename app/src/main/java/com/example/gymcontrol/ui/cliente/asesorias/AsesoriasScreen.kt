@@ -21,8 +21,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.AsesoriasRepository
+import com.example.gymcontrol.data.remote.InstructorRow
+import com.example.gymcontrol.ui.components.SesionActual
+import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.theme.GymColors
 
@@ -46,13 +49,28 @@ private fun initials(name: String): String =
         .joinToString("") { it.first().uppercase() }
 
 // Solicitud que se quiere cancelar
-private class CancelTarget(val instructorId: Int, val instructorName: String)
+private class CancelTarget(val instructorId: Long, val instructorName: String)
 
 @Composable
 fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
-    val instructors = GymApp.repository.instructors()
-    val pending = remember { mutableStateMapOf<Int, Boolean>() }
+    val scope = rememberCoroutineScope()
+    var instructors by remember { mutableStateOf<List<InstructorRow>>(emptyList()) }
+    // instructorId -> "PENDIENTE" | "APROBADA"
+    var estados by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     var cancelling by remember { mutableStateOf<CancelTarget?>(null) }
+    var mensaje by remember { mutableStateOf<String?>(null) }
+    val correo = SesionActual.correo ?: ""
+
+    suspend fun recargar() {
+        try {
+            instructors = AsesoriasRepository.instructores()
+            estados = AsesoriasRepository.misSolicitudes(correo).associate { it.instructorId to it.estado }
+        } catch (e: Exception) {
+            mensaje = "No se pudo cargar: ${e.message?.substringBefore("\nCode:")}"
+        }
+    }
+
+    LaunchedEffect(Unit) { recargar() }
 
     ClienteScaffold(
         currentSection = "Asesorías",
@@ -82,8 +100,25 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 }
             }
 
+            mensaje?.let { msg ->
+                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
+            }
+
+            if (instructors.isEmpty() && mensaje == null) {
+                item {
+                    Text(
+                        "Aún no hay instructores disponibles",
+                        color = GymColors.TextSecondary,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
             items(instructors) { instructor ->
-                val isPending = pending[instructor.id] == true
+                val estado = estados[instructor.id]
+                val isPending = estado == "PENDIENTE"
+                val isApproved = estado == "APROBADA"
+                val sinCupo = instructor.activos >= instructor.maxClientes
 
                 Column(
                     modifier = Modifier
@@ -97,13 +132,13 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        InstructorAvatar(name = instructor.name)
+                        InstructorAvatar(name = instructor.nombre)
 
                         Spacer(Modifier.width(16.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = instructor.name,
+                                text = instructor.nombre,
                                 color = GymColors.TextPrimary,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
@@ -112,13 +147,13 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                             )
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                text = "Cupo: ${instructor.activeClients}/${instructor.maxClients}",
+                                text = "Cupo: ${instructor.activos}/${instructor.maxClientes}",
                                 color = GymColors.Purple,
                                 fontSize = 16.sp
                             )
                             Spacer(Modifier.height(2.dp))
                             Text(
-                                text = "${formatPrice(instructor.cost)} /mes",
+                                text = "${formatPrice(instructor.costo)} /mes",
                                 color = GymColors.Gold,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
@@ -129,7 +164,23 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(16.dp))
 
                     // Botones
-                    if (isPending) {
+                    if (isApproved) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(ButtonHeight)
+                                .background(GymColors.Green.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                                .border(1.dp, GymColors.Green, RoundedCornerShape(10.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Asesoría aprobada",
+                                color = GymColors.Green,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    } else if (isPending) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -154,7 +205,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                             // Pide confirmación antes de cancelar la solicitud
                             OutlinedButton(
                                 onClick = {
-                                    cancelling = CancelTarget(instructor.id, instructor.name)
+                                    cancelling = CancelTarget(instructor.id, instructor.nombre)
                                 },
                                 modifier = Modifier
                                     .weight(1f)
@@ -172,7 +223,18 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         }
                     } else {
                         Button(
-                            onClick = { pending[instructor.id] = true },
+                            onClick = {
+                                scope.launch {
+                                    try {
+                                        AsesoriasRepository.solicitar(correo, instructor.id)
+                                        mensaje = null
+                                        recargar()
+                                    } catch (e: Exception) {
+                                        mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo solicitar"
+                                    }
+                                }
+                            },
+                            enabled = !sinCupo,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(ButtonHeight),
@@ -182,7 +244,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                 contentColor = GymColors.TextPrimary
                             )
                         ) {
-                            Text("Solicitar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                            Text(if (sinCupo) "Sin cupo" else "Solicitar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -218,9 +280,16 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             confirmButton = {
                 Button(
                     onClick = {
-                        // TODO: cancelar la solicitud en Supabase
-                        pending[target.instructorId] = false
                         cancelling = null
+                        scope.launch {
+                            try {
+                                AsesoriasRepository.cancelar(correo, target.instructorId)
+                                mensaje = null
+                                recargar()
+                            } catch (e: Exception) {
+                                mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo cancelar"
+                            }
+                        }
                     },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(

@@ -36,12 +36,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.data.model.Status
 import com.example.gymcontrol.data.model.UserRole
+import com.example.gymcontrol.data.remote.CorreoRepository
+import com.example.gymcontrol.data.remote.PersonalRepository
+import com.example.gymcontrol.data.remote.PersonalRow
 import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
@@ -52,16 +56,29 @@ private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
 )
 
+<<<<<<< Updated upstream
 // El nombre debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 // Datos mínimos de la persona seleccionada para editar o eliminar
+=======
+private val STAFF_ROLES = listOf(UserRole.RECEPCION, UserRole.INSTRUCTOR, UserRole.ENCARGADO)
+
+// Datos mínimos de la persona seleccionada para editar o dar de baja
+>>>>>>> Stashed changes
 private class StaffItem(
+    val id: Long,
     val name: String,
     val email: String,
     val role: UserRole,
     val status: Status
 )
+
+// Acción que espera la confirmación "¿Estás seguro?"
+private class Pendiente(val mensaje: String, val accion: () -> Unit)
+
+private fun mensajeError(e: Exception, porDefecto: String): String =
+    e.message?.substringBefore("\nCode:") ?: porDefecto
 
 @Composable
 fun UsuariosScreen(
@@ -69,14 +86,27 @@ fun UsuariosScreen(
     onNewUser: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     var showNewForm by remember { mutableStateOf(false) }
+    var errorAlta by remember { mutableStateOf<String?>(null) }
     var editing by remember { mutableStateOf<StaffItem?>(null) }
+    var errorEditar by remember { mutableStateOf<String?>(null) }
     var deleting by remember { mutableStateOf<StaffItem?>(null) }
-    // Solo para la demo: oculta de la lista a quien se "elimina". TODO: quitar cuando haya validación real
-    val removed = remember { mutableStateListOf<String>() }
+    var errorBaja by remember { mutableStateOf<String?>(null) }
+    var pendiente by remember { mutableStateOf<Pendiente?>(null) }
+    var info by remember { mutableStateOf<String?>(null) }
 
-    val personal = GymApp.repository.users()
-        .filter { it.membershipNumber == null && "${it.email}" !in removed }
+    var personal by remember { mutableStateOf<List<PersonalRow>>(emptyList()) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        try {
+            personal = PersonalRepository.listar()
+            errorMsg = null
+        } catch (e: Exception) {
+            errorMsg = "No se pudo cargar: ${e.message}"
+        }
+    }
 
     GymScaffold(
         currentSection = "Personal",
@@ -103,8 +133,21 @@ fun UsuariosScreen(
                 }
             }
 
+            errorMsg?.let { msg ->
+                item { Text(msg, color = GymColors.Red) }
+            }
+            info?.let { msg ->
+                item { Text(msg, color = GymColors.Green, fontSize = 13.sp) }
+            }
+
             items(personal) { user ->
-                val item = StaffItem(user.name, "${user.email}", user.role, user.status)
+                val item = StaffItem(
+                    user.id,
+                    user.nombre,
+                    user.gmail,
+                    UserRole.valueOf(user.rol),
+                    Status.valueOf(user.estado)
+                )
                 StaffCard(
                     item = item,
                     onEdit = { editing = item },
@@ -116,10 +159,30 @@ fun UsuariosScreen(
 
     if (showNewForm) {
         NewStaffDialog(
-            onDismiss = { showNewForm = false },
-            onSave = {
-                // TODO: guardar el nuevo personal en el repositorio
+            error = errorAlta,
+            onDismiss = {
                 showNewForm = false
+                errorAlta = null
+            },
+            onSave = { nombre, tel, correo, rol, costo, cap ->
+                pendiente = Pendiente("¿Estás seguro de dar de alta a $nombre como ${rol.name}?") {
+                    scope.launch {
+                        try {
+                            PersonalRepository.crear(
+                                nombre, tel, correo.trim(),
+                                rol.name, costo.toDoubleOrNull(), cap.toIntOrNull()
+                            )
+                            errorAlta = null
+                            showNewForm = false
+                            personal = PersonalRepository.listar()
+                            val enviado = CorreoRepository.enviarBienvenida(correo.trim())
+                            info = if (enviado) "Alta realizada. Se envió la contraseña al correo."
+                            else "Alta realizada, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026"
+                        } catch (e: Exception) {
+                            errorAlta = mensajeError(e, "No se pudo crear")
+                        }
+                    }
+                }
             }
         )
     }
@@ -127,24 +190,55 @@ fun UsuariosScreen(
     editing?.let { target ->
         EditStaffDialog(
             target = target,
-            onDismiss = { editing = null },
-            onSave = { _, _, _, _ ->
-                // TODO: actualizar el personal en el repositorio
+            error = errorEditar,
+            onDismiss = {
                 editing = null
+                errorEditar = null
+            },
+            onSave = { nombre, correo, rol, estado ->
+                pendiente = Pendiente("¿Estás seguro de guardar los cambios de ${target.name}?") {
+                    scope.launch {
+                        try {
+                            PersonalRepository.editar(
+                                SesionActual.correo ?: "", target.id,
+                                nombre, correo, rol.name, estado.name
+                            )
+                            errorEditar = null
+                            editing = null
+                            personal = PersonalRepository.listar()
+                        } catch (e: Exception) {
+                            errorEditar = mensajeError(e, "No se pudo guardar")
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+    pendiente?.let { p ->
+        ConfirmarDialog(
+            pendiente = p,
+            onCancelar = { pendiente = null },
+            onAceptar = {
+                pendiente = null
+                p.accion()
             }
         )
     }
 
     deleting?.let { target ->
         AlertDialog(
-            onDismissRequest = { deleting = null },
+            onDismissRequest = {
+                deleting = null
+                errorBaja = null
+            },
             modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
             containerColor = GymColors.Surface,
             shape = RoundedCornerShape(16.dp),
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
             title = {
                 Text(
-                    "¿Eliminar personal?",
+                    "¿Eliminar al personal?",
                     color = GymColors.TextPrimary,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -152,18 +246,32 @@ fun UsuariosScreen(
                 )
             },
             text = {
-                Text(
-                    "Se eliminará a ${target.name}. Esta acción no se puede deshacer.",
-                    color = GymColors.TextSecondary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "${target.name} se eliminará definitivamente del sistema. Esta acción no se puede deshacer.",
+                        color = GymColors.TextSecondary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    errorBaja?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, color = GymColors.Red, fontSize = 13.sp)
+                    }
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        removed.add(target.email)
-                        deleting = null
+                        scope.launch {
+                            try {
+                                PersonalRepository.eliminar(SesionActual.correo ?: "", target.id)
+                                deleting = null
+                                errorBaja = null
+                                personal = PersonalRepository.listar()
+                            } catch (e: Exception) {
+                                errorBaja = mensajeError(e, "No se pudo eliminar")
+                            }
+                        }
                     },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -174,7 +282,10 @@ fun UsuariosScreen(
             },
             dismissButton = {
                 OutlinedButton(
-                    onClick = { deleting = null },
+                    onClick = {
+                        deleting = null
+                        errorBaja = null
+                    },
                     shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, GymColors.Border),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
@@ -182,6 +293,34 @@ fun UsuariosScreen(
             }
         )
     }
+}
+
+// ---------- Confirmación genérica ----------
+
+@Composable
+private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAceptar: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        containerColor = GymColors.Surface,
+        shape = RoundedCornerShape(16.dp),
+        title = { Text("Confirmar", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold) },
+        text = { Text(pendiente.mensaje, color = GymColors.TextSecondary) },
+        confirmButton = {
+            Button(
+                onClick = onAceptar,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple)
+            ) { Text("Sí, continuar", fontWeight = FontWeight.Bold) }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onCancelar,
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, GymColors.Border),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+            ) { Text("Cancelar") }
+        }
+    )
 }
 
 // ---------- Tarjeta (mismo estilo que ServiceCard) ----------
@@ -328,18 +467,26 @@ private fun StaffDialog(
 }
 
 @Composable
-private fun NewStaffDialog(onDismiss: () -> Unit, onSave: () -> Unit) {
+private fun NewStaffDialog(
+    error: String?,
+    onDismiss: () -> Unit,
+    onSave: (String, String, String, UserRole, String, String) -> Unit
+) {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     var role by remember { mutableStateOf(UserRole.RECEPCION) }
     var cost by remember { mutableStateOf("") }
     var capacity by remember { mutableStateOf("") }
 
     val isInstructor = role == UserRole.INSTRUCTOR
+<<<<<<< Updated upstream
     val canSave = nameHasMinLetters(name) && phone.length == 10 &&
             email.isNotBlank() && password.isNotBlank() &&
+=======
+    val canSave = name.isNotBlank() && phone.length == 10 &&
+            email.isNotBlank() &&
+>>>>>>> Stashed changes
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
 
     StaffDialog(title = "Nuevo personal", onDismiss = onDismiss) {
@@ -349,7 +496,11 @@ private fun NewStaffDialog(onDismiss: () -> Unit, onSave: () -> Unit) {
         Spacer(Modifier.height(10.dp))
         GymTextField(email, { email = it }, "Correo asignado", KeyboardType.Email)
         Spacer(Modifier.height(10.dp))
-        GymTextField(password, { password = it }, "Contraseña asignada", KeyboardType.Password, isPassword = true)
+        Text(
+            "La contraseña inicial es Axolotl2026 y se envía al correo del usuario.",
+            color = GymColors.TextSecondary,
+            fontSize = 12.sp
+        )
 
         Spacer(Modifier.height(14.dp))
         Text("Rol", color = GymColors.TextSecondary, fontSize = 14.sp)
@@ -380,10 +531,15 @@ private fun NewStaffDialog(onDismiss: () -> Unit, onSave: () -> Unit) {
             DigitsField(capacity, { capacity = it }, "Capacidad máxima", maxLength = 3)
         }
 
+        error?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, color = GymColors.Red, fontSize = 13.sp)
+        }
+
         Spacer(Modifier.height(18.dp))
 
         Button(
-            onClick = onSave,
+            onClick = { onSave(name.trim(), phone, email, role, cost, capacity) },
             enabled = canSave,
             colors = ButtonDefaults.buttonColors(
                 containerColor = GymColors.Purple,
@@ -403,6 +559,7 @@ private fun NewStaffDialog(onDismiss: () -> Unit, onSave: () -> Unit) {
 @Composable
 private fun EditStaffDialog(
     target: StaffItem,
+    error: String?,
     onDismiss: () -> Unit,
     onSave: (String, String, UserRole, Status) -> Unit
 ) {
@@ -439,7 +596,7 @@ private fun EditStaffDialog(
                 onDismissRequest = { roleExpanded = false },
                 modifier = Modifier.background(GymColors.Surface)
             ) {
-                UserRole.values().forEach { r ->
+                STAFF_ROLES.forEach { r ->
                     DropdownMenuItem(
                         text = { Text(r.name, color = GymColors.TextPrimary) },
                         onClick = {
@@ -483,6 +640,11 @@ private fun EditStaffDialog(
                     )
                 }
             }
+        }
+
+        error?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(it, color = GymColors.Red, fontSize = 13.sp)
         }
 
         Spacer(Modifier.height(18.dp))
