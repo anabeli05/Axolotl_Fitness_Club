@@ -56,16 +56,12 @@ private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
 )
 
-<<<<<<< Updated upstream
+private val STAFF_ROLES = listOf(UserRole.RECEPCION, UserRole.INSTRUCTOR, UserRole.ENCARGADO)
+
 // El nombre debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
-// Datos mínimos de la persona seleccionada para editar o eliminar
-=======
-private val STAFF_ROLES = listOf(UserRole.RECEPCION, UserRole.INSTRUCTOR, UserRole.ENCARGADO)
-
 // Datos mínimos de la persona seleccionada para editar o dar de baja
->>>>>>> Stashed changes
 private class StaffItem(
     val id: Long,
     val name: String,
@@ -480,13 +476,8 @@ private fun NewStaffDialog(
     var capacity by remember { mutableStateOf("") }
 
     val isInstructor = role == UserRole.INSTRUCTOR
-<<<<<<< Updated upstream
     val canSave = nameHasMinLetters(name) && phone.length == 10 &&
-            email.isNotBlank() && password.isNotBlank() &&
-=======
-    val canSave = name.isNotBlank() && phone.length == 10 &&
             email.isNotBlank() &&
->>>>>>> Stashed changes
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
 
     StaffDialog(title = "Nuevo personal", onDismiss = onDismiss) {
