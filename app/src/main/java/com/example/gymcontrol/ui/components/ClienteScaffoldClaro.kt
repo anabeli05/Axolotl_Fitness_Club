@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -25,30 +26,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 
-/** Paleta del nuevo diseño del cliente. */
+/** Paleta unisex del cliente: grafito + violeta + dorado suave. */
 object ClienteTema {
-    val Fondo = Color(0xFFBDB9B9)
-    val Navy = Color(0xFF020A3A)
-    val Beige = Color(0xFFE9E5D3)
-    val Azul = Color(0xFF4F7BEA)
-    val AzulClaro = Color(0xFF8DA6EA)
-    val AzulSel = Color(0xFF6C8FF0)
-    val Barras = Color(0xFF0A1B9A)
-    val Texto = Color(0xFF111111)
-    val TextoSec = Color(0xFF555555)
-    val Borde = Color(0xFF333333)
-    val Verde = Color(0xFF1B6B1B)
-    val Rojo = Color(0xFFC62828)
+    val Fondo = Color(0xFF232222)
+    val Navy = Color(0xFF111111)       // encabezado y barra inferior (grafito)
+    val Beige = Color(0xFF3D3D3F)      // tarjetas (gris lavanda muy claro)
+    val Azul = Color(0xFF3D3D4E)       // botones (violeta)
+    val AzulClaro = Color(0xFFA0A4C2)  // "Pendiente"
+    val AzulSel = Color(0xFFAC933D)    // pestaña seleccionada (dorado)
+    val Barras = Color(0xFFAF9A54)     // barras de la gráfica
+    val Texto = Color(0xFFEEEEF3)
+    val TextoSec = Color(0xFFE3E3EC)
+    val Borde = Color(0xFF93834C)
+    val Verde = Color(0xFF2E8B57)
+    val Rojo = Color(0xFFD64545)
 }
 
 private val TABS_CLARO = listOf(
     ScaffoldTab("Inicio", Icons.Filled.Home),
     ScaffoldTab("Asesorías", Icons.Filled.FitnessCenter),
+    ScaffoldTab( label= "Pagos", Icons.Filled.CreditCard),
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
 private val LogoutBorderClaro = Brush.linearGradient(
-    listOf(ClienteTema.AzulSel, ClienteTema.Borde, ClienteTema.Rojo)
+    listOf(ClienteTema.Azul, ClienteTema.AzulSel, ClienteTema.Rojo)
 )
 
 @Composable
@@ -136,7 +138,7 @@ fun ClienteScaffoldClaro(
                 Icon(
                     Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = null,
-                    tint = ClienteTema.Navy
+                    tint = ClienteTema.Azul
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
