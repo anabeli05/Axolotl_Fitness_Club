@@ -41,7 +41,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffoldClaro(
         currentSection = "Inicio",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_pi2
+        logoRes = R.drawable.prueba
     ) {
         LazyColumn(
             modifier = Modifier
