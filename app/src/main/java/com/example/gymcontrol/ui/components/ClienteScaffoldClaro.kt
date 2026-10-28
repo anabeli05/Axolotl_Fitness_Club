@@ -19,20 +19,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.ui.theme.GymColors
 
 /** Paleta unisex del cliente: grafito + violeta + dorado suave. */
 object ClienteTema {
-    val Fondo = Color(0xFF232222)
+    val Fondo = Color(0xFF222223)
     val Navy = Color(0xFF111111)       // encabezado y barra inferior (grafito)
     val Beige = Color(0xFF3D3D3F)      // tarjetas (gris lavanda muy claro)
-    val Azul = Color(0xFF3D3D4E)       // botones (violeta)
-    val AzulClaro = Color(0xFFA0A4C2)  // "Pendiente"
+    val Azul = Color(0xFF8E723A)       // botones (violeta)
+    val AzulClaro = Color(0xFFC1AA60)  // "Pendiente"
     val AzulSel = Color(0xFFAC933D)    // pestaña seleccionada (dorado)
     val Barras = Color(0xFFAF9A54)     // barras de la gráfica
     val Texto = Color(0xFFEEEEF3)
@@ -42,15 +45,17 @@ object ClienteTema {
     val Rojo = Color(0xFFD64545)
 }
 
+data class ScaffoldTab(val label: String, val icon: ImageVector)
+
 private val TABS_CLARO = listOf(
     ScaffoldTab("Inicio", Icons.Filled.Home),
     ScaffoldTab("Asesorías", Icons.Filled.FitnessCenter),
-    ScaffoldTab( label= "Pagos", Icons.Filled.CreditCard),
+    ScaffoldTab("Pagos", Icons.Filled.CreditCard),
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
 private val LogoutBorderClaro = Brush.linearGradient(
-    listOf(ClienteTema.Azul, ClienteTema.AzulSel, ClienteTema.Rojo)
+    listOf(ClienteTema.Azul, ClienteTema.AzulSel)
 )
 
 @Composable
@@ -68,7 +73,7 @@ fun ClienteScaffoldClaro(
             .fillMaxSize()
             .background(ClienteTema.Fondo)
     ) {
-        // Encabezado recto y compacto con botón de cerrar sesión
+        // Encabezado recto con botón de cerrar sesión
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -80,7 +85,9 @@ fun ClienteScaffoldClaro(
             Image(
                 painter = painterResource(logoRes),
                 contentDescription = "Axolotl Fitness Club",
-                modifier = Modifier.height(56.dp)
+                modifier = Modifier
+                    .height(28.dp)
+                    .graphicsLayer(scaleX = 1.6f, scaleY = 1.6f) // baja a 1.4f si se ve cortado o muy grande
             )
             IconButton(
                 onClick = { confirmarLogout = true },
@@ -99,27 +106,36 @@ fun ClienteScaffoldClaro(
 
         Box(modifier = Modifier.weight(1f)) { content() }
 
-        // Barra inferior recta y baja
-        NavigationBar(
-            modifier = Modifier.height(64.dp),
-            containerColor = ClienteTema.Navy,
-            tonalElevation = 0.dp,
-            windowInsets = WindowInsets(0, 0, 0, 0)
+        // Barra inferior recta y baja.
+        // El Box pinta el fondo y deja espacio para la barra de botones del sistema
+        // (si el teléfono usa gestos, ese espacio es mínimo).
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(ClienteTema.Navy)
+                .navigationBarsPadding()
         ) {
-            TABS_CLARO.forEach { tab ->
-                NavigationBarItem(
-                    selected = tab.label == currentSection,
-                    onClick = { onNavigate(tab.label) },
-                    icon = { Icon(tab.icon, contentDescription = tab.label) },
-                    label = { Text(tab.label, fontSize = 12.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = ClienteTema.AzulSel,
-                        selectedTextColor = ClienteTema.AzulSel,
-                        unselectedIconColor = Color.White,
-                        unselectedTextColor = Color.White,
-                        indicatorColor = Color.Transparent
+            NavigationBar(
+                modifier = Modifier.height(64.dp),
+                containerColor = ClienteTema.Navy,
+                tonalElevation = 0.dp,
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            ) {
+                TABS_CLARO.forEach { tab ->
+                    NavigationBarItem(
+                        selected = tab.label == currentSection,
+                        onClick = { onNavigate(tab.label) },
+                        icon = { Icon(tab.icon, contentDescription = tab.label) },
+                        label = { Text(tab.label, fontSize = 12.sp) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = ClienteTema.AzulSel,
+                            selectedTextColor = ClienteTema.AzulSel,
+                            unselectedIconColor = Color.White,
+                            unselectedTextColor = Color.White,
+                            indicatorColor = Color.Transparent
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -187,4 +203,95 @@ fun ClienteScaffoldClaro(
             }
         }
     }
+}
+
+// ---------- Scaffold usado por las pantallas del instructor ----------
+
+private val CLIENTE_TABS = listOf(
+    ScaffoldTab("Inicio", Icons.Filled.Home),
+    ScaffoldTab("Asesorías", Icons.Filled.FitnessCenter),
+    ScaffoldTab("Perfil", Icons.Filled.Person)
+)
+
+private val PageBackground = Color.Black
+
+@Composable
+fun ClienteScaffold(
+    currentSection: String,
+    onNavigate: (String) -> Unit,
+    @DrawableRes logoRes: Int,
+    tabs: List<ScaffoldTab> = CLIENTE_TABS,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(PageBackground)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+        ) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(logoRes),
+                    contentDescription = "Axolotl Fitness Club",
+                    modifier = Modifier
+                        .padding(vertical = 20.dp)
+                        .height(105.dp)
+                )
+                BotonCerrarSesion(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 8.dp)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(GymColors.Gold.copy(alpha = 0.7f))
+            )
+        }
+
+        Box(modifier = Modifier.weight(1f)) {
+            content()
+        }
+
+        HorizontalDividerLine()
+        NavigationBar(
+            containerColor = PageBackground,
+            tonalElevation = 0.dp
+        ) {
+            tabs.forEach { tab ->
+                NavigationBarItem(
+                    selected = tab.label == currentSection,
+                    onClick = { onNavigate(tab.label) },
+                    icon = { Icon(imageVector = tab.icon, contentDescription = tab.label) },
+                    label = { Text(tab.label, fontSize = 13.sp) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = GymColors.Purple,
+                        selectedTextColor = GymColors.Purple,
+                        unselectedIconColor = GymColors.TextSecondary,
+                        unselectedTextColor = GymColors.TextSecondary,
+                        indicatorColor = Color.Transparent
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HorizontalDividerLine() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(GymColors.Border)
+    )
 }
