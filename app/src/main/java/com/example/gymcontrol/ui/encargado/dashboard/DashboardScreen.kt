@@ -7,6 +7,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.data.remote.ClientesMesRow
+import com.example.gymcontrol.data.remote.IngresoDiaRow
 import com.example.gymcontrol.data.remote.OcupacionRepository
 import com.example.gymcontrol.data.remote.OcupacionRow
 import com.example.gymcontrol.data.remote.ResumenRepository
@@ -28,6 +30,8 @@ private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servic
 fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
     var ocupacion by remember { mutableStateOf<List<OcupacionRow>>(emptyList()) }
     var resumen by remember { mutableStateOf<ResumenRow?>(null) }
+    var clientesMes by remember { mutableStateOf<List<ClientesMesRow>>(emptyList()) }
+    var ingresosDia by remember { mutableStateOf<List<IngresoDiaRow>>(emptyList()) }
 
     // Se actualiza cada 30 segundos
     LaunchedEffect(Unit) {
@@ -39,6 +43,16 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             }
             try {
                 resumen = ResumenRepository.obtener()
+            } catch (e: Exception) {
+                // si falla, se conserva lo último que se cargó
+            }
+            try {
+                clientesMes = ResumenRepository.clientesPorMes()
+            } catch (e: Exception) {
+                // si falla, se conserva lo último que se cargó
+            }
+            try {
+                ingresosDia = ResumenRepository.ingresosSemana()
             } catch (e: Exception) {
                 // si falla, se conserva lo último que se cargó
             }
@@ -134,20 +148,13 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 GroupedBarChart(
                     title = "Clientes Activos/Inactivos",
-                    entries = listOf(
-                        GroupedBarEntry("Ene", 830f, 330f),
-                        GroupedBarEntry("Feb", 540f, 570f),
-                        GroupedBarEntry("Mar", 370f, 160f),
-                        GroupedBarEntry("Abr", 290f, 350f),
-                        GroupedBarEntry("May", 520f, 400f),
-                        GroupedBarEntry("Jun", 660f, 390f),
-                        GroupedBarEntry("Jul", 270f, 520f),
-                        GroupedBarEntry("Ago", 370f, 240f),
-                        GroupedBarEntry("Sep", 420f, 790f),
-                        GroupedBarEntry("Oct", 570f, 150f),
-                        GroupedBarEntry("Nov", 330f, 60f),
-                        GroupedBarEntry("Dic", 150f, 250f)
-                    ),
+                    entries = clientesMes.map {
+                        GroupedBarEntry(
+                            ResumenRepository.mesCorto(it.periodo),
+                            it.activos.toFloat(),
+                            it.inactivos.toFloat()
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -155,10 +162,10 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 SimpleBarChart(
                     title = "Ingresos por Día",
-                    entries = listOf(
-                        BarEntry("Lun", 210f), BarEntry("Mar", 270f), BarEntry("Mié", 155f),
-                        BarEntry("Jue", 310f), BarEntry("Vie", 185f), BarEntry("Sáb", 345f)
-                    ),
+                    // El domingo solo aparece si ese día hubo cobros
+                    entries = ingresosDia
+                        .filter { it.diaSemana != 7 || it.total > 0.0 }
+                        .map { BarEntry(ResumenRepository.diaCorto(it.diaSemana), it.total.toFloat()) },
                     barColor = GymColors.Gold,
                     modifier = Modifier.fillMaxWidth()
                 )

@@ -7,7 +7,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.ui.components.SesionActual
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,13 +41,21 @@ import java.util.Calendar
 
 @Composable
 fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
-    val membership = "M-1001" // TODO: tomar la membresía del cliente en sesión
-    val userName = "Ana López" // TODO: tomar el nombre del cliente en sesión
+    // Datos del cliente en sesión: el nombre ya viene del login, la membresía se consulta en Supabase
+    var membership by remember { mutableStateOf("") }
+    val userName = SesionActual.nombre ?: ""
+
+    LaunchedEffect(Unit) {
+        val correo = SesionActual.correo ?: return@LaunchedEffect
+        try {
+            ClientesRepository.porCorreo(correo)?.let { membership = it.numeroMembresia }
+        } catch (_: Exception) { }
+    }
 
     ClienteScaffoldClaro(
         currentSection = "Inicio",
         onNavigate = onNavigate,
-        logoRes = R.drawable.prueba
+        logoRes = R.drawable.logo_pi2
     ) {
         LazyColumn(
             modifier = Modifier

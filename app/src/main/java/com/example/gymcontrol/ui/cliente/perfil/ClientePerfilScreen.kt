@@ -53,6 +53,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.AuthRepository
+import com.example.gymcontrol.data.remote.ClienteRow
+import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.Dispatchers
@@ -67,11 +71,27 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf("Ana López") }
-    var phone by remember { mutableStateOf("3121111111") }
-    var email by remember { mutableStateOf("ana@email.com") }
+    // Datos reales del cliente en sesión (se cargan de clientes_lista)
+    var cliente by remember { mutableStateOf<ClienteRow?>(null) }
+    var name by remember { mutableStateOf(SesionActual.nombre ?: "") }
+    var phone by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(SesionActual.correo ?: "") }
     var photo by remember { mutableStateOf<ImageBitmap?>(null) }
-    val membership = "M-1001"
+    val membership = cliente?.numeroMembresia ?: ""
+
+    LaunchedEffect(Unit) {
+        val correo = SesionActual.correo ?: return@LaunchedEffect
+        try {
+            ClientesRepository.porCorreo(correo)?.let {
+                cliente = it
+                name = it.nombre
+                phone = it.telefono
+                email = it.gmail
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "No se pudieron cargar tus datos", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
@@ -141,7 +161,15 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Estado:", color = ClienteTema.Texto, fontSize = 15.sp)
                         Spacer(Modifier.width(8.dp))
-                        StatusBadge(isActive = true)
+                        StatusBadge(isActive = cliente?.let { it.activa && it.estado == "ACTIVO" } ?: true)
+                    }
+                    cliente?.let {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Plan: ${it.plan ?: "—"} · Vence: ${ClientesRepository.fechaApp(it.fechaFin)}",
+                            color = ClienteTema.TextoSec,
+                            fontSize = 13.sp
+                        )
                     }
 
                     Spacer(Modifier.height(16.dp))
@@ -215,11 +243,27 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
             initialEmail = email,
             onDismiss = { showEditDialog = false },
             onSave = { newName, newPhone, newEmail ->
-                // TODO: guardar cambios en Supabase
-                name = newName
-                phone = newPhone
-                email = newEmail
-                showEditDialog = false
+                val c = cliente
+                if (c == null) {
+                    Toast.makeText(context, "Aún no se cargan tus datos", Toast.LENGTH_SHORT).show()
+                    return@EditDataDialog
+                }
+                scope.launch {
+                    try {
+                        ClientesRepository.editar(c.id, newName.trim(), newPhone.trim(), newEmail.trim(), c.estado)
+                        name = newName.trim()
+                        phone = newPhone.trim()
+                        email = newEmail.trim()
+                        cliente = c.copy(nombre = name, telefono = phone, gmail = email)
+                        SesionActual.fijarCorreo(email)
+                        SesionActual.fijarNombre(name)
+                        showEditDialog = false
+                        Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "No se pudo guardar: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         )
     }
@@ -227,7 +271,18 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     if (showPasswordDialog) {
         PasswordDialog(
             onDismiss = { showPasswordDialog = false },
-            onSave = { /* TODO: actualizar contraseña en Supabase */ showPasswordDialog = false }
+            onSave = { actual, nueva ->
+                scope.launch {
+                    try {
+                        AuthRepository.cambiarContrasena(email, actual, nueva)
+                        showPasswordDialog = false
+                        Toast.makeText(context, "Contraseña actualizada", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "No se pudo cambiar: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
         )
     }
 }
@@ -537,19 +592,43 @@ private fun EditDataDialog(
 }
 
 @Composable
-private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String) -> Unit) {
+private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+    var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
+    // Mínimo 8 caracteres y que la confirmación coincida
+    val tooShort = newPassword.isNotEmpty() && newPassword.length < 8
+    val mismatch = confirmPassword.isNotEmpty() && confirmPassword != newPassword
+    val canSave = currentPassword.isNotEmpty() && newPassword.length >= 8 && confirmPassword == newPassword
 
     GymDialog(title = "Cambiar contraseña", onDismiss = onDismiss) {
+        GymTextField(
+            value = currentPassword,
+            onValueChange = { currentPassword = it },
+            label = "Contraseña actual",
+            isPassword = true
+        )
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
             label = "Nueva contraseña",
-            isPassword = true
+            isPassword = true,
+            isError = tooShort,
+            errorText = "Mínimo 8 caracteres"
+        )
+        GymTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = "Confirmar contraseña",
+            isPassword = true,
+            isError = mismatch,
+            errorText = "Las contraseñas no coinciden"
         )
         DialogButtons(
             confirmText = "Actualizar",
-            onConfirm = { onSave(newPassword) },
+            confirmEnabled = canSave,
+            onConfirm = { onSave(currentPassword, newPassword) },
             onDismiss = onDismiss
         )
     }
