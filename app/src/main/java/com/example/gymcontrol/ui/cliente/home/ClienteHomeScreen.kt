@@ -1,13 +1,19 @@
 package com.example.gymcontrol.ui.cliente.home
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +47,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffoldClaro(
         currentSection = "Inicio",
         onNavigate = onNavigate,
-        logoRes = R.drawable.prueba
+        logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
             modifier = Modifier
@@ -78,16 +84,16 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
                 BarrasClaro(
                     titulo = "Clientes ahorita",
                     datos = listOf(
-                        "6am" to 25f, "8am" to 35f, "10am" to 30f, "12pm" to 15f,
+                        "6am" to 25f, "8am" to 35f, "10am" to 25f, "12pm" to 10f,
                         "2pm" to 27f, "4pm" to 42f, "6pm" to 47f, "8pm" to 55f,
-                        "10pm" to 63f, "12am" to 30f
+                        "10pm" to 55f, "12am" to 25f
                     )
                 )
             }
 
             item {
                 Text(
-                    text = "Horario del gimnasio: 06:00 - 22:00",
+                    text = "Horario del gimnasio: 06:00 - 00:00",
                     color = ClienteTema.TextoSec,
                     fontSize = 13.sp
                 )
@@ -130,7 +136,7 @@ private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
     val max = 100f
     val altoMax = 150.dp
     val marcas = listOf(0, 20, 40, 60, 80, 100)
-    val lineaColor = Color(0xFFCCCCCC)
+    var seleccionado by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -144,6 +150,7 @@ private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
         Spacer(Modifier.height(14.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
+            // Eje Y (números)
             Box(
                 modifier = Modifier
                     .width(28.dp)
@@ -165,42 +172,76 @@ private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Box(
+                // Área de barras (sin líneas horizontales, solo el eje vertical)
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(altoMax)
                         .drawBehind {
-                            marcas.forEach { m ->
-                                val y = size.height * (1f - m / max)
-                                drawLine(
-                                    color = lineaColor,
-                                    start = Offset(0f, y),
-                                    end = Offset(size.width, y),
-                                    strokeWidth = 1.dp.toPx()
-                                )
-                            }
                             drawLine(
                                 color = Color(0xFF888888),
                                 start = Offset(0f, 0f),
                                 end = Offset(0f, size.height),
                                 strokeWidth = 1.5.dp.toPx()
                             )
-                        }
+                            // Línea base (eje X)
+                            drawLine(
+                                color = Color(0xFF888888),
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, size.height),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                        },
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        datos.forEach { (_, valor) ->
+                    datos.forEachIndexed { index, (_, valor) ->
+                        val activo = seleccionado == index
+                        val colorBarra by animateColorAsState(
+                            targetValue = if (activo) Color(0xFFF2D675) else ClienteTema.Barras,
+                            label = "colorBarra"
+                        )
+                        val anchoBarra by animateDpAsState(
+                            targetValue = if (activo) 22.dp else 18.dp,
+                            label = "anchoBarra"
+                        )
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            if (activo) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            Color(0xFFF2D675),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = valor.toInt().toString(),
+                                        color = Color(0xFF1A1A1A),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
+                                Spacer(Modifier.height(3.dp))
+                            }
                             Box(
                                 modifier = Modifier
-                                    .width(18.dp)
+                                    .width(anchoBarra)
                                     .height(altoMax * (valor / max))
                                     .background(
-                                        ClienteTema.Barras,
+                                        colorBarra,
                                         RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
                                     )
+                                    .clickable {
+                                        seleccionado = if (activo) null else index
+                                    }
                             )
                         }
                     }
@@ -208,16 +249,17 @@ private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
 
                 Spacer(Modifier.height(4.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
+                // Etiquetas de hora: cada una usa el mismo ancho que su barra
+                Row(modifier = Modifier.fillMaxWidth()) {
                     datos.forEach { (etiqueta, _) ->
-                        Box(modifier = Modifier.width(18.dp), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
-                                etiqueta,
+                                text = etiqueta,
                                 color = ClienteTema.TextoSec,
-                                fontSize = 8.sp,
+                                fontSize = 9.sp,
                                 maxLines = 1,
                                 softWrap = false
                             )
