@@ -29,15 +29,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.data.model.UserRole
+import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
-private val RECEPCION_SECTIONS = listOf("Home", "Clientes", "Solicitudes")
+private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 // ---------- Modelo de UI ----------
 data class ClienteScan(
@@ -132,7 +131,6 @@ fun QrScannerScreen(
 
     GymScaffold(
         currentSection = "Home",
-        sections = RECEPCION_SECTIONS,
         onNavigate = onNavigate
     ) {
         Column(
@@ -148,7 +146,7 @@ fun QrScannerScreen(
             ) {
                 Text(
                     "Escanear código QR",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
@@ -160,7 +158,7 @@ fun QrScannerScreen(
             GymCard {
                 Text(
                     "Escanear código",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -185,19 +183,19 @@ fun QrScannerScreen(
             GymCard {
                 Text(
                     "Información del cliente",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = GymColors.Gold.copy(alpha = 0.6f))
+                HorizontalDivider(color = ClienteTema.Borde.copy(alpha = 0.6f))
                 Spacer(Modifier.height(16.dp))
 
                 val actual = cliente
                 if (actual == null) {
                     Text(
                         "Escanea un código para ver la información del cliente",
-                        color = GymColors.TextSecondary,
+                        color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
@@ -210,14 +208,14 @@ fun QrScannerScreen(
                             modifier = Modifier
                                 .size(72.dp)
                                 .clip(CircleShape)
-                                .border(2.dp, GymColors.TextPrimary, CircleShape)
-                                .background(GymColors.Border),
+                                .border(2.dp, ClienteTema.AzulSel, CircleShape)
+                                .background(ClienteTema.Navy),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.Person,
                                 contentDescription = null,
-                                tint = GymColors.TextSecondary,
+                                tint = ClienteTema.TextoSec,
                                 modifier = Modifier.size(40.dp)
                             )
                         }
@@ -225,17 +223,17 @@ fun QrScannerScreen(
                         Column {
                             Text(
                                 actual.nombre,
-                                color = GymColors.TextPrimary,
+                                color = ClienteTema.Texto,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(Modifier.height(6.dp))
-                            Text("Membresía: ${actual.membresia}", color = GymColors.TextSecondary, fontSize = 14.sp)
+                            Text("Membresía: ${actual.membresia}", color = ClienteTema.TextoSec, fontSize = 14.sp)
                             Row {
-                                Text("Estado: ", color = GymColors.TextSecondary, fontSize = 14.sp)
+                                Text("Estado: ", color = ClienteTema.TextoSec, fontSize = 14.sp)
                                 Text(
                                     if (actual.activo) "Activo" else "Inactivo",
-                                    color = if (actual.activo) GymColors.Green else GymColors.Red,
+                                    color = if (actual.activo) ClienteTema.Verde else ClienteTema.Rojo,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -243,7 +241,7 @@ fun QrScannerScreen(
                             dentro[actual.membresia]?.let { desde ->
                                 Text(
                                     "Dentro desde ${formatHora(desde)}",
-                                    color = GymColors.Gold,
+                                    color = ClienteTema.AzulSel,
                                     fontSize = 14.sp
                                 )
                             }
@@ -252,7 +250,7 @@ fun QrScannerScreen(
                 }
 
                 Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = GymColors.Gold.copy(alpha = 0.6f))
+                HorizontalDivider(color = ClienteTema.Borde.copy(alpha = 0.6f))
                 Spacer(Modifier.height(16.dp))
 
                 // Aviso de resultado (éxito o error)
@@ -267,14 +265,14 @@ fun QrScannerScreen(
                 ) {
                     SolidButton(
                         text = "Entrada",
-                        color = GymColors.Green,
+                        color = ClienteTema.Verde,
                         enabled = cliente != null,
                         onClick = { registrarEntrada() },
                         modifier = Modifier.weight(1f)
                     )
                     SolidButton(
                         text = "Salida",
-                        color = GymColors.Red,
+                        color = ClienteTema.Rojo,
                         enabled = cliente != null,
                         onClick = { registrarSalida() },
                         modifier = Modifier.weight(1f)
@@ -307,13 +305,13 @@ private fun AforoChip(personas: Int) {
     val shape = RoundedCornerShape(50)
     Box(
         modifier = Modifier
-            .background(GymColors.Purple.copy(alpha = 0.15f), shape)
-            .border(1.dp, GymColors.Purple, shape)
+            .background(ClienteTema.AzulSel.copy(alpha = 0.15f), shape)
+            .border(1.dp, ClienteTema.AzulSel, shape)
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = "Dentro: $personas",
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold
         )
@@ -323,7 +321,7 @@ private fun AforoChip(personas: Int) {
 /** Mensaje verde (éxito) o rojo (error) con fondo tintado. */
 @Composable
 private fun AvisoBanner(aviso: Aviso) {
-    val color = if (aviso.esError) GymColors.Red else GymColors.Green
+    val color = if (aviso.esError) ClienteTema.Rojo else ClienteTema.Verde
     val shape = RoundedCornerShape(10.dp)
     Box(
         modifier = Modifier
@@ -343,7 +341,7 @@ private fun AvisoBanner(aviso: Aviso) {
     }
 }
 
-/** Tarjeta oscura con borde degradado morado → dorado (igual que el resto de la app). */
+/** Tarjeta grafito con borde degradado dorado (igual que el resto de la app del cliente). */
 @Composable
 private fun GymCard(content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(16.dp)
@@ -351,14 +349,14 @@ private fun GymCard(content: @Composable ColumnScope.() -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(GymColors.Surface)
+            .background(ClienteTema.Beige)
             .border(BorderStroke(1.5.dp, CardBorder), shape)
             .padding(16.dp),
         content = content
     )
 }
 
-/** Las 4 esquinas moradas del visor. */
+/** Las 4 esquinas doradas del visor. */
 @Composable
 private fun ScannerCorners(modifier: Modifier = Modifier) {
     Canvas(modifier) {
@@ -367,7 +365,7 @@ private fun ScannerCorners(modifier: Modifier = Modifier) {
         val w = size.width
         val h = size.height
         fun line(a: Offset, b: Offset) =
-            drawLine(GymColors.Purple, a, b, strokeWidth = stroke, cap = StrokeCap.Round)
+            drawLine(ClienteTema.AzulSel, a, b, strokeWidth = stroke, cap = StrokeCap.Round)
 
         line(Offset(0f, 0f), Offset(len, 0f)); line(Offset(0f, 0f), Offset(0f, len))
         line(Offset(w, 0f), Offset(w - len, 0f)); line(Offset(w, 0f), Offset(w, len))

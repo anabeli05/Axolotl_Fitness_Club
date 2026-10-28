@@ -60,16 +60,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
-
 @Composable
 fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf("Ana López") }
+    val name by remember { mutableStateOf("Ana López") }
     var phone by remember { mutableStateOf("3121111111") }
-    var email by remember { mutableStateOf("ana@email.com") }
+    val email by remember { mutableStateOf("ana@email.com") }
     var photo by remember { mutableStateOf<ImageBitmap?>(null) }
     val membership = "M-1001"
 
@@ -103,7 +101,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffoldClaro(
         currentSection = "Perfil",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_pi2
+        logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
             modifier = Modifier
@@ -210,15 +208,13 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
     if (showEditDialog) {
         EditDataDialog(
-            initialName = name,
+            name = name,
             initialPhone = phone,
-            initialEmail = email,
+            email = email,
             onDismiss = { showEditDialog = false },
-            onSave = { newName, newPhone, newEmail ->
-                // TODO: guardar cambios en Supabase
-                name = newName
+            onSave = { newPhone ->
+                // TODO: guardar el teléfono en Supabase
                 phone = newPhone
-                email = newEmail
                 showEditDialog = false
             }
         )
@@ -466,46 +462,40 @@ private fun PhotoDialog(
 
 @Composable
 private fun EditDataDialog(
-    initialName: String,
+    name: String,
     initialPhone: String,
-    initialEmail: String,
+    email: String,
     onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
+    onSave: (String) -> Unit
 ) {
-    var name by remember { mutableStateOf(initialName) }
     var phone by remember { mutableStateOf(initialPhone) }
-    var email by remember { mutableStateOf(initialEmail) }
 
-    var nameWarning by remember { mutableStateOf(false) }
-    var nameTick by remember { mutableStateOf(0) }
     var phoneWarning by remember { mutableStateOf(false) }
     var phoneTick by remember { mutableStateOf(0) }
 
-    LaunchedEffect(nameTick) {
-        if (nameTick > 0) { nameWarning = true; delay(2500); nameWarning = false }
-    }
     LaunchedEffect(phoneTick) {
         if (phoneTick > 0) { phoneWarning = true; delay(2500); phoneWarning = false }
     }
 
-    val nameValid = nameHasMinLetters(name)
-    val nameShort = name.isNotEmpty() && !nameValid
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
-    val isValid = nameValid && phone.length == 10
+    val isValid = phone.length == 10
 
     GymDialog(title = "Editar datos", onDismiss = onDismiss) {
+        // Nombre y correo: solo lectura
         GymTextField(
             value = name,
-            onValueChange = { new ->
-                when {
-                    !new.all { it.isLetter() || it == ' ' } -> nameTick++
-                    new.length <= 40 -> name = new
-                }
-            },
+            onValueChange = {},
             label = "Nombre",
-            isError = nameWarning || nameShort,
-            errorText = if (nameWarning) "Solo se permiten letras" else "Mínimo 3 letras"
+            enabled = false
         )
+        GymTextField(
+            value = email,
+            onValueChange = {},
+            label = "Correo",
+            enabled = false
+        )
+
+        // Único campo editable
         GymTextField(
             value = phone,
             onValueChange = { new ->
@@ -520,17 +510,11 @@ private fun EditDataDialog(
             errorText = if (phoneWarning) "Solo se permiten números"
             else "Deben ser 10 dígitos (${phone.length}/10)"
         )
-        GymTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = "Correo",
-            keyboardType = KeyboardType.Email
-        )
 
         DialogButtons(
             confirmText = "Guardar",
             confirmEnabled = isValid,
-            onConfirm = { onSave(name.trim(), phone, email) },
+            onConfirm = { onSave(phone) },
             onDismiss = onDismiss
         )
     }
@@ -563,11 +547,13 @@ private fun GymTextField(
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     isError: Boolean = false,
-    errorText: String? = null
+    errorText: String? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         label = { Text(label) },
         singleLine = true,
         isError = isError,
@@ -590,7 +576,11 @@ private fun GymTextField(
             errorTextColor = ClienteTema.Texto,
             errorLabelColor = ClienteTema.Rojo,
             errorCursorColor = ClienteTema.Rojo,
-            errorSupportingTextColor = ClienteTema.Rojo
+            errorSupportingTextColor = ClienteTema.Rojo,
+            // Campos de solo lectura (nombre y correo)
+            disabledTextColor = ClienteTema.TextoSec.copy(alpha = 0.6f),
+            disabledBorderColor = ClienteTema.Borde.copy(alpha = 0.4f),
+            disabledLabelColor = ClienteTema.TextoSec.copy(alpha = 0.5f)
         )
     )
 }
