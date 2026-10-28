@@ -53,7 +53,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.InstructorRepository
 import com.example.gymcontrol.ui.components.ClienteScaffold
+import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ScaffoldTab
 import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.Dispatchers
@@ -77,14 +79,33 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf("Maclovin Ramiez") }
-    var phone by remember { mutableStateOf("2487693720") }
-    var email by remember { mutableStateOf("loxd@hotmail.com") }
+    var name by remember { mutableStateOf(SesionActual.nombre ?: "") }
+    var phone by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(SesionActual.correo ?: "") }
     var photo by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    // TODO: tomar la capacidad y los clientes activos desde Supabase
-    val capacity = 3
-    val activeClients = 3
+    var activo by remember { mutableStateOf(true) }
+    var capacity by remember { mutableStateOf(0) }
+    var activeClients by remember { mutableStateOf(0) }
+
+    // Datos reales del instructor que inició sesión
+    LaunchedEffect(Unit) {
+        val correo = SesionActual.correo ?: return@LaunchedEffect
+        try {
+            val p = InstructorRepository.perfil(correo)
+            if (p != null) {
+                name = p.nombre
+                phone = p.telefono
+                email = p.gmail
+                activo = p.estado == "ACTIVO"
+                capacity = p.maxClientes
+                activeClients = p.activos
+            }
+        } catch (e: Exception) {
+            val msg = e.message?.substringBefore("\nCode:") ?: ""
+            Toast.makeText(context, "No se pudo cargar el perfil: $msg", Toast.LENGTH_LONG).show()
+        }
+    }
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showPhotoDialog by remember { mutableStateOf(false) }
@@ -169,7 +190,11 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             fontSize = 16.sp
                         )
                         Spacer(Modifier.width(8.dp))
-                        Chip(text = "Activo", color = GymColors.Green, width = 84.dp, height = 30.dp)
+                        if (activo) {
+                            Chip(text = "Activo", color = GymColors.Green, width = 84.dp, height = 30.dp)
+                        } else {
+                            Chip(text = "Inactivo", color = GymColors.Red, width = 96.dp, height = 30.dp)
+                        }
                     }
 
                     Spacer(Modifier.height(18.dp))
@@ -277,11 +302,21 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
             initialEmail = email,
             onDismiss = { showEditDialog = false },
             onSave = { newName, newPhone, newEmail ->
-                // TODO: guardar cambios en Supabase
-                name = newName
-                phone = newPhone
-                email = newEmail
-                showEditDialog = false
+                scope.launch {
+                    try {
+                        InstructorRepository.editarPerfil(email, newName.trim(), newPhone.trim(), newEmail.trim())
+                        name = newName.trim()
+                        phone = newPhone.trim()
+                        email = newEmail.trim()
+                        SesionActual.fijarCorreo(email)
+                        SesionActual.fijarNombre(name)
+                        showEditDialog = false
+                        Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "No se pudo guardar: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         )
     }

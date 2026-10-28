@@ -191,13 +191,14 @@ fun UsuariosScreen(
                 editing = null
                 errorEditar = null
             },
-            onSave = { nombre, correo, rol, estado ->
+            onSave = { nombre, correo, rol, estado, tel, costo, cap ->
                 pendiente = Pendiente("¿Estás seguro de guardar los cambios de ${target.name}?") {
                     scope.launch {
                         try {
                             PersonalRepository.editar(
                                 SesionActual.correo ?: "", target.id,
-                                nombre, correo, rol.name, estado.name
+                                nombre, correo, rol.name, estado.name,
+                                tel, costo, cap
                             )
                             errorEditar = null
                             editing = null
@@ -552,7 +553,8 @@ private fun EditStaffDialog(
     target: StaffItem,
     error: String?,
     onDismiss: () -> Unit,
-    onSave: (String, String, UserRole, Status) -> Unit
+    // teléfono, costo y capacidad van en null si no se pudieron cargar (así no se borran en la BD)
+    onSave: (String, String, UserRole, Status, String?, Double?, Int?) -> Unit
 ) {
     var name by remember { mutableStateOf(target.name) }
     var email by remember { mutableStateOf(target.email) }
@@ -561,9 +563,37 @@ private fun EditStaffDialog(
     var roleExpanded by remember { mutableStateOf(false) }
     var statusExpanded by remember { mutableStateOf(false) }
 
+    var phone by remember { mutableStateOf("") }
+    var cost by remember { mutableStateOf("") }
+    var capacity by remember { mutableStateOf("") }
+    var detalleCargado by remember { mutableStateOf(false) }
+    var errorDetalle by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(target.id) {
+        try {
+            PersonalRepository.detalle(target.id)?.let { d ->
+                phone = d.telefono
+                cost = d.costo?.let { c -> if (c % 1.0 == 0.0) c.toLong().toString() else c.toString() } ?: ""
+                capacity = d.maxClientes?.toString() ?: ""
+            }
+            detalleCargado = true
+        } catch (e: Exception) {
+            errorDetalle = mensajeError(e, "No se pudieron cargar teléfono, costo y capacidad")
+        }
+    }
+
+    val isInstructor = role == UserRole.INSTRUCTOR
+    val phoneOk = phone.isEmpty() || phone.length == 10
+    val instructorOk = !isInstructor || !detalleCargado ||
+            ((cost.toDoubleOrNull() ?: -1.0) >= 0.0 && (capacity.toIntOrNull() ?: 0) >= 1)
+
     StaffDialog(title = "Editar personal", onDismiss = onDismiss) {
         NameField(name, { name = it })
         Spacer(Modifier.height(10.dp))
+        if (detalleCargado) {
+            PhoneField(phone, { phone = it })
+            Spacer(Modifier.height(10.dp))
+        }
         GymTextField(email, { email = it }, "Correo", KeyboardType.Email)
         Spacer(Modifier.height(10.dp))
 
@@ -633,7 +663,14 @@ private fun EditStaffDialog(
             }
         }
 
-        error?.let {
+        if (isInstructor && detalleCargado) {
+            Spacer(Modifier.height(10.dp))
+            DigitsField(cost, { cost = it }, "Costo asesoría", maxLength = 6)
+            Spacer(Modifier.height(10.dp))
+            DigitsField(capacity, { capacity = it }, "Capacidad máxima", maxLength = 3)
+        }
+
+        (error ?: errorDetalle)?.let {
             Spacer(Modifier.height(8.dp))
             Text(it, color = GymColors.Red, fontSize = 13.sp)
         }
@@ -641,8 +678,15 @@ private fun EditStaffDialog(
         Spacer(Modifier.height(18.dp))
 
         Button(
-            onClick = { onSave(name.trim(), email.trim(), role, status) },
-            enabled = nameHasMinLetters(name) && email.isNotBlank(),
+            onClick = {
+                onSave(
+                    name.trim(), email.trim(), role, status,
+                    if (detalleCargado) phone else null,
+                    if (detalleCargado && isInstructor) cost.toDoubleOrNull() else null,
+                    if (detalleCargado && isInstructor) capacity.toIntOrNull() else null
+                )
+            },
+            enabled = nameHasMinLetters(name) && email.isNotBlank() && phoneOk && instructorOk,
             colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth()
