@@ -146,8 +146,10 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
                             val rolEncontrado = fila?.let {
                                 runCatching { UserRole.valueOf(it.rol) }.getOrNull()
                             }
-                            if (rolEncontrado != null) {
-                                SesionActual.fijarCorreo(id)
+                            if (rolEncontrado != null && fila != null) {
+                                // Se guarda el correo real aunque haya entrado con su número de membresía
+                                SesionActual.fijarCorreo(fila.gmail.ifBlank { id })
+                                SesionActual.fijarDatos(fila.id, fila.nombre, fila.codigoQr)
                                 onLogin(rolEncontrado)
                             } else {
                                 error = "Usuario o contraseña incorrectos"
