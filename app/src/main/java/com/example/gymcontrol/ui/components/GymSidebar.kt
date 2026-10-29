@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -24,14 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.data.model.UserRole
-import com.example.gymcontrol.ui.theme.GymColors
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
     UserRole.RECEPCION -> listOf("Home", "Clientes", "Solicitudes")
@@ -59,7 +57,7 @@ private fun iconoPara(seccion: String): ImageVector = when (seccion) {
     else -> Icons.Filled.Home
 }
 
-private val BorderBrush = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
+private val BorderBrush = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 @Composable
 fun GymSidebar(
@@ -69,7 +67,7 @@ fun GymSidebar(
     onNavigate: (String) -> Unit,
     onLogout: () -> Unit
 ) {
-    Row(Modifier.fillMaxSize().background(GymColors.Surface)) {
+    Row(Modifier.fillMaxSize().background(ClienteTema.Navy)) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -81,25 +79,17 @@ fun GymSidebar(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(84.dp)
-                        .border(2.dp, BorderBrush, CircleShape)
-                        .padding(6.dp)
-                        .clip(CircleShape)
-                        .background(GymColors.Background),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_axolotl),
-                        contentDescription = "Logo Axolotl",
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
+                // El logo ya trae su propio aro dorado, así que se muestra solo (sin círculo extra)
+                Image(
+                    painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_final),
+                    contentDescription = "Logo Axolotl",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(110.dp)
+                )
                 Spacer(Modifier.height(12.dp))
                 Text(
                     "AXOLOTL",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     letterSpacing = 3.sp
@@ -107,11 +97,11 @@ fun GymSidebar(
                 Spacer(Modifier.height(8.dp))
                 Box(
                     modifier = Modifier
-                        .background(GymColors.Purple.copy(alpha = 0.15f), RoundedCornerShape(50))
-                        .border(1.dp, GymColors.Purple, RoundedCornerShape(50))
+                        .background(ClienteTema.AzulSel.copy(alpha = 0.15f), RoundedCornerShape(50))
+                        .border(1.dp, ClienteTema.AzulSel, RoundedCornerShape(50))
                         .padding(horizontal = 14.dp, vertical = 4.dp)
                 ) {
-                    Text(titulo, color = GymColors.Gold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(titulo, color = ClienteTema.AzulSel, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -120,7 +110,7 @@ fun GymSidebar(
                 Modifier
                     .fillMaxWidth()
                     .height(1.5.dp)
-                    .background(Brush.horizontalGradient(listOf(GymColors.Purple, GymColors.Gold)))
+                    .background(Brush.horizontalGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel)))
             )
             Spacer(Modifier.height(16.dp))
 
@@ -137,11 +127,14 @@ fun GymSidebar(
                             if (selected) Modifier
                                 .background(
                                     Brush.horizontalGradient(
-                                        listOf(GymColors.Purple.copy(alpha = 0.35f), GymColors.Purple.copy(alpha = 0.05f))
+                                        listOf(
+                                            ClienteTema.AzulSel.copy(alpha = 0.30f),
+                                            ClienteTema.AzulSel.copy(alpha = 0.05f)
+                                        )
                                     ),
                                     shape
                                 )
-                                .border(BorderStroke(1.dp, GymColors.Purple), shape)
+                                .border(BorderStroke(1.dp, ClienteTema.AzulSel), shape)
                             else Modifier
                         )
                         .clickable { onNavigate(section) }
@@ -151,13 +144,13 @@ fun GymSidebar(
                     Icon(
                         iconoPara(section),
                         contentDescription = null,
-                        tint = if (selected) GymColors.Gold else GymColors.TextSecondary,
+                        tint = if (selected) ClienteTema.AzulSel else ClienteTema.TextoSec,
                         modifier = Modifier.size(22.dp)
                     )
                     Spacer(Modifier.width(14.dp))
                     Text(
                         text = section,
-                        color = if (selected) GymColors.TextPrimary else GymColors.TextSecondary,
+                        color = if (selected) ClienteTema.Texto else ClienteTema.TextoSec,
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                         fontSize = 15.sp
                     )
@@ -167,7 +160,7 @@ fun GymSidebar(
             Spacer(Modifier.weight(1f))
 
             // ---------- Cerrar sesión ----------
-            val rojo = GymColors.Red
+            val rojo = ClienteTema.Rojo
             val shape = RoundedCornerShape(12.dp)
             Row(
                 modifier = Modifier
@@ -195,7 +188,7 @@ fun GymSidebar(
             Modifier
                 .width(2.dp)
                 .fillMaxHeight()
-                .background(Brush.verticalGradient(listOf(GymColors.Purple, GymColors.Gold)))
+                .background(Brush.verticalGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel)))
         )
     }
 }

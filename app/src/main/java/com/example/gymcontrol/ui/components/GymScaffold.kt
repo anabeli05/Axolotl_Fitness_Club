@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,11 +25,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.data.model.UserRole
-import com.example.gymcontrol.ui.theme.GymColors
 import kotlinx.coroutines.launch
 
+// Borde del cuadro "¿Seguro que quieres salir?": degradado solo en tonos dorados
 private val LogoutBorder = Brush.linearGradient(
-    listOf(GymColors.Purple, GymColors.Gold, GymColors.Red)
+    listOf(ClienteTema.Borde, ClienteTema.AzulSel)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,28 +50,30 @@ fun GymScaffold(
 
     val scaffold: @Composable () -> Unit = {
         Scaffold(
-            containerColor = GymColors.Background,
+            containerColor = ClienteTema.Fondo,
             topBar = {
                 TopAppBar(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_axolotl),
+                                painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_final),
                                 contentDescription = "Logo Axolotl",
-                                modifier = Modifier.size(56.dp)
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .graphicsLayer(scaleX = 1.4f, scaleY = 1.4f)
                             )
-                            Spacer(Modifier.width(8.dp))
-                            Text(currentSection, color = GymColors.TextPrimary, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.width(16.dp))
+                            Text(currentSection, color = ClienteTema.Texto, fontWeight = FontWeight.Bold)
                         }
                     },
                     actions = {
                         if (rolConSidebar != null) {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, "Menú", tint = GymColors.TextPrimary)
+                                Icon(Icons.Default.Menu, "Menú", tint = Color.White)
                             }
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = GymColors.Background)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = ClienteTema.Navy)
                 )
             }
         ) { padding ->
@@ -88,7 +91,7 @@ fun GymScaffold(
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         ModalDrawerSheet(
                             modifier = Modifier.width(290.dp),
-                            drawerContainerColor = GymColors.Surface,
+                            drawerContainerColor = ClienteTema.Navy,
                             drawerShape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)
                         ) {
                             GymSidebar(
@@ -121,7 +124,7 @@ fun GymScaffold(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(GymColors.Surface, RoundedCornerShape(20.dp))
+                    .background(ClienteTema.Beige, RoundedCornerShape(20.dp))
                     .border(1.5.dp, LogoutBorder, RoundedCornerShape(20.dp))
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -129,12 +132,12 @@ fun GymScaffold(
                 Icon(
                     Icons.AutoMirrored.Filled.ExitToApp,
                     contentDescription = null,
-                    tint = GymColors.Gold
+                    tint = ClienteTema.AzulSel
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
                     "Cerrar sesión",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -143,7 +146,7 @@ fun GymScaffold(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     "¿Seguro que quieres salir?",
-                    color = GymColors.TextSecondary,
+                    color = ClienteTema.TextoSec,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -160,8 +163,8 @@ fun GymScaffold(
                             .weight(1f)
                             .height(44.dp),
                         shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(1.dp, GymColors.Purple),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+                        border = BorderStroke(1.dp, ClienteTema.Borde),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
                     ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
 
                     Button(
@@ -171,7 +174,7 @@ fun GymScaffold(
                             .height(44.dp),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = GymColors.Red,
+                            containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
                         )
                     ) { Text("Salir", fontWeight = FontWeight.Bold) }
