@@ -34,9 +34,9 @@ import com.example.gymcontrol.ui.components.SesionActual
 // Paleta tomada del diseño
 private val FondoNegro = Color(0xFF000000)
 private val TarjetaOscura = Color(0xFF1B1B1B)
-private val MoradoCampo = Color(0xFF3B2459)
-private val MoradoBorde = Color(0xFF4A2D73)
-private val DoradoBorde = Color(0xFF6B5326)
+private val MoradoCampo = Color(0xFF2F2E2E)
+private val MoradoBorde = Color(0xFF6B5326)
+private val DoradoBorde = Color(0xFFC9A24B)
 private val Dorado = Color(0xFFC9A24B)
 private val BlancoTexto = Color(0xFFFFFFFF)
 private val RojoError = Color(0xFFFF6B6B)
@@ -93,7 +93,7 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
             Image(
                 painter = painterResource(id = R.drawable.logo_final),
                 contentDescription = "Axolotl Fitness Club",
-                modifier = Modifier.size(150.dp)
+                modifier = Modifier.size(140.dp)
             )
             Spacer(Modifier.height(24.dp))
 
