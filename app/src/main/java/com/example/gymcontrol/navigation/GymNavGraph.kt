@@ -254,7 +254,7 @@ private fun RoleDevMenu(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_axolotl),
+                painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_final),
                 contentDescription = "Logo Axolotl",
                 modifier = Modifier.size(36.dp)
             )

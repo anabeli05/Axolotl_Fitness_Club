@@ -27,7 +27,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.gymcontrol.ui.theme.GymColors
 
 /** Paleta unisex del cliente: grafito + violeta + dorado suave. */
 object ClienteTema {
@@ -213,8 +212,7 @@ private val CLIENTE_TABS = listOf(
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
-private val PageBackground = Color.Black
-
+// Mismo encabezado, fondo y barra inferior que ClienteScaffoldClaro; solo cambian las pestañas
 @Composable
 fun ClienteScaffold(
     currentSection: String,
@@ -226,35 +224,27 @@ fun ClienteScaffold(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(PageBackground)
+            .background(ClienteTema.Fondo)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(ClienteTema.Navy)
                 .statusBarsPadding()
+                .padding(vertical = 4.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(logoRes),
-                    contentDescription = "Axolotl Fitness Club",
-                    modifier = Modifier
-                        .padding(vertical = 20.dp)
-                        .height(105.dp)
-                )
-                BotonCerrarSesion(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 8.dp)
-                )
-            }
-            Box(
+            Image(
+                painter = painterResource(logoRes),
+                contentDescription = "Axolotl Fitness Club",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(GymColors.Gold.copy(alpha = 0.7f))
+                    .height(28.dp)
+                    .graphicsLayer(scaleX = 1.6f, scaleY = 1.6f)
+            )
+            BotonCerrarSesion(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 4.dp)
             )
         }
 
@@ -262,36 +252,34 @@ fun ClienteScaffold(
             content()
         }
 
-        HorizontalDividerLine()
-        NavigationBar(
-            containerColor = PageBackground,
-            tonalElevation = 0.dp
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(ClienteTema.Navy)
+                .navigationBarsPadding()
         ) {
-            tabs.forEach { tab ->
-                NavigationBarItem(
-                    selected = tab.label == currentSection,
-                    onClick = { onNavigate(tab.label) },
-                    icon = { Icon(imageVector = tab.icon, contentDescription = tab.label) },
-                    label = { Text(tab.label, fontSize = 13.sp) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = GymColors.Purple,
-                        selectedTextColor = GymColors.Purple,
-                        unselectedIconColor = GymColors.TextSecondary,
-                        unselectedTextColor = GymColors.TextSecondary,
-                        indicatorColor = Color.Transparent
+            NavigationBar(
+                modifier = Modifier.height(64.dp),
+                containerColor = ClienteTema.Navy,
+                tonalElevation = 0.dp,
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            ) {
+                tabs.forEach { tab ->
+                    NavigationBarItem(
+                        selected = tab.label == currentSection,
+                        onClick = { onNavigate(tab.label) },
+                        icon = { Icon(imageVector = tab.icon, contentDescription = tab.label) },
+                        label = { Text(tab.label, fontSize = 12.sp) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = ClienteTema.AzulSel,
+                            selectedTextColor = ClienteTema.AzulSel,
+                            unselectedIconColor = Color.White,
+                            unselectedTextColor = Color.White,
+                            indicatorColor = Color.Transparent
+                        )
                     )
-                )
+                }
             }
         }
     }
-}
-
-@Composable
-private fun HorizontalDividerLine() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(GymColors.Border)
-    )
 }

@@ -55,13 +55,13 @@ import androidx.core.content.ContextCompat
 import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.ScaffoldTab
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
+private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 private val InnerBackground = Color.Black.copy(alpha = 0.35f)
 
 private val INSTRUCTOR_TABS = listOf(
@@ -119,7 +119,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffold(
         currentSection = "Perfil",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_axolotl,
+        logoRes = R.drawable.logo_final,
         tabs = INSTRUCTOR_TABS
     ) {
         LazyColumn(
@@ -132,7 +132,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 Text(
                     text = "Mi perfil",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -142,7 +142,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                        .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
                         .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -157,7 +157,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Text(
                         text = name,
-                        color = GymColors.TextPrimary,
+                        color = ClienteTema.Texto,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -165,11 +165,11 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Estado:",
-                            color = GymColors.TextSecondary,
+                            color = ClienteTema.TextoSec,
                             fontSize = 16.sp
                         )
                         Spacer(Modifier.width(8.dp))
-                        Chip(text = "Activo", color = GymColors.Green, width = 84.dp, height = 30.dp)
+                        Chip(text = "Activo", color = ClienteTema.Verde, width = 84.dp, height = 30.dp)
                     }
 
                     Spacer(Modifier.height(18.dp))
@@ -191,7 +191,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Text(
                             text = "Datos Personales",
-                            color = GymColors.TextPrimary,
+                            color = ClienteTema.Texto,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -200,7 +200,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(GymColors.Border)
+                                .background(ClienteTema.Borde)
                         )
                         Spacer(Modifier.height(12.dp))
 
@@ -216,27 +216,27 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             Icon(
                                 Icons.Filled.Group,
                                 contentDescription = null,
-                                tint = GymColors.TextSecondary,
+                                tint = ClienteTema.TextoSec,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(Modifier.width(12.dp))
                             Text(
                                 text = "Capacidad máx:",
-                                color = GymColors.TextSecondary,
+                                color = ClienteTema.TextoSec,
                                 fontSize = 16.sp
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = capacity.toString(),
-                                color = GymColors.TextPrimary,
+                                color = ClienteTema.Texto,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(Modifier.width(10.dp))
                             if (activeClients >= capacity) {
-                                Chip(text = "Lleno", color = GymColors.Red, width = 64.dp, height = 28.dp)
+                                Chip(text = "Lleno", color = ClienteTema.Rojo, width = 64.dp, height = 28.dp)
                             } else {
-                                Chip(text = "Cupo libre", color = GymColors.Green, width = 90.dp, height = 28.dp)
+                                Chip(text = "Cupo libre", color = ClienteTema.Verde, width = 90.dp, height = 28.dp)
                             }
                         }
                     }
@@ -338,7 +338,7 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
                 .size(116.dp)
                 .align(Alignment.BottomStart)
                 .clip(CircleShape)
-                .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
+                .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
                 .border(3.dp, CardBorder, CircleShape),
             contentAlignment = Alignment.Center
         ) {
@@ -352,7 +352,7 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
             } else {
                 Text(
                     text = initials(name),
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -363,14 +363,14 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
             modifier = Modifier
                 .size(34.dp)
                 .align(Alignment.TopEnd)
-                .background(GymColors.Border, CircleShape)
+                .background(ClienteTema.Borde, CircleShape)
                 .clickable(onClick = onEditPhoto),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.Edit,
                 contentDescription = "Cambiar foto",
-                tint = GymColors.TextPrimary,
+                tint = ClienteTema.Texto,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -395,11 +395,11 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = GymColors.TextPrimary, modifier = Modifier.size(22.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.Texto, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(14.dp))
         Text(
             text = label,
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
@@ -407,7 +407,7 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
         Icon(
             Icons.Filled.ChevronRight,
             contentDescription = null,
-            tint = GymColors.TextSecondary,
+            tint = ClienteTema.TextoSec,
             modifier = Modifier.size(24.dp)
         )
     }
@@ -416,17 +416,17 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
 @Composable
 private fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = GymColors.TextSecondary, modifier = Modifier.size(24.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.TextoSec, modifier = Modifier.size(24.dp))
         Spacer(Modifier.width(12.dp))
         Text(
             text = label,
-            color = GymColors.TextSecondary,
+            color = ClienteTema.TextoSec,
             fontSize = 16.sp,
             modifier = Modifier.width(88.dp)
         )
         Text(
             text = value,
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
@@ -472,7 +472,7 @@ private fun GymDialog(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
                 .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
         ) {
             Column(
@@ -483,7 +483,7 @@ private fun GymDialog(
             ) {
                 Text(
                     text = title,
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(end = 36.dp)
@@ -502,7 +502,7 @@ private fun GymDialog(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Cerrar",
-                    tint = GymColors.TextSecondary,
+                    tint = ClienteTema.TextoSec,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -612,8 +612,8 @@ private fun EditDataDialog(
                     .weight(1f)
                     .height(44.dp),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.Red),
-                border = BorderStroke(1.dp, GymColors.Red)
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
+                border = BorderStroke(1.dp, ClienteTema.Rojo)
             ) {
                 Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
@@ -625,8 +625,8 @@ private fun EditDataDialog(
                     .height(44.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GymColors.Purple,
-                    contentColor = GymColors.TextPrimary
+                    containerColor = ClienteTema.Azul,
+                    contentColor = ClienteTema.Texto
                 )
             ) {
                 Text("Guardar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -657,18 +657,18 @@ private fun GymTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GymColors.Purple,
-            unfocusedBorderColor = GymColors.Border,
-            focusedTextColor = GymColors.TextPrimary,
-            unfocusedTextColor = GymColors.TextPrimary,
-            focusedLabelColor = GymColors.Purple,
-            unfocusedLabelColor = GymColors.TextSecondary,
-            cursorColor = GymColors.Gold,
-            errorBorderColor = GymColors.Red,
-            errorTextColor = GymColors.TextPrimary,
-            errorLabelColor = GymColors.Red,
-            errorCursorColor = GymColors.Red,
-            errorSupportingTextColor = GymColors.Red
+            focusedBorderColor = ClienteTema.AzulSel,
+            unfocusedBorderColor = ClienteTema.Borde,
+            focusedTextColor = ClienteTema.Texto,
+            unfocusedTextColor = ClienteTema.Texto,
+            focusedLabelColor = ClienteTema.AzulSel,
+            unfocusedLabelColor = ClienteTema.TextoSec,
+            cursorColor = ClienteTema.AzulSel,
+            errorBorderColor = ClienteTema.Rojo,
+            errorTextColor = ClienteTema.Texto,
+            errorLabelColor = ClienteTema.Rojo,
+            errorCursorColor = ClienteTema.Rojo,
+            errorSupportingTextColor = ClienteTema.Rojo
         )
     )
 }
