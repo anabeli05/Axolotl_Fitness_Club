@@ -1,5 +1,6 @@
 package com.example.gymcontrol.ui.recepcion.solicitudes
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -23,12 +24,11 @@ import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.data.remote.ClientesRepository
 import com.example.gymcontrol.data.remote.SolicitudAdminRow
 import com.example.gymcontrol.data.remote.SolicitudesRepository
-import kotlinx.coroutines.launch
+import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import kotlinx.coroutines.launch
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
-private val RECEPCION_SECTIONS = listOf("Home", "Clientes", "Solicitudes")
+private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 // Mismo tamaño que en ClientesScreen: badge, chip de costo y botones de acción
 private val ChipWidth = 96.dp
@@ -59,7 +59,6 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
 
     GymScaffold(
         currentSection = "Solicitudes",
-        sections = RECEPCION_SECTIONS,
         onNavigate = onNavigate
     ) {
         LazyColumn(
@@ -72,14 +71,14 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 Text(
                     text = "Pendientes: $pendientes",
-                    color = GymColors.TextSecondary,
+                    color = ClienteTema.TextoSec,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             mensaje?.let { msg ->
-                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
+                item { Text(msg, color = ClienteTema.Rojo, fontSize = 14.sp) }
             }
 
             items(requests, key = { it.id }) { req ->
@@ -99,7 +98,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                 item {
                     Text(
                         text = "No hay solicitudes",
-                        color = GymColors.TextSecondary,
+                        color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -115,14 +114,14 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
         val aprobar = r.estado == "APROBADA"
         AlertDialog(
             onDismissRequest = { confirmar = null },
-            containerColor = GymColors.Surface,
+            containerColor = ClienteTema.Beige,
             shape = RoundedCornerShape(16.dp),
-            title = { Text("Confirmar", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold) },
+            title = { Text("Confirmar", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
             text = {
                 Text(
                     "¿Estás seguro de ${if (aprobar) "aprobar" else "rechazar"} la solicitud de " +
                             "${r.solicitud.cliente} con ${r.solicitud.instructor}?",
-                    color = GymColors.TextSecondary
+                    color = ClienteTema.TextoSec
                 )
             },
             confirmButton = {
@@ -141,7 +140,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                     },
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (aprobar) GymColors.Green else GymColors.Red,
+                        containerColor = if (aprobar) ClienteTema.Verde else ClienteTema.Rojo,
                         contentColor = Color.White
                     )
                 ) { Text(if (aprobar) "Aprobar" else "Rechazar", fontWeight = FontWeight.Bold) }
@@ -150,8 +149,8 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                 OutlinedButton(
                     onClick = { confirmar = null },
                     shape = RoundedCornerShape(10.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GymColors.Border),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+                    border = BorderStroke(1.dp, ClienteTema.Borde),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
                 ) { Text("Cancelar") }
             }
         )
@@ -172,7 +171,7 @@ private fun SolicitudCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -180,16 +179,16 @@ private fun SolicitudCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = clientName,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
-            Text("Membresía: $membership", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text("Membresía: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Instructor: $instructor", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text("Instructor: $instructor", color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Fecha: $date", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text("Fecha: $date", color = ClienteTema.TextoSec, fontSize = 17.sp)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -205,13 +204,13 @@ private fun SolicitudCard(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     IconSquareButton(
                         icon = Icons.Filled.Check,
-                        color = GymColors.Green,
+                        color = ClienteTema.Verde,
                         description = "Aprobar",
                         onClick = onApprove
                     )
                     IconSquareButton(
                         icon = Icons.Filled.Close,
-                        color = GymColors.Red,
+                        color = ClienteTema.Rojo,
                         description = "Rechazar",
                         onClick = onReject
                     )
@@ -224,9 +223,9 @@ private fun SolicitudCard(
 @Composable
 private fun StatusChip(status: String) {
     val color = when (status) {
-        "APROBADA" -> GymColors.Green
-        "RECHAZADA" -> GymColors.Red
-        else -> GymColors.Gold
+        "APROBADA" -> ClienteTema.Verde
+        "RECHAZADA" -> ClienteTema.Rojo
+        else -> ClienteTema.AzulSel
     }
     val label = when (status) {
         "APROBADA" -> "Aprobada"
@@ -255,13 +254,13 @@ private fun CostChip(cost: String) {
     Box(
         modifier = Modifier
             .size(ChipWidth, ChipHeight)
-            .background(GymColors.Purple.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
-            .border(1.dp, GymColors.Purple, RoundedCornerShape(10.dp)),
+            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
+            .border(1.dp, ClienteTema.Borde, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "$$cost",
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )

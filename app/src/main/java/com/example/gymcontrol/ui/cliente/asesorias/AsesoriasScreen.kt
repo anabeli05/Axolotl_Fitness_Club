@@ -59,7 +59,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffoldClaro(
         currentSection = "Asesorías",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_pi2
+        logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
             modifier = Modifier
