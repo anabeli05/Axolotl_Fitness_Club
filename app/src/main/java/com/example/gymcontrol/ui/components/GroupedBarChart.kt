@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.ui.theme.GymColors
 
 data class GroupedBarEntry(val label: String, val activos: Float, val inactivos: Float)
 
@@ -26,14 +25,14 @@ fun GroupedBarChart(
     modifier: Modifier = Modifier,
     chartHeight: Int = 180
 ) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
     val maxValue = entries.maxOf { maxOf(it.activos, it.inactivos) }
     val niceMax = niceCeil(maxValue)
     val labels = axisLabels(maxValue)
 
     Column(
         modifier = modifier
-            .background(GymColors.Surface, RoundedCornerShape(16.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
             .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
@@ -44,21 +43,21 @@ fun GroupedBarChart(
         ) {
             Text(
                 text = title,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(10.dp).background(GymColors.Green, RoundedCornerShape(2.dp)))
+                    Box(Modifier.size(10.dp).background(ClienteTema.Verde, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text("Activos", color = GymColors.TextSecondary, fontSize = 11.sp)
+                    Text("Activos", color = ClienteTema.TextoSec, fontSize = 11.sp)
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(10.dp).background(GymColors.Red, RoundedCornerShape(2.dp)))
+                    Box(Modifier.size(10.dp).background(ClienteTema.Rojo, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text("Inactivos", color = GymColors.TextSecondary, fontSize = 11.sp)
+                    Text("Inactivos", color = ClienteTema.TextoSec, fontSize = 11.sp)
                 }
             }
         }
@@ -74,7 +73,7 @@ fun GroupedBarChart(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 labels.forEach { label ->
-                    Text(text = label, color = GymColors.TextSecondary, fontSize = 10.sp)
+                    Text(text = label, color = ClienteTema.TextoSec, fontSize = 10.sp)
                 }
             }
 
@@ -106,7 +105,7 @@ fun GroupedBarChart(
                                         .width(8.dp)
                                         .fillMaxHeight(fractionA)
                                 ) {
-                                    drawRoundRect(color = GymColors.Green, cornerRadius = CornerRadius(4f, 4f))
+                                    drawRoundRect(color = ClienteTema.Verde, cornerRadius = CornerRadius(4f, 4f))
                                 }
                                 Spacer(Modifier.width(3.dp))
                                 Canvas(
@@ -114,7 +113,7 @@ fun GroupedBarChart(
                                         .width(8.dp)
                                         .fillMaxHeight(fractionB)
                                 ) {
-                                    drawRoundRect(color = GymColors.Red, cornerRadius = CornerRadius(4f, 4f))
+                                    drawRoundRect(color = ClienteTema.Rojo, cornerRadius = CornerRadius(4f, 4f))
                                 }
                             }
                         }
@@ -124,14 +123,14 @@ fun GroupedBarChart(
                             .align(Alignment.CenterStart)
                             .fillMaxHeight()
                             .width(2.dp)
-                            .background(GymColors.Purple)
+                            .background(ClienteTema.AzulSel)
                     )
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .fillMaxWidth()
                             .height(2.dp)
-                            .background(GymColors.Purple)
+                            .background(ClienteTema.AzulSel)
                     )
                 }
 
@@ -146,7 +145,7 @@ fun GroupedBarChart(
                     entries.forEach { entry ->
                         Text(
                             text = entry.label,
-                            color = GymColors.TextSecondary,
+                            color = ClienteTema.TextoSec,
                             fontSize = 10.sp,
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center

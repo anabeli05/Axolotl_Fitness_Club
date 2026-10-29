@@ -91,7 +91,7 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo_axolotl),
+                painter = painterResource(id = R.drawable.logo_final),
                 contentDescription = "Axolotl Fitness Club",
                 modifier = Modifier.size(150.dp)
             )

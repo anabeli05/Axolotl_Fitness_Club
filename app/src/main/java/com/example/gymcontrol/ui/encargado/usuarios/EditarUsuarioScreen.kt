@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.data.model.Status
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import androidx.compose.foundation.background
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
@@ -48,7 +48,7 @@ fun EditarUsuarioScreen(
         ) {
             Text(
                 "Editar personal",
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -64,30 +64,30 @@ fun EditarUsuarioScreen(
                     value = editedRole.name,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Rol", color = GymColors.TextSecondary) },
+                    label = { Text("Rol", color = ClienteTema.TextoSec) },
                     trailingIcon = {
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = GymColors.TextSecondary)
+                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ClienteTema.TextoSec)
                     },
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GymColors.Purple,
-                        unfocusedBorderColor = GymColors.Border,
-                        focusedTextColor = GymColors.TextPrimary,
-                        unfocusedTextColor = GymColors.TextPrimary,
-                        cursorColor = GymColors.Gold
+                        focusedBorderColor = ClienteTema.AzulSel,
+                        unfocusedBorderColor = ClienteTema.Borde,
+                        focusedTextColor = ClienteTema.Texto,
+                        unfocusedTextColor = ClienteTema.Texto,
+                        cursorColor = ClienteTema.AzulSel
                     )
                 )
                 ExposedDropdownMenu(
                     expanded = roleMenuExpanded,
                     onDismissRequest = { roleMenuExpanded = false },
-                    modifier = Modifier.background(GymColors.Surface)
+                    modifier = Modifier.background(ClienteTema.Beige)
                 ) {
                     UserRole.values().forEach { r ->
                         DropdownMenuItem(
-                            text = { Text(r.name, color = GymColors.TextPrimary) },
+                            text = { Text(r.name, color = ClienteTema.Texto) },
                             onClick = {
                                 editedRole = r
                                 roleMenuExpanded = false
@@ -105,30 +105,30 @@ fun EditarUsuarioScreen(
                     value = editedStatus.name,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Estado", color = GymColors.TextSecondary) },
+                    label = { Text("Estado", color = ClienteTema.TextoSec) },
                     trailingIcon = {
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = GymColors.TextSecondary)
+                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ClienteTema.TextoSec)
                     },
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GymColors.Purple,
-                        unfocusedBorderColor = GymColors.Border,
-                        focusedTextColor = GymColors.TextPrimary,
-                        unfocusedTextColor = GymColors.TextPrimary,
-                        cursorColor = GymColors.Gold
+                        focusedBorderColor = ClienteTema.AzulSel,
+                        unfocusedBorderColor = ClienteTema.Borde,
+                        focusedTextColor = ClienteTema.Texto,
+                        unfocusedTextColor = ClienteTema.Texto,
+                        cursorColor = ClienteTema.AzulSel
                     )
                 )
                 ExposedDropdownMenu(
                     expanded = statusMenuExpanded,
                     onDismissRequest = { statusMenuExpanded = false },
-                    modifier = Modifier.background(GymColors.Surface)
+                    modifier = Modifier.background(ClienteTema.Beige)
                 ) {
                     Status.values().forEach { s ->
                         DropdownMenuItem(
-                            text = { Text(s.name, color = GymColors.TextPrimary) },
+                            text = { Text(s.name, color = ClienteTema.Texto) },
                             onClick = {
                                 editedStatus = s
                                 statusMenuExpanded = false
@@ -145,8 +145,8 @@ fun EditarUsuarioScreen(
                     onClick = onBack,
                     modifier = Modifier.weight(1f),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GymColors.Border)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ClienteTema.Borde)
                 ) {
                     Text("Cancelar")
                 }
@@ -154,7 +154,7 @@ fun EditarUsuarioScreen(
                     onClick = {
                         onSave(editedName, editedEmail, editedRole, editedStatus)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
+                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
                     modifier = Modifier.weight(1f)
                 ) {
@@ -174,15 +174,15 @@ private fun GymTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, color = GymColors.TextSecondary) },
+        label = { Text(label, color = ClienteTema.TextoSec) },
         modifier = Modifier.fillMaxWidth(),
         shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GymColors.Purple,
-            unfocusedBorderColor = GymColors.Border,
-            focusedTextColor = GymColors.TextPrimary,
-            unfocusedTextColor = GymColors.TextPrimary,
-            cursorColor = GymColors.Gold
+            focusedBorderColor = ClienteTema.AzulSel,
+            unfocusedBorderColor = ClienteTema.Borde,
+            focusedTextColor = ClienteTema.Texto,
+            unfocusedTextColor = ClienteTema.Texto,
+            cursorColor = ClienteTema.AzulSel
         )
     )
 }

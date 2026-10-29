@@ -31,9 +31,9 @@ import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.ScaffoldTab
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
+private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 private val INSTRUCTOR_TABS = listOf(
     ScaffoldTab("Mis clientes", Icons.Filled.Group),
@@ -75,7 +75,7 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffold(
         currentSection = "Mis clientes",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_axolotl,
+        logoRes = R.drawable.logo_final,
         tabs = INSTRUCTOR_TABS
     ) {
         LazyColumn(
@@ -88,14 +88,14 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 Text(
                     text = "Usuarios asignados",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             mensaje?.let { msg ->
-                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
+                item { Text(msg, color = ClienteTema.Rojo, fontSize = 14.sp) }
             }
 
             itemsIndexed(clientes) { index, cliente ->
@@ -109,7 +109,7 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
                 item {
                     Text(
                         text = "No tienes clientes asignados",
-                        color = GymColors.TextSecondary,
+                        color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -149,7 +149,7 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -158,13 +158,13 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
         Box(
             modifier = Modifier
                 .size(60.dp)
-                .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
+                .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
                 .border(2.dp, CardBorder, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = iniciales(cliente.nombre),
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -175,20 +175,20 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = cliente.nombre,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = cliente.dias.ifBlank { "Sin días asignados" },
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 15.sp
             )
             Spacer(Modifier.height(2.dp))
             Text(
                 text = "Objetivo: ${cliente.objetivo.ifBlank { "—" }}",
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 15.sp
             )
         }
@@ -199,8 +199,8 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
             onClick = onEditar,
             modifier = Modifier.size(width = 88.dp, height = 40.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = GymColors.Purple,
-                contentColor = GymColors.TextPrimary
+                containerColor = ClienteTema.Azul,
+                contentColor = ClienteTema.Texto
             ),
             shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(0.dp)
@@ -255,7 +255,7 @@ private fun EditarClienteDialog(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
                 .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
         ) {
             Column(
@@ -266,7 +266,7 @@ private fun EditarClienteDialog(
             ) {
                 Text(
                     text = "Días que asistirá",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -282,7 +282,7 @@ private fun EditarClienteDialog(
 
                 Text(
                     text = "Objetivo",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -296,10 +296,10 @@ private fun EditarClienteDialog(
                     enabled = esValido,
                     modifier = Modifier.size(width = 160.dp, height = 44.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GymColors.Purple,
-                        contentColor = GymColors.TextPrimary,
-                        disabledContainerColor = GymColors.Purple.copy(alpha = 0.45f),
-                        disabledContentColor = GymColors.TextPrimary.copy(alpha = 0.7f)
+                        containerColor = ClienteTema.Azul,
+                        contentColor = ClienteTema.Texto,
+                        disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
+                        disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {
@@ -318,7 +318,7 @@ private fun EditarClienteDialog(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Cerrar",
-                    tint = GymColors.TextSecondary,
+                    tint = ClienteTema.TextoSec,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -344,14 +344,14 @@ private fun SelectorDias(seleccionados: Set<String>, onToggle: (String) -> Unit)
                             .weight(1f)
                             .height(40.dp)
                             .clip(forma)
-                            .background(if (activo) GymColors.Purple else Color.Transparent)
-                            .border(1.dp, GymColors.Purple, forma)
+                            .background(if (activo) ClienteTema.AzulSel else Color.Transparent)
+                            .border(1.dp, ClienteTema.AzulSel, forma)
                             .clickable { onToggle(dia) },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = dia,
-                            color = if (activo) GymColors.TextPrimary else GymColors.TextSecondary,
+                            color = if (activo) ClienteTema.Texto else ClienteTema.TextoSec,
                             fontSize = 15.sp,
                             fontWeight = if (activo) FontWeight.Bold else FontWeight.Normal
                         )
@@ -370,16 +370,16 @@ private fun CampoPill(valor: String, onCambio: (String) -> Unit) {
         singleLine = true,
         shape = RoundedCornerShape(50),
         textStyle = TextStyle(
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 16.sp,
             textAlign = TextAlign.Center
         ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GymColors.Purple,
-            unfocusedBorderColor = GymColors.Purple,
-            focusedTextColor = GymColors.TextPrimary,
-            unfocusedTextColor = GymColors.TextPrimary,
-            cursorColor = GymColors.Gold
+            focusedBorderColor = ClienteTema.AzulSel,
+            unfocusedBorderColor = ClienteTema.AzulSel,
+            focusedTextColor = ClienteTema.Texto,
+            unfocusedTextColor = ClienteTema.Texto,
+            cursorColor = ClienteTema.AzulSel
         ),
         modifier = Modifier.fillMaxWidth()
     )
