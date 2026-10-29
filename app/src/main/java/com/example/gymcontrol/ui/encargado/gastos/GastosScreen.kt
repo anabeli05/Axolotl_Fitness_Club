@@ -39,7 +39,7 @@ import com.example.gymcontrol.data.remote.GastoRow
 import com.example.gymcontrol.data.remote.GastosRepository
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -49,7 +49,7 @@ private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servic
 
 // Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(
-    listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
+    listOf(Color(0xFFFF6B6B), ClienteTema.Rojo, Color(0xFF7A0A0A))
 )
 
 // Gasto seleccionado para eliminar: clave única para ocultarlo y concepto para mostrarlo en el aviso
@@ -120,7 +120,7 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                             date = ""
                             showForm = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
+                        colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -131,10 +131,10 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                 }
 
                 if (cargando) {
-                    item { Text("Cargando...", color = GymColors.TextSecondary) }
+                    item { Text("Cargando...", color = ClienteTema.TextoSec) }
                 }
                 errorMsg?.let { msg ->
-                    item { Text(msg, color = GymColors.Red) }
+                    item { Text(msg, color = ClienteTema.Rojo) }
                 }
 
                 itemsIndexed(gastos) { index, g ->
@@ -225,13 +225,13 @@ private fun DeleteConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
-        containerColor = GymColors.Surface,
+        containerColor = ClienteTema.Beige,
         shape = RoundedCornerShape(16.dp),
-        icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
+        icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
         title = {
             Text(
                 title,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -240,7 +240,7 @@ private fun DeleteConfirmDialog(
         text = {
             Text(
                 message,
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -250,7 +250,7 @@ private fun DeleteConfirmDialog(
                 onClick = onConfirm,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GymColors.Red,
+                    containerColor = ClienteTema.Rojo,
                     contentColor = Color.White
                 )
             ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
@@ -259,8 +259,8 @@ private fun DeleteConfirmDialog(
             OutlinedButton(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, GymColors.Border),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
+                border = BorderStroke(1.dp, ClienteTema.Borde),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
             ) { Text("Cancelar") }
         }
     )
@@ -275,12 +275,12 @@ private fun ExpenseCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, borderBrush, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -288,27 +288,27 @@ private fun ExpenseCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = concept,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(10.dp))
             Text(
                 text = "Categoría: $category",
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = "Monto: $amount",
-                color = GymColors.Gold,
+                color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = "Fecha: $date",
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 14.sp
             )
         }
@@ -318,12 +318,12 @@ private fun ExpenseCard(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             IconCircleButton(
                 icon = Icons.Filled.Edit,
-                color = GymColors.Orange,
+                color = ClienteTema.AzulSel,
                 onClick = onEdit
             )
             IconCircleButton(
                 icon = Icons.Filled.Close,
-                color = GymColors.Red,
+                color = ClienteTema.Rojo,
                 onClick = onDelete
             )
         }
@@ -364,7 +364,7 @@ private fun ExpenseFormDialog(
     onDismiss: () -> Unit,
     onSave: () -> Unit
 ) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
     val conceptValid = nameHasMinLetters(concept)
     val categoryValid = nameHasMinLetters(category)
 
@@ -380,7 +380,7 @@ private fun ExpenseFormDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(GymColors.Surface, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
                 .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
@@ -392,12 +392,12 @@ private fun ExpenseFormDialog(
             ) {
                 Text(
                     text = if (isEditing) "Editar gasto" else "Nuevo gasto",
-                    color = GymColors.TextPrimary,
+                    color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = GymColors.TextSecondary)
+                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = ClienteTema.TextoSec)
                 }
             }
 
@@ -445,10 +445,10 @@ private fun ExpenseFormDialog(
                         (amount.toDoubleOrNull() ?: 0.0) > 0.0 &&
                         date.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GymColors.Purple,
-                    contentColor = GymColors.TextPrimary,
-                    disabledContainerColor = GymColors.Purple.copy(alpha = 0.45f),
-                    disabledContentColor = GymColors.TextPrimary.copy(alpha = 0.7f)
+                    containerColor = ClienteTema.Azul,
+                    contentColor = ClienteTema.Texto,
+                    disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
+                    disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                 ),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -461,17 +461,17 @@ private fun ExpenseFormDialog(
 
 @Composable
 private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = GymColors.Purple,
-    unfocusedBorderColor = GymColors.Border,
-    focusedTextColor = GymColors.TextPrimary,
-    unfocusedTextColor = GymColors.TextPrimary,
-    focusedLabelColor = GymColors.Purple,
-    cursorColor = GymColors.Gold,
-    errorBorderColor = GymColors.Red,
-    errorTextColor = GymColors.TextPrimary,
-    errorLabelColor = GymColors.Red,
-    errorCursorColor = GymColors.Red,
-    errorSupportingTextColor = GymColors.Red
+    focusedBorderColor = ClienteTema.AzulSel,
+    unfocusedBorderColor = ClienteTema.Borde,
+    focusedTextColor = ClienteTema.Texto,
+    unfocusedTextColor = ClienteTema.Texto,
+    focusedLabelColor = ClienteTema.AzulSel,
+    cursorColor = ClienteTema.AzulSel,
+    errorBorderColor = ClienteTema.Rojo,
+    errorTextColor = ClienteTema.Texto,
+    errorLabelColor = ClienteTema.Rojo,
+    errorCursorColor = ClienteTema.Rojo,
+    errorSupportingTextColor = ClienteTema.Rojo
 )
 
 // Campo que rechaza lo que no cumple `accept` (muestra un aviso unos segundos)
@@ -509,14 +509,14 @@ private fun RestrictedField(
                 new.length <= maxLength -> onValueChange(new)
             }
         },
-        label = { Text(label, color = if (shownError != null) GymColors.Red else GymColors.TextSecondary) },
+        label = { Text(label, color = if (shownError != null) ClienteTema.Rojo else ClienteTema.TextoSec) },
         singleLine = true,
         isError = shownError != null,
         supportingText = if (shownError != null) {
             { Text(shownError) }
         } else null,
         prefix = if (prefix != null) {
-            { Text(prefix, color = GymColors.TextPrimary) }
+            { Text(prefix, color = ClienteTema.Texto) }
         } else null,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth(),
@@ -558,14 +558,14 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
             onValueChange = {},
             readOnly = true,
             singleLine = true,
-            label = { Text(label, color = GymColors.TextSecondary) },
-            placeholder = { Text("dd/mm/aaaa", color = GymColors.TextSecondary) },
+            label = { Text(label, color = ClienteTema.TextoSec) },
+            placeholder = { Text("dd/mm/aaaa", color = ClienteTema.TextoSec) },
             trailingIcon = {
                 IconButton(onClick = { showPicker = true }) {
                     Icon(
                         Icons.Filled.CalendarMonth,
                         contentDescription = "Elegir fecha",
-                        tint = GymColors.Purple
+                        tint = ClienteTema.AzulSel
                     )
                 }
             },
@@ -595,11 +595,11 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
                         pickerState.selectedDateMillis?.let { onValueChange(formatDate(it)) }
                         showPicker = false
                     }
-                ) { Text("Aceptar", color = GymColors.Purple, fontWeight = FontWeight.Bold) }
+                ) { Text("Aceptar", color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
                 TextButton(onClick = { showPicker = false }) {
-                    Text("Cancelar", color = GymColors.TextSecondary)
+                    Text("Cancelar", color = ClienteTema.TextoSec)
                 }
             }
         ) {

@@ -17,7 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.gymcontrol.navigation.Routes
 import com.example.gymcontrol.ui.instructor.clientes.MisClientesScreen
 import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import androidx.compose.runtime.getValue
 
 private data class InstructorTabItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
@@ -32,12 +32,12 @@ fun InstructorRootScreen() {
     val navController = rememberNavController()
 
     Scaffold(
-        containerColor = GymColors.Background,
+        containerColor = ClienteTema.Fondo,
         bottomBar = {
             val backStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = backStackEntry?.destination?.route
 
-            NavigationBar(containerColor = GymColors.Surface) {
+            NavigationBar(containerColor = ClienteTema.Beige) {
                 instructorTabs.forEach { tab ->
                     NavigationBarItem(
                         selected = currentRoute == tab.route,
@@ -53,10 +53,10 @@ fun InstructorRootScreen() {
                         icon = { Icon(tab.icon, contentDescription = null) },
                         label = { Text(tab.label) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = GymColors.Gold,
-                            selectedTextColor = GymColors.Gold,
-                            unselectedIconColor = GymColors.TextSecondary,
-                            unselectedTextColor = GymColors.TextSecondary,
+                            selectedIconColor = ClienteTema.AzulSel,
+                            selectedTextColor = ClienteTema.AzulSel,
+                            unselectedIconColor = ClienteTema.TextoSec,
+                            unselectedTextColor = ClienteTema.TextoSec,
                             indicatorColor = Color.Transparent
                         )
                     )
