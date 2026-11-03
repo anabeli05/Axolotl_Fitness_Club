@@ -8,6 +8,8 @@ object Routes {
     const val CLIENT_ADVISORIES = "client_advisories"
     const val CLIENT_PROFILE = "client_profile"
 
+    const val CLIENT_PAYMENTS = "client_payments"
+
     const val INSTRUCTOR_ROOT = "instructor_root"
     const val INSTRUCTOR_CLIENTS = "instructor_clients"
     const val INSTRUCTOR_PROFILE = "instructor_profile"
