@@ -38,6 +38,7 @@ import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
 import com.example.gymcontrol.ui.recepcion.scanner.QrScannerScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
 import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
 
 @Composable
 fun GymNavGraph() {
@@ -80,6 +81,9 @@ fun GymNavGraph() {
                 }
                 composable(Routes.CLIENT_ADVISORIES) {
                     AsesoriasScreen(onNavigate = { section -> navigateClient(navController, section) })
+                }
+                composable(Routes.CLIENT_PAYMENTS) {
+                    PagHomeScreen(onNavigate = { section -> navigateClient(navController, section) })
                 }
                 composable(Routes.CLIENT_PROFILE) {
                     ClientePerfilScreen(onNavigate = { section -> navigateClient(navController, section) })
@@ -150,6 +154,7 @@ private fun navigateClient(navController: NavHostController, section: String) {
     val route = when (section) {
         "Inicio" -> Routes.CLIENT_HOME
         "Asesorías" -> Routes.CLIENT_ADVISORIES
+        "Pagos" -> Routes.CLIENT_PAYMENTS
         "Perfil" -> Routes.CLIENT_PROFILE
         else -> null
     }
