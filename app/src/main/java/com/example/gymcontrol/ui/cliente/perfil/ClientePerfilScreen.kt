@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -115,7 +116,9 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     "Mi perfil",
                     color = ClienteTema.Texto,
                     fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -399,7 +402,14 @@ private fun GymDialog(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(title, color = ClienteTema.Texto, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                title,
+                color = ClienteTema.Texto,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
             content()
         }
     }
@@ -416,7 +426,7 @@ private fun DialogButtons(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
     ) {
         OutlinedButton(
             onClick = onDismiss,

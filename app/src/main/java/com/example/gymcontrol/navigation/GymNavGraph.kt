@@ -34,6 +34,8 @@ import com.example.gymcontrol.ui.encargado.usuarios.NuevoUsuarioScreen
 import com.example.gymcontrol.ui.encargado.usuarios.UsuariosScreen
 import com.example.gymcontrol.ui.instructor.clientes.MisClientesScreen
 import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
+import com.example.gymcontrol.ui.legal.PrivacyPolicyScreen
+import com.example.gymcontrol.ui.legal.TermsScreen
 import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
 import com.example.gymcontrol.ui.recepcion.scanner.QrScannerScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
@@ -60,18 +62,29 @@ fun GymNavGraph() {
         ) {
             NavHost(navController = navController, startDestination = Routes.LOGIN) {
                 composable(Routes.LOGIN) {
-                    LoginScreen { role ->
-                        SesionActual.iniciar(role)
-                        val target = when (role) {
-                            UserRole.CLIENTE -> Routes.CLIENT_HOME
-                            UserRole.RECEPCION -> Routes.RECEPTION_SCANNER
-                            UserRole.INSTRUCTOR -> Routes.INSTRUCTOR_CLIENTS
-                            UserRole.ENCARGADO -> Routes.ADMIN_DASHBOARD
+                    LoginScreen(
+                        onNavigateToTerms = { navController.navigate(Routes.TERMS) },
+                        onNavigateToPrivacy = { navController.navigate(Routes.PRIVACY) },
+                        onLogin = { role ->
+                            SesionActual.iniciar(role)
+                            val target = when (role) {
+                                UserRole.CLIENTE -> Routes.CLIENT_HOME
+                                UserRole.RECEPCION -> Routes.RECEPTION_SCANNER
+                                UserRole.INSTRUCTOR -> Routes.INSTRUCTOR_CLIENTS
+                                UserRole.ENCARGADO -> Routes.ADMIN_DASHBOARD
+                            }
+                            navController.navigate(target) {
+                                popUpTo(Routes.LOGIN) { inclusive = true }
+                            }
                         }
-                        navController.navigate(target) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
-                        }
-                    }
+                    )
+                }
+
+                composable(Routes.TERMS) {
+                    TermsScreen(onBack = { navController.popBackStack() })
+                }
+                composable(Routes.PRIVACY) {
+                    PrivacyPolicyScreen(onBack = { navController.popBackStack() })
                 }
 
                 // Cliente: la barra inferior cambia entre Inicio, Asesorías y Perfil

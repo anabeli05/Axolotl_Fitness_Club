@@ -113,20 +113,25 @@ private fun WelcomeMessage(name: String) {
     }
     val firstName = name.trim().split(" ").firstOrNull().orEmpty()
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = "$greeting, $firstName",
             color = ClienteTema.Texto,
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Qué bueno verte por aquí. ¡A darle con todo hoy!",
             color = ClienteTema.TextoSec,
-            fontSize = 15.sp
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center
         )
     }
 }

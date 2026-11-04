@@ -69,14 +69,24 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
                     Text(
                         "Asesorías",
                         color = ClienteTema.Texto,
                         fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
                     )
-                    Text("Elige tu instructor", color = ClienteTema.Texto, fontSize = 14.sp)
+                    Text(
+                        "Elige tu instructor",
+                        color = ClienteTema.Texto,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
 
@@ -232,33 +242,37 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 )
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        cancelling = null
-                        scope.launch {
-                            try {
-                                AsesoriasRepository.cancelar(correo, target.instructorId)
-                                mensaje = null
-                                recargar()
-                            } catch (e: Exception) {
-                                mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo cancelar"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                ) {
+                    OutlinedButton(
+                        onClick = { cancelling = null },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, ClienteTema.Borde),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                    ) { Text("Volver") }
+
+                    Button(
+                        onClick = {
+                            cancelling = null
+                            scope.launch {
+                                try {
+                                    AsesoriasRepository.cancelar(correo, target.instructorId)
+                                    mensaje = null
+                                    recargar()
+                                } catch (e: Exception) {
+                                    mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo cancelar"
+                                }
                             }
-                        }
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ClienteTema.Rojo,
-                        contentColor = Color.White
-                    )
-                ) { Text("Sí, cancelar", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { cancelling = null },
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Volver") }
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ClienteTema.Rojo,
+                            contentColor = Color.White
+                        )
+                    ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
+                }
             }
         )
     }
