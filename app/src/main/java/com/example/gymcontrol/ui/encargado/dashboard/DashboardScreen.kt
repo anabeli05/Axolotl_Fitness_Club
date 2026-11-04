@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.OcupacionRepository
 import com.example.gymcontrol.data.remote.OcupacionRow
 import com.example.gymcontrol.data.remote.ResumenRepository
@@ -28,6 +29,15 @@ private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servic
 fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
     var ocupacion by remember { mutableStateOf<List<OcupacionRow>>(emptyList()) }
     var resumen by remember { mutableStateOf<ResumenRow?>(null) }
+    var dentro by remember { mutableStateOf<Int?>(null) }
+
+    // Personas dentro ahora (entradas − salidas de hoy), cada 5 segundos
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { dentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
+            delay(5_000)
+        }
+    }
 
     // Se actualiza cada 30 segundos
     LaunchedEffect(Unit) {
@@ -79,6 +89,17 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
+            item {
+                StatCard(
+                    title = "Personas dentro ahora",
+                    value = dentro?.toString() ?: "—",
+                    valueColor = ClienteTema.AzulSel,
+                    iconType = StatIconType.PERSON,
+                    iconColor = ClienteTema.AzulSel,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             item {
                 StatCard(
                     title = "Clientes Activos",
