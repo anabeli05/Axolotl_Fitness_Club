@@ -18,12 +18,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
 import com.example.gymcontrol.data.remote.CorreoRepository
@@ -49,6 +51,9 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var errorForm by remember { mutableStateOf<String?>(null) }
     var renovando by remember { mutableStateOf<ClienteRow?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
+    // Reconocimiento facial: clientes con rostro y a quién se le registra ahora
+    var conRostro by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var registrandoRostro by remember { mutableStateOf<ClienteRow?>(null) }
     // Pregunta "¿Estás seguro?" pendiente: mensaje + acción
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
@@ -60,6 +65,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
         } catch (e: Exception) {
             errorMsg = "No se pudo cargar: ${e.message}"
         }
+        try { conRostro = AccesoFacialRepository.clientesConRostro() } catch (_: Exception) {}
     }
 
     fun mensaje(e: Exception, def: String) = e.message?.substringBefore("\nCode:") ?: def
@@ -137,6 +143,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 else " · sin membresía",
                         registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
+                        tieneRostro = client.id in conRostro,
+                        onRostro = { registrandoRostro = client },
                         onEdit = {
                             editing = client
                             errorForm = null
@@ -192,6 +200,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                         val enviado = CorreoRepository.enviarBienvenida(correo)
                                         info = if (enviado) "Cliente ${nuevo.numero} registrado. Se envió su membresía y contraseña al correo."
                                         else "Cliente ${nuevo.numero} registrado, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026"
+                                        // Siguiente paso: registrar su rostro para el acceso
+                                        registrandoRostro = todos.firstOrNull { it.id == nuevo.id }
                                     } catch (e: Exception) {
                                         errorForm = mensaje(e, "No se pudo registrar")
                                     }
@@ -241,6 +251,19 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
+            registrandoRostro?.let { cl ->
+                RegistroRostroDialog(
+                    cliente = cl,
+                    yaTieneRostro = cl.id in conRostro,
+                    onDismiss = { registrandoRostro = null },
+                    onRegistrado = {
+                        conRostro = conRostro + cl.id
+                        registrandoRostro = null
+                        info = "Rostro de ${cl.nombre} registrado para el acceso"
+                    }
+                )
+            }
+
             confirmar?.let { (texto, accion) ->
                 AlertDialog(
                     onDismissRequest = { confirmar = null },
@@ -281,6 +304,8 @@ private fun ClientCard(
     membership: String,
     registrationDate: String,
     isActive: Boolean,
+    tieneRostro: Boolean,
+    onRostro: () -> Unit,
     onEdit: () -> Unit,
     onRenovar: () -> Unit
 ) {
@@ -292,12 +317,19 @@ private fun ClientCard(
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Espacio para la foto del cliente (círculo de relleno por ahora)
+        // Espacio para la foto del cliente. Al tocarlo se registra/actualiza su rostro
+        // (borde verde = ya tiene rostro registrado)
         Box(
             modifier = Modifier
                 .size(52.dp)
                 .background(ClienteTema.Navy, CircleShape)
-                .border(1.dp, ClienteTema.Borde, CircleShape),
+                .border(
+                    if (tieneRostro) 2.dp else 1.dp,
+                    if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
+                    CircleShape
+                )
+                .clip(CircleShape)
+                .clickable(onClick = onRostro),
             contentAlignment = Alignment.Center
         ) {
             Icon(
