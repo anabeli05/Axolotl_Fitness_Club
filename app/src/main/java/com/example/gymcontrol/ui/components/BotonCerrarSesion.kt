@@ -64,17 +64,19 @@ fun LogoutDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = onDismiss,
                     shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, ClienteTema.AzulSel),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ClienteTema.Rojo,
+                        contentColor = Color.White
+                    )
+                ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
                 Button(
                     onClick = onConfirm,
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ClienteTema.Rojo,
+                        containerColor = ClienteTema.Verde,
                         contentColor = Color.White
                     )
                 ) { Text("Salir", fontWeight = FontWeight.Bold) }

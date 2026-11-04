@@ -116,42 +116,56 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
             onDismissRequest = { confirmar = null },
             containerColor = ClienteTema.Beige,
             shape = RoundedCornerShape(16.dp),
-            title = { Text("Confirmar", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    "Confirmar",
+                    color = ClienteTema.Texto,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
             text = {
                 Text(
                     "¿Estás seguro de ${if (aprobar) "aprobar" else "rechazar"} la solicitud de " +
                             "${r.solicitud.cliente} con ${r.solicitud.instructor}?",
-                    color = ClienteTema.TextoSec
+                    color = ClienteTema.TextoSec,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        confirmar = null
-                        scope.launch {
-                            try {
-                                SolicitudesRepository.resolver(r.solicitud.id, r.estado)
-                                mensaje = null
-                            } catch (e: Exception) {
-                                mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo guardar"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                ) {
+                    OutlinedButton(
+                        onClick = { confirmar = null },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, ClienteTema.Borde),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                    ) { Text("Cancelar") }
+
+                    Button(
+                        onClick = {
+                            confirmar = null
+                            scope.launch {
+                                try {
+                                    SolicitudesRepository.resolver(r.solicitud.id, r.estado)
+                                    mensaje = null
+                                } catch (e: Exception) {
+                                    mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo guardar"
+                                }
+                                recargar()
                             }
-                            recargar()
-                        }
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (aprobar) ClienteTema.Verde else ClienteTema.Rojo,
-                        contentColor = Color.White
-                    )
-                ) { Text(if (aprobar) "Aprobar" else "Rechazar", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { confirmar = null },
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (aprobar) ClienteTema.Verde else ClienteTema.Rojo,
+                            contentColor = Color.White
+                        )
+                    ) { Text(if (aprobar) "Aprobar" else "Rechazar", fontWeight = FontWeight.Bold) }
+                }
             }
         )
     }

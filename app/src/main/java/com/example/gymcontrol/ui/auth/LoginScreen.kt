@@ -20,10 +20,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
@@ -43,10 +51,15 @@ private val RojoError = Color(0xFFFF6B6B)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLogin: (UserRole) -> Unit) {
+fun LoginScreen(
+    onNavigateToTerms: () -> Unit = {},
+    onNavigateToPrivacy: () -> Unit = {},
+    onLogin: (UserRole) -> Unit
+) {
     var identifier by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var terminosAceptados by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var mostrarCambio by remember { mutableStateOf(false) }
@@ -134,7 +147,67 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
                 colors = campoColors,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = terminosAceptados,
+                    onCheckedChange = { terminosAceptados = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Dorado,
+                        uncheckedColor = DoradoBorde,
+                        checkmarkColor = TarjetaOscura
+                    )
+                )
+                val textoTerminos = buildAnnotatedString {
+                    append("Acepto los ")
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "terminos",
+                            styles = TextLinkStyles(
+                                style = SpanStyle(
+                                    color = Dorado,
+                                    textDecoration = TextDecoration.Underline,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            ),
+                            linkInteractionListener = {
+                                onNavigateToTerms()
+                            }
+                        )
+                    ) {
+                        append("Términos y Condiciones")
+                    }
+                    append(" y la ")
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "politica",
+                            styles = TextLinkStyles(
+                                style = SpanStyle(
+                                    color = Dorado,
+                                    textDecoration = TextDecoration.Underline,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            ),
+                            linkInteractionListener = {
+                                onNavigateToPrivacy()
+                            }
+                        )
+                    ) {
+                        append("Política de Privacidad")
+                    }
+                }
+                Text(
+                    text = textoTerminos,
+                    style = MaterialTheme.typography.bodySmall.copy(color = BlancoTexto),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+            Spacer(Modifier.height(20.dp))
             Button(
                 onClick = {
                     scope.launch {
@@ -159,7 +232,7 @@ fun LoginScreen(onLogin: (UserRole) -> Unit) {
                         loading = false
                     }
                 },
-                enabled = !loading,
+                enabled = !loading && terminosAceptados,
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MoradoCampo,
@@ -263,7 +336,14 @@ private fun CambiarContrasenaDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = TarjetaOscura,
-        title = { Text("Cambiar contraseña", color = BlancoTexto) },
+        title = {
+            Text(
+                "Cambiar contraseña",
+                color = BlancoTexto,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 campo(correo, { correo = it }, "Correo", false)
@@ -287,26 +367,30 @@ private fun CambiarContrasenaDialog(
             }
         },
         confirmButton = {
-            Button(
-                enabled = puedeGuardar,
-                onClick = {
-                    scope.launch {
-                        cargando = true
-                        error = null
-                        try {
-                            AuthRepository.cambiarContrasena(correo, actual, nueva)
-                            onListo()
-                        } catch (e: Exception) {
-                            error = e.message?.substringBefore("\nCode:") ?: "No se pudo cambiar"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
+                TextButton(onClick = onDismiss) { Text("Cancelar", color = BlancoTexto) }
+
+                Button(
+                    enabled = puedeGuardar,
+                    onClick = {
+                        scope.launch {
+                            cargando = true
+                            error = null
+                            try {
+                                AuthRepository.cambiarContrasena(correo, actual, nueva)
+                                onListo()
+                            } catch (e: Exception) {
+                                error = e.message?.substringBefore("\nCode:") ?: "No se pudo cambiar"
+                            }
+                            cargando = false
                         }
-                        cargando = false
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MoradoCampo, contentColor = BlancoTexto)
-            ) { Text(if (cargando) "Guardando..." else "Guardar") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar", color = BlancoTexto) }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MoradoCampo, contentColor = BlancoTexto)
+                ) { Text(if (cargando) "Guardando..." else "Guardar") }
+            }
         }
     )
 }
