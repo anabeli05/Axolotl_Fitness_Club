@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,18 +35,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.delay
 import java.util.Calendar
 
 @Composable
 fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
-    val membership = "M-1001" // TODO: tomar la membresía del cliente en sesión
     val userName = "Ana López" // TODO: tomar el nombre del cliente en sesión
+
+    // Personas dentro del gimnasio ahora (entradas − salidas de hoy); se actualiza cada 5 s
+    var personasDentro by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { personasDentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
+            delay(5_000)
+        }
+    }
 
     ClienteScaffoldClaro(
         currentSection = "Inicio",
@@ -61,7 +71,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 Text(
-                    text = "Escanea código QR",
+                    text = "Acceso con reconocimiento facial",
                     color = ClienteTema.Texto,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
@@ -70,10 +80,10 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    QrCard(content = "AXOLOTL-GYM|ACCESO|$membership")
+                    AccesoFacialCard(personasDentro = personasDentro)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "QR de acceso · $membership",
+                        text = "Mira a la cámara de recepción para entrar y salir",
                         color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )
@@ -277,7 +287,7 @@ private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
 }
 
 @Composable
-private fun QrCard(content: String) {
+private fun AccesoFacialCard(personasDentro: Int?) {
     Box(
         modifier = Modifier
             .size(250.dp)
@@ -286,41 +296,25 @@ private fun QrCard(content: String) {
             .drawBehind { drawCornerBrackets() },
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(184.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .padding(6.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            QrCode(content = content, modifier = Modifier.fillMaxSize())
-        }
-    }
-}
-
-@Composable
-private fun QrCode(content: String, modifier: Modifier = Modifier) {
-    val matrix = remember(content) {
-        val hints = mapOf(
-            EncodeHintType.MARGIN to 0,
-            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M
-        )
-        QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, 0, 0, hints)
-    }
-
-    Canvas(modifier = modifier) {
-        val cell = size.width / matrix.width
-        for (x in 0 until matrix.width) {
-            for (y in 0 until matrix.height) {
-                if (matrix.get(x, y)) {
-                    drawRect(
-                        color = Color.Black,
-                        topLeft = Offset(x * cell, y * cell),
-                        size = Size(cell + 0.5f, cell + 0.5f)
-                    )
-                }
-            }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Filled.Face,
+                contentDescription = null,
+                tint = ClienteTema.AzulSel,
+                modifier = Modifier.size(96.dp)
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = personasDentro?.toString() ?: "—",
+                color = ClienteTema.Texto,
+                fontSize = 34.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = if (personasDentro == 1) "persona dentro ahora" else "personas dentro ahora",
+                color = ClienteTema.TextoSec,
+                fontSize = 13.sp
+            )
         }
     }
 }

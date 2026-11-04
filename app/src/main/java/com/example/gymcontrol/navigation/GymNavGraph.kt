@@ -37,7 +37,7 @@ import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
 import com.example.gymcontrol.ui.legal.PrivacyPolicyScreen
 import com.example.gymcontrol.ui.legal.TermsScreen
 import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
-import com.example.gymcontrol.ui.recepcion.scanner.QrScannerScreen
+import com.example.gymcontrol.ui.recepcion.scanner.AccesoFacialScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
 import com.example.gymcontrol.ui.theme.GymColors
 import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
@@ -104,7 +104,7 @@ fun GymNavGraph() {
 
                 // Recepción (con sidebar)
                 composable(Routes.RECEPTION_SCANNER) {
-                    QrScannerScreen(onNavigate = { section -> navigateReception(navController, section) })
+                    AccesoFacialScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
                 composable(Routes.RECEPTION_CLIENTS) {
                     ClientesScreen(onNavigate = { section -> navigateReception(navController, section) })
@@ -299,7 +299,7 @@ private fun RoleDevMenu(navController: NavHostController) {
             Triple("Cliente · Inicio", Routes.CLIENT_HOME, UserRole.CLIENTE),
             Triple("Cliente · Asesorías", Routes.CLIENT_ADVISORIES, UserRole.CLIENTE),
             Triple("Cliente · Perfil", Routes.CLIENT_PROFILE, UserRole.CLIENTE),
-            Triple("Recepción · QR", Routes.RECEPTION_SCANNER, UserRole.RECEPCION),
+            Triple("Recepción · Acceso facial", Routes.RECEPTION_SCANNER, UserRole.RECEPCION),
             Triple("Recepción · Clientes", Routes.RECEPTION_CLIENTS, UserRole.RECEPCION),
             Triple("Recepción · Solicitudes", Routes.RECEPTION_REQUESTS, UserRole.RECEPCION),
             Triple("Instructor · Clientes", Routes.INSTRUCTOR_CLIENTS, UserRole.INSTRUCTOR),
