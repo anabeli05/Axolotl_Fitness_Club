@@ -90,7 +90,9 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
                     text = "Usuarios asignados",
                     color = ClienteTema.Texto,
                     fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -256,36 +257,40 @@ fun UsuariosScreen(
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        scope.launch {
-                            try {
-                                PersonalRepository.eliminar(SesionActual.correo ?: "", target.id)
-                                deleting = null
-                                errorBaja = null
-                                personal = PersonalRepository.listar()
-                            } catch (e: Exception) {
-                                errorBaja = mensajeError(e, "No se pudo eliminar")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            deleting = null
+                            errorBaja = null
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, ClienteTema.Borde),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                    ) { Text("Cancelar") }
+
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    PersonalRepository.eliminar(SesionActual.correo ?: "", target.id)
+                                    deleting = null
+                                    errorBaja = null
+                                    personal = PersonalRepository.listar()
+                                } catch (e: Exception) {
+                                    errorBaja = mensajeError(e, "No se pudo eliminar")
+                                }
                             }
-                        }
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ClienteTema.Rojo,
-                        contentColor = Color.White
-                    )
-                ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = {
-                        deleting = null
-                        errorBaja = null
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ClienteTema.Rojo,
+                            contentColor = Color.White
+                        )
+                    ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+                }
             }
         )
     }
@@ -299,22 +304,41 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
         onDismissRequest = onCancelar,
         containerColor = ClienteTema.Beige,
         shape = RoundedCornerShape(16.dp),
-        title = { Text("Confirmar", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
-        text = { Text(pendiente.mensaje, color = ClienteTema.TextoSec) },
-        confirmButton = {
-            Button(
-                onClick = onAceptar,
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-            ) { Text("Sí, continuar", fontWeight = FontWeight.Bold) }
+        title = {
+            Text(
+                "Confirmar",
+                color = ClienteTema.Texto,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
         },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onCancelar,
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, ClienteTema.Borde),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-            ) { Text("Cancelar") }
+        text = {
+            Text(
+                pendiente.mensaje,
+                color = ClienteTema.TextoSec,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
+                OutlinedButton(
+                    onClick = onCancelar,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, ClienteTema.Borde),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                ) { Text("Cancelar") }
+
+                Button(
+                    onClick = onAceptar,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
+                ) { Text("Sí, continuar", fontWeight = FontWeight.Bold) }
+            }
         }
     )
 }
@@ -441,18 +465,21 @@ private fun StaffDialog(
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = title,
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-                IconButton(onClick = onDismiss) {
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
                     Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = ClienteTema.TextoSec)
                 }
             }
@@ -486,17 +513,47 @@ private fun NewStaffDialog(
         PhoneField(phone, { phone = it })
         Spacer(Modifier.height(10.dp))
         GymTextField(email, { email = it }, "Correo asignado", KeyboardType.Email)
-        Spacer(Modifier.height(10.dp))
-        Text(
-            "La contraseña inicial es Axolotl2026 y se envía al correo del usuario.",
-            color = ClienteTema.TextoSec,
-            fontSize = 12.sp
-        )
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            shape = RoundedCornerShape(10.dp),
+            color = ClienteTema.Navy,
+            border = BorderStroke(1.dp, ClienteTema.Borde.copy(alpha = 0.6f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = null,
+                    tint = ClienteTema.AzulSel,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    "La contraseña inicial es Axolotl2026 y se envía al correo del usuario.",
+                    color = ClienteTema.TextoSec,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+            }
+        }
 
-        Spacer(Modifier.height(14.dp))
-        Text("Rol", color = ClienteTema.TextoSec, fontSize = 14.sp)
-        Spacer(Modifier.height(6.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Spacer(Modifier.height(16.dp))
+        Text(
+            "Rol",
+            color = ClienteTema.Texto,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+        ) {
             listOf(
                 UserRole.RECEPCION to "Recepción",
                 UserRole.INSTRUCTOR to "Instructor"
@@ -504,12 +561,16 @@ private fun NewStaffDialog(
                 FilterChip(
                     selected = role == value,
                     onClick = { role = value },
-                    label = { Text(label) },
+                    label = { Text(label, fontWeight = if (role == value) FontWeight.Bold else FontWeight.Normal) },
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.Black,
+                        containerColor = ClienteTema.Navy,
                         labelColor = ClienteTema.Texto,
                         selectedContainerColor = ClienteTema.Azul,
-                        selectedLabelColor = Color.Black
+                        selectedLabelColor = Color.White
+                    ),
+                    border = BorderStroke(
+                        1.dp,
+                        if (role == value) ClienteTema.Azul else ClienteTema.Borde
                     )
                 )
             }
