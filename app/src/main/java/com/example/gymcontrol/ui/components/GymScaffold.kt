@@ -157,14 +157,16 @@ fun GymScaffold(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    OutlinedButton(
+                    Button(
                         onClick = { confirmarLogout = false },
                         modifier = Modifier
                             .weight(1f)
                             .height(44.dp),
                         shape = RoundedCornerShape(10.dp),
-                        border = BorderStroke(1.dp, ClienteTema.Borde),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ClienteTema.Rojo,
+                            contentColor = Color.White
+                        )
                     ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
 
                     Button(
@@ -174,7 +176,7 @@ fun GymScaffold(
                             .height(44.dp),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = ClienteTema.Rojo,
+                            containerColor = ClienteTema.Verde,
                             contentColor = Color.White
                         )
                     ) { Text("Salir", fontWeight = FontWeight.Bold) }

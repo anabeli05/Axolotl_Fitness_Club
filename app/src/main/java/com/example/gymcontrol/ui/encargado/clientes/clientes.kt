@@ -399,20 +399,24 @@ private fun RenovarDialog(
             }
         },
         confirmButton = {
-            Button(
-                onClick = { onRenovar(plan) },
-                enabled = plan.isNotBlank(),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-            ) { Text("Renovar", fontWeight = FontWeight.Bold) }
-        },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, ClienteTema.Borde),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-            ) { Text("Cancelar") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, ClienteTema.Borde),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                ) { Text("Cancelar") }
+
+                Button(
+                    onClick = { onRenovar(plan) },
+                    enabled = plan.isNotBlank(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
+                ) { Text("Renovar", fontWeight = FontWeight.Bold) }
+            }
         }
     )
 }
