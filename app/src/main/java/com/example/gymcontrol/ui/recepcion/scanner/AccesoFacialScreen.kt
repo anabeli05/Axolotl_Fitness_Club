@@ -1,5 +1,8 @@
 package com.example.gymcontrol.ui.recepcion.scanner
 
+import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -14,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,48 +27,72 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.GymApp
-import com.example.gymcontrol.data.model.UserRole
+import com.example.gymcontrol.data.biometria.CapturaFacial
+import com.example.gymcontrol.data.biometria.PasoFacial
+import com.example.gymcontrol.data.biometria.ReconocedorFacial
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
+import com.example.gymcontrol.data.remote.MovimientoRow
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
+import com.google.mlkit.vision.face.Face
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Date
+import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 // ---------- Modelo de UI ----------
 data class ClienteScan(
+    val id: Long,
     val nombre: String,
     val membresia: String,
     val activo: Boolean,
+    val dentroDesde: String? = null,
     val fotoUrl: String? = null
 )
 
 // Aviso que aparece unos segundos después de registrar (o rechazar) una entrada/salida
 private data class Aviso(val texto: String, val esError: Boolean, val id: Long = System.nanoTime())
 
+/**
+ * Acceso por reconocimiento facial (reemplaza al escáner QR).
+ * La cámara detecta el rostro más cercano, lo identifica y registra
+ * ENTRADA (1) o SALIDA (0) sola, sin botones. Los botones quedan para corregir a mano.
+ */
 @Composable
-fun QrScannerScreen(
-    onNavigate: (String) -> Unit = {},
-    // Ganchos para guardar en Supabase cuando esté conectado
-    onEntrada: (ClienteScan, Long) -> Unit = { _, _ -> },
-    onSalida: (ClienteScan, Long, Long) -> Unit = { _, _, _ -> }
-) {
+fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val main = remember { Handler(Looper.getMainLooper()) }
+
     var cliente by remember { mutableStateOf<ClienteScan?>(null) }
     var aviso by remember { mutableStateOf<Aviso?>(null) }
+    var dentro by remember { mutableStateOf(0) }
+    var indicacion by remember { mutableStateOf("Colócate frente a la cámara") }
+    var progreso by remember { mutableStateOf(0f) }
 
-    // Solo para la demo: quién está dentro (membresía -> hora de entrada). TODO: reemplazar por Supabase
-    val dentro = remember { mutableStateMapOf<String, Long>() }
+    // Motor facial (MobileFaceNet) y captura: 3 muestras seguidas del rostro más cercano
+    val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
+    val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 3) } }
+    val pausa = remember { AtomicBoolean(false) }
+    DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 
-    // Evita procesar el mismo QR muchas veces seguidas mientras la cámara lo sigue viendo
-    var ultimoCodigo by remember { mutableStateOf("") }
-    var ultimoEscaneo by remember { mutableStateOf(0L) }
+    // Personas dentro: se consulta cada 5 s (además de actualizarse con cada movimiento)
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { dentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
+            delay(5_000)
+        }
+    }
 
     // El aviso se quita solo; si fue un registro exitoso también se limpia la tarjeta del cliente
     LaunchedEffect(aviso) {
@@ -76,56 +104,78 @@ fun QrScannerScreen(
         }
     }
 
-    fun escanear(codigo: String) {
-        val texto = codigo.trim()
-        val ahora = System.currentTimeMillis()
-        if (texto == ultimoCodigo && ahora - ultimoEscaneo < 3000) return
-        ultimoCodigo = texto
-        ultimoEscaneo = ahora
-
-        val encontrado = GymApp.repository.users()
-            .firstOrNull { it.role == UserRole.CLIENTE && it.membershipNumber == texto }
-
-        aviso = null
-        if (encontrado == null) {
-            cliente = null
-            aviso = Aviso("Código no reconocido", esError = true)
-        } else {
-            cliente = ClienteScan(
-                nombre = encontrado.name,
-                membresia = texto,
-                activo = encontrado.status.name == "ACTIVO"
+    fun mostrar(r: MovimientoRow) {
+        dentro = r.dentroTotal
+        val id = r.clienteId
+        cliente = if (id == null) null else ClienteScan(
+            id = id,
+            nombre = r.nombre ?: "Cliente",
+            membresia = r.membresia ?: "—",
+            activo = r.activa == true,
+            dentroDesde = if (r.esEntrada == true) r.entradaDesde ?: r.fechaHora else null
+        )
+        val nombre = r.nombre ?: "El cliente"
+        aviso = when (r.resultado) {
+            "ENTRADA" -> Aviso("$nombre ha ingresado · ${formatHora(r.fechaHora)}", esError = false)
+            "SALIDA" -> Aviso(
+                "$nombre ha salido" + (duracion(r.entradaDesde, r.fechaHora)?.let { " · Estuvo $it" } ?: ""),
+                esError = false
             )
+            "DENEGADO" -> Aviso("Acceso denegado: membresía inactiva. Pasa a renovar", esError = true)
+            "REPETIDO" -> Aviso("$nombre ya fue registrado hace un momento", esError = false)
+            "YA_DENTRO" -> Aviso("$nombre ya tiene una entrada registrada", esError = true)
+            "SIN_ENTRADA" -> Aviso("$nombre no tiene una entrada abierta", esError = true)
+            else -> Aviso("Acceso denegado: rostro no registrado", esError = true)
         }
     }
 
-    fun registrarEntrada() {
-        val c = cliente ?: return
-        val ahora = System.currentTimeMillis()
-        aviso = when {
-            !c.activo -> Aviso("Membresía vencida. Pasa a renovar", esError = true)
-            c.membresia in dentro -> Aviso("${c.nombre} ya tiene una entrada registrada", esError = true)
-            else -> {
-                dentro[c.membresia] = ahora
-                onEntrada(c, ahora)
-                Aviso("Entrada registrada · ${formatHora(ahora)}", esError = false)
+    // Se llama cuando la captura entregó un vector
+    fun identificar(vector: FloatArray) {
+        scope.launch {
+            try {
+                val r = AccesoFacialRepository.acceso(vector)
+                mostrar(r)
+                // Si no lo reconoció se le deja intentar de nuevo con el mismo rostro
+                if (r.resultado == "NO_RECONOCIDO") captura?.olvidarProcesado()
+            } catch (e: Exception) {
+                captura?.olvidarProcesado()
+                aviso = Aviso("Sin conexión con la base de datos", esError = true)
+            }
+            delay(2_500)
+            progreso = 0f
+            pausa.set(false)
+        }
+    }
+
+    // Se ejecuta en el hilo de la cámara
+    val onFrame: (Bitmap, List<Face>) -> Unit = onFrame@{ frame, rostros ->
+        val c = captura ?: return@onFrame
+        if (pausa.get()) return@onFrame
+        when (val paso = c.procesar(frame, rostros)) {
+            is PasoFacial.Indicacion -> main.post {
+                indicacion = paso.texto
+                progreso = paso.progreso
+            }
+            is PasoFacial.Listo -> {
+                pausa.set(true)
+                c.marcarProcesado()
+                main.post {
+                    indicacion = "Verificando…"
+                    progreso = 1f
+                    identificar(paso.vector)
+                }
             }
         }
     }
 
-    fun registrarSalida() {
+    fun manual(esEntrada: Boolean) {
         val c = cliente ?: return
-        val ahora = System.currentTimeMillis()
-        val horaEntrada = dentro[c.membresia]
-        aviso = if (horaEntrada == null) {
-            Aviso("${c.nombre} no tiene una entrada abierta", esError = true)
-        } else {
-            dentro.remove(c.membresia)
-            onSalida(c, horaEntrada, ahora)
-            Aviso(
-                "Salida registrada · Estuvo ${formatDuracion(ahora - horaEntrada)}",
-                esError = false
-            )
+        scope.launch {
+            try {
+                mostrar(AccesoFacialRepository.manual(c.id, esEntrada))
+            } catch (e: Exception) {
+                aviso = Aviso("Sin conexión con la base de datos", esError = true)
+            }
         }
     }
 
@@ -145,19 +195,19 @@ fun QrScannerScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Escanear código QR",
+                    "Reconocimiento facial",
                     color = ClienteTema.Texto,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                AforoChip(personas = dentro.size)
+                AforoChip(personas = dentro)
             }
 
-            // ---------- Tarjeta: Escanear código (cámara real) ----------
+            // ---------- Tarjeta: Escanear rostro (cámara real) ----------
             GymCard {
                 Text(
-                    "Escanear código",
+                    "Escanear rostro",
                     color = ClienteTema.Texto,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -171,12 +221,33 @@ fun QrScannerScreen(
                         .clip(RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    QrCameraPreview(
-                        modifier = Modifier.fillMaxSize(),
-                        onQrDetected = { qrText -> escanear(qrText) }
-                    )
+                    if (captura != null) {
+                        FaceCameraPreview(
+                            modifier = Modifier.fillMaxSize(),
+                            onFrame = onFrame
+                        )
+                    }
                     ScannerCorners(Modifier.fillMaxSize())
                 }
+
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    if (captura == null) "No se pudo cargar el modelo facial" else indicacion,
+                    color = if (captura == null) ClienteTema.Rojo else ClienteTema.TextoSec,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = { progreso },
+                    color = ClienteTema.AzulSel,
+                    trackColor = ClienteTema.Borde.copy(alpha = 0.3f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                )
             }
 
             // ---------- Tarjeta: Información del cliente ----------
@@ -194,7 +265,7 @@ fun QrScannerScreen(
                 val actual = cliente
                 if (actual == null) {
                     Text(
-                        "Escanea un código para ver la información del cliente",
+                        "Escanea un rostro para ver la información del cliente",
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -238,7 +309,7 @@ fun QrScannerScreen(
                                     fontWeight = FontWeight.Medium
                                 )
                             }
-                            dentro[actual.membresia]?.let { desde ->
+                            actual.dentroDesde?.let { desde ->
                                 Text(
                                     "Dentro desde ${formatHora(desde)}",
                                     color = ClienteTema.AzulSel,
@@ -267,14 +338,14 @@ fun QrScannerScreen(
                         text = "Entrada",
                         color = ClienteTema.Verde,
                         enabled = cliente != null,
-                        onClick = { registrarEntrada() },
+                        onClick = { manual(esEntrada = true) },
                         modifier = Modifier.weight(1f)
                     )
                     SolidButton(
                         text = "Salida",
                         color = ClienteTema.Rojo,
                         enabled = cliente != null,
-                        onClick = { registrarSalida() },
+                        onClick = { manual(esEntrada = false) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -285,11 +356,18 @@ fun QrScannerScreen(
 
 // ---------- Utilidades ----------
 
-private fun formatHora(millis: Long): String =
-    SimpleDateFormat("hh:mm a", Locale.forLanguageTag("es-MX")).format(Date(millis))
+private val HORA = DateTimeFormatter.ofPattern("hh:mm a", Locale.forLanguageTag("es-MX"))
 
-private fun formatDuracion(millis: Long): String {
-    val minutos = millis / 60_000
+private fun instante(iso: String?): OffsetDateTime? =
+    iso?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() }
+
+private fun formatHora(iso: String?): String =
+    instante(iso)?.atZoneSameInstant(ZoneId.systemDefault())?.format(HORA) ?: "—"
+
+private fun duracion(desdeIso: String?, hastaIso: String?): String? {
+    val desde = instante(desdeIso) ?: return null
+    val hasta = instante(hastaIso) ?: return null
+    val minutos = java.time.Duration.between(desde, hasta).toMinutes()
     return when {
         minutos < 1 -> "menos de 1 min"
         minutos < 60 -> "$minutos min"
@@ -358,7 +436,7 @@ private fun GymCard(content: @Composable ColumnScope.() -> Unit) {
 
 /** Las 4 esquinas doradas del visor. */
 @Composable
-private fun ScannerCorners(modifier: Modifier = Modifier) {
+internal fun ScannerCorners(modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val stroke = 4.dp.toPx()
         val len = 36.dp.toPx()
