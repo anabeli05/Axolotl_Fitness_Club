@@ -18,6 +18,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,9 +31,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
@@ -39,11 +46,25 @@ fun seccionesPara(rol: UserRole): List<String> = when (rol) {
 
 fun UserRole.tieneSidebar(): Boolean = seccionesPara(this).isNotEmpty()
 
+@Composable
+fun translatedSection(section: String): String = when (section) {
+    "Home" -> stringResource(R.string.tab_home)
+    "Dashboard" -> stringResource(R.string.tab_dashboard)
+    "Clientes" -> stringResource(R.string.tab_clients)
+    "Solicitudes" -> stringResource(R.string.tab_requests)
+    "Personal" -> stringResource(R.string.tab_staff)
+    "Servicios" -> stringResource(R.string.tab_services)
+    "Gastos" -> stringResource(R.string.tab_expenses)
+    "Reportes" -> stringResource(R.string.tab_reports)
+    else -> section
+}
+
+@Composable
 fun UserRole.etiqueta(): String = when (this) {
-    UserRole.RECEPCION -> "Recepción"
-    UserRole.ENCARGADO -> "Encargado"
-    UserRole.INSTRUCTOR -> "Instructor"
-    UserRole.CLIENTE -> "Cliente"
+    UserRole.RECEPCION -> stringResource(R.string.role_reception)
+    UserRole.ENCARGADO -> stringResource(R.string.role_manager)
+    UserRole.INSTRUCTOR -> stringResource(R.string.role_instructor)
+    UserRole.CLIENTE -> stringResource(R.string.role_client)
 }
 
 private fun iconoPara(seccion: String): ImageVector = when (seccion) {
@@ -67,6 +88,7 @@ fun GymSidebar(
     onNavigate: (String) -> Unit,
     onLogout: () -> Unit
 ) {
+    val context = LocalContext.current
     Row(Modifier.fillMaxSize().background(ClienteTema.Navy)) {
         Column(
             modifier = Modifier
@@ -149,13 +171,28 @@ fun GymSidebar(
                     )
                     Spacer(Modifier.width(14.dp))
                     Text(
-                        text = section,
+                        text = translatedSection(section),
                         color = if (selected) ClienteTema.Texto else ClienteTema.TextoSec,
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                         fontSize = 15.sp
                     )
                 }
             }
+
+            Spacer(Modifier.height(8.dp))
+            NavigationDrawerItem(
+                label = { Text(stringResource(R.string.change_language), color = ClienteTema.TextoSec, fontSize = 15.sp, fontWeight = FontWeight.Medium) },
+                icon = { Icon(Icons.Filled.Language, contentDescription = null, tint = ClienteTema.TextoSec, modifier = Modifier.size(22.dp)) },
+                selected = false,
+                onClick = { LocaleHelper.toggleLanguage(context) },
+                colors = NavigationDrawerItemDefaults.colors(
+                    unselectedContainerColor = Color.Transparent,
+                    unselectedTextColor = ClienteTema.TextoSec,
+                    unselectedIconColor = ClienteTema.TextoSec
+                ),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.padding(vertical = 3.dp)
+            )
 
             Spacer(Modifier.weight(1f))
 
@@ -179,7 +216,7 @@ fun GymSidebar(
                     modifier = Modifier.size(22.dp)
                 )
                 Spacer(Modifier.width(14.dp))
-                Text("Cerrar sesión", color = rojo, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.logout), color = rojo, fontSize = 15.sp, fontWeight = FontWeight.Bold)
             }
         }
 

@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -153,7 +154,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Mi perfil",
+                    text = stringResource(R.string.perfil_title),
                     color = ClienteTema.Texto,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
@@ -188,15 +189,15 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Estado:",
+                            text = stringResource(R.string.perfil_status_label),
                             color = ClienteTema.TextoSec,
                             fontSize = 16.sp
                         )
                         Spacer(Modifier.width(8.dp))
                         if (activo) {
-                            Chip(text = "Activo", color = ClienteTema.Verde, width = 84.dp, height = 30.dp)
+                            Chip(text = stringResource(R.string.status_active), color = ClienteTema.Verde, width = 84.dp, height = 30.dp)
                         } else {
-                            Chip(text = "Inactivo", color = ClienteTema.Rojo, width = 96.dp, height = 30.dp)
+                            Chip(text = stringResource(R.string.status_inactive), color = ClienteTema.Rojo, width = 96.dp, height = 30.dp)
                         }
                     }
 
@@ -204,7 +205,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     ActionRow(
                         icon = Icons.Filled.Edit,
-                        label = "Editar datos",
+                        label = stringResource(R.string.perfil_action_edit_data),
                         onClick = { showEditDialog = true }
                     )
 
@@ -218,7 +219,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Datos Personales",
+                            text = stringResource(R.string.perfil_personal_data_title),
                             color = ClienteTema.Texto,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
@@ -232,11 +233,11 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         )
                         Spacer(Modifier.height(12.dp))
 
-                        InfoRow(icon = Icons.Filled.Person, label = "Nombre:", value = name)
+                        InfoRow(icon = Icons.Filled.Person, label = stringResource(R.string.perfil_label_name), value = name)
                         Spacer(Modifier.height(14.dp))
-                        InfoRow(icon = Icons.Filled.Phone, label = "Teléfono:", value = formatPhone(phone))
+                        InfoRow(icon = Icons.Filled.Phone, label = stringResource(R.string.perfil_label_phone), value = formatPhone(phone))
                         Spacer(Modifier.height(14.dp))
-                        InfoRow(icon = Icons.Filled.Email, label = "Correo:", value = email)
+                        InfoRow(icon = Icons.Filled.Email, label = stringResource(R.string.perfil_label_email), value = email)
                         Spacer(Modifier.height(14.dp))
 
                         // Capacidad máxima de clientes
@@ -249,7 +250,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             )
                             Spacer(Modifier.width(12.dp))
                             Text(
-                                text = "Capacidad máx:",
+                                text = stringResource(R.string.instructor_max_capacity_label),
                                 color = ClienteTema.TextoSec,
                                 fontSize = 16.sp
                             )
@@ -262,9 +263,9 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             )
                             Spacer(Modifier.width(10.dp))
                             if (activeClients >= capacity) {
-                                Chip(text = "Lleno", color = ClienteTema.Rojo, width = 64.dp, height = 28.dp)
+                                Chip(text = stringResource(R.string.instructor_capacity_full), color = ClienteTema.Rojo, width = 64.dp, height = 28.dp)
                             } else {
-                                Chip(text = "Cupo libre", color = ClienteTema.Verde, width = 90.dp, height = 28.dp)
+                                Chip(text = stringResource(R.string.instructor_capacity_available), color = ClienteTema.Verde, width = 90.dp, height = 28.dp)
                             }
                         }
                     }
@@ -383,7 +384,7 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
             if (photo != null) {
                 Image(
                     bitmap = photo,
-                    contentDescription = "Foto de perfil",
+                    contentDescription = stringResource(R.string.perfil_photo_desc),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -407,7 +408,7 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
         ) {
             Icon(
                 imageVector = Icons.Filled.Edit,
-                contentDescription = "Cambiar foto",
+                contentDescription = stringResource(R.string.perfil_change_photo_desc),
                 tint = ClienteTema.Texto,
                 modifier = Modifier.size(18.dp)
             )
@@ -540,7 +541,7 @@ private fun GymDialog(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "Cerrar",
+                    contentDescription = stringResource(R.string.common_close),
                     tint = ClienteTema.TextoSec,
                     modifier = Modifier.size(24.dp)
                 )
@@ -557,11 +558,11 @@ private fun PhotoDialog(
     onGallery: () -> Unit,
     onRemove: () -> Unit
 ) {
-    GymDialog(title = "Foto de perfil", onDismiss = onDismiss) {
-        ActionRow(icon = Icons.Filled.PhotoCamera, label = "Tomar foto", onClick = onCamera)
-        ActionRow(icon = Icons.Filled.PhotoLibrary, label = "Elegir de la galería", onClick = onGallery)
+    GymDialog(title = stringResource(R.string.perfil_photo_dialog_title), onDismiss = onDismiss) {
+        ActionRow(icon = Icons.Filled.PhotoCamera, label = stringResource(R.string.perfil_photo_take), onClick = onCamera)
+        ActionRow(icon = Icons.Filled.PhotoLibrary, label = stringResource(R.string.perfil_photo_gallery), onClick = onGallery)
         if (hasPhoto) {
-            ActionRow(icon = Icons.Filled.Delete, label = "Quitar foto", onClick = onRemove)
+            ActionRow(icon = Icons.Filled.Delete, label = stringResource(R.string.perfil_photo_remove), onClick = onRemove)
         }
     }
 }
@@ -605,7 +606,7 @@ private fun EditDataDialog(
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
     val isValid = nameValid && phone.length == 10
 
-    GymDialog(title = "Editar datos", onDismiss = onDismiss) {
+    GymDialog(title = stringResource(R.string.perfil_edit_dialog_title), onDismiss = onDismiss) {
         GymTextField(
             value = name,
             onValueChange = { new ->
@@ -614,9 +615,9 @@ private fun EditDataDialog(
                     new.length <= 40 -> name = new
                 }
             },
-            label = "Nombre",
+            label = stringResource(R.string.perfil_field_name),
             isError = nameWarning || nameShort,
-            errorText = if (nameWarning) "Solo se permiten letras" else "Mínimo 3 letras"
+            errorText = if (nameWarning) stringResource(R.string.perfil_error_letters_only) else stringResource(R.string.perfil_error_min_letters)
         )
         GymTextField(
             value = phone,
@@ -626,16 +627,16 @@ private fun EditDataDialog(
                     new.length <= 10 -> phone = new
                 }
             },
-            label = "Teléfono",
+            label = stringResource(R.string.perfil_field_phone),
             keyboardType = KeyboardType.Number,
             isError = phoneWarning || phoneIncomplete,
-            errorText = if (phoneWarning) "Solo se permiten números"
+            errorText = if (phoneWarning) stringResource(R.string.perfil_error_phone_digits)
             else "Deben ser 10 dígitos (${phone.length}/10)"
         )
         GymTextField(
             value = email,
             onValueChange = { email = it },
-            label = "Correo",
+            label = stringResource(R.string.perfil_field_email),
             keyboardType = KeyboardType.Email
         )
 
@@ -654,7 +655,7 @@ private fun EditDataDialog(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
                 border = BorderStroke(1.dp, ClienteTema.Rojo)
             ) {
-                Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             Button(
                 onClick = { onSave(name.trim(), phone, email) },
@@ -668,7 +669,7 @@ private fun EditDataDialog(
                     contentColor = ClienteTema.Texto
                 )
             ) {
-                Text("Guardar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.save), fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

@@ -19,12 +19,14 @@ import com.example.gymcontrol.ui.instructor.clientes.MisClientesScreen
 import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
 import com.example.gymcontrol.ui.components.ClienteTema
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
+import com.example.gymcontrol.R
 
-private data class InstructorTabItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+private data class InstructorTabItem(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
 private val instructorTabs = listOf(
-    InstructorTabItem(Routes.INSTRUCTOR_CLIENTS, "Clientes", Icons.Filled.Group),
-    InstructorTabItem(Routes.INSTRUCTOR_PROFILE, "Perfil", Icons.Filled.Person)
+    InstructorTabItem(Routes.INSTRUCTOR_CLIENTS, R.string.tab_clients, Icons.Filled.Group),
+    InstructorTabItem(Routes.INSTRUCTOR_PROFILE, R.string.tab_profile, Icons.Filled.Person)
 )
 
 @Composable
@@ -51,7 +53,7 @@ fun InstructorRootScreen() {
                             }
                         },
                         icon = { Icon(tab.icon, contentDescription = null) },
-                        label = { Text(tab.label) },
+                        label = { Text(stringResource(tab.labelRes)) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ClienteTema.AzulSel,
                             selectedTextColor = ClienteTema.AzulSel,

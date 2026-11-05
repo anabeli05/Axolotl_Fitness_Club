@@ -17,10 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
 import com.example.gymcontrol.data.remote.CorreoRepository
@@ -88,7 +90,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     OutlinedTextField(
                         value = search,
                         onValueChange = { search = it },
-                        placeholder = { Text("Nombre o membresía", color = ClienteTema.TextoSec) },
+                        placeholder = { Text(stringResource(R.string.encargado_clients_search_placeholder), color = ClienteTema.TextoSec) },
                         leadingIcon = {
                             Icon(Icons.Filled.Search, contentDescription = null, tint = ClienteTema.TextoSec)
                         },
@@ -118,7 +120,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Nuevo Cliente", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.encargado_clients_new_client_button), fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -145,7 +147,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 if (clients.isEmpty()) {
                     item {
                         Text(
-                            text = "No se encontraron clientes",
+                            text = stringResource(R.string.encargado_clients_not_found),
                             color = ClienteTema.TextoSec,
                             fontSize = 14.sp,
                             modifier = Modifier
@@ -242,7 +244,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     onDismissRequest = { confirmar = null },
                     containerColor = ClienteTema.Beige,
                     shape = RoundedCornerShape(16.dp),
-                    title = { Text("Confirmar", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
+                    title = { Text(stringResource(R.string.common_confirm), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
                     text = { Text(texto, color = ClienteTema.TextoSec) },
                     confirmButton = {
                         Button(
@@ -252,7 +254,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             },
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-                        ) { Text("Sí, continuar", fontWeight = FontWeight.Bold) }
+                        ) { Text(stringResource(R.string.common_yes_continue), fontWeight = FontWeight.Bold) }
                     },
                     dismissButton = {
                         OutlinedButton(
@@ -260,7 +262,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             shape = RoundedCornerShape(10.dp),
                             border = BorderStroke(1.dp, ClienteTema.Borde),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                        ) { Text("Cancelar") }
+                        ) { Text(stringResource(R.string.cancel)) }
                     }
                 )
             }
@@ -320,7 +322,7 @@ private fun ClientCard(
                     modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("Renovar", fontSize = 17.sp)
+                    Text(stringResource(R.string.encargado_clients_renew_button), fontSize = 17.sp)
                 }
             }
         }
@@ -341,7 +343,7 @@ private fun IconSquareButton(
         contentAlignment = Alignment.Center
     ) {
         IconButton(onClick = onClick, modifier = Modifier.fillMaxSize()) {
-            Icon(icon, contentDescription = "Editar", tint = color, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = stringResource(R.string.common_edit), tint = color, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -349,7 +351,7 @@ private fun IconSquareButton(
 @Composable
 private fun StatusBadge(isActive: Boolean) {
     val color = if (isActive) ClienteTema.Verde else ClienteTema.Rojo
-    val label = if (isActive) "Activo" else "Inactivo"
+    val label = if (isActive) stringResource(R.string.status_active) else stringResource(R.string.status_inactive)
 
     Box(
         modifier = Modifier
@@ -381,7 +383,7 @@ private fun RenovarDialog(
         title = { Text("Renovar a ${cliente.nombre}", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
         text = {
             Column {
-                Text("Elige el plan:", color = ClienteTema.TextoSec)
+                Text(stringResource(R.string.encargado_clients_choose_plan), color = ClienteTema.TextoSec)
                 Spacer(Modifier.height(8.dp))
                 planes.forEach { p ->
                     Row(
@@ -408,14 +410,14 @@ private fun RenovarDialog(
                     shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, ClienteTema.Borde),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                ) { Text(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = { onRenovar(plan) },
                     enabled = plan.isNotBlank(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-                ) { Text("Renovar", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.encargado_clients_renew_button), fontWeight = FontWeight.Bold) }
             }
         }
     )

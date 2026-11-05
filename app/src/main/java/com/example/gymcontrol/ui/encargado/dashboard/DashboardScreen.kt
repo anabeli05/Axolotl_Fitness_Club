@@ -5,8 +5,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ClientesMesRow
 import com.example.gymcontrol.data.remote.IngresoDiaRow
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
@@ -105,7 +107,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 StatCard(
-                    title = "Personas dentro ahora",
+                    title = stringResource(R.string.encargado_stat_people_inside_now),
                     value = dentro?.toString() ?: "—",
                     valueColor = ClienteTema.AzulSel,
                     iconType = StatIconType.PERSON,
@@ -116,7 +118,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 StatCard(
-                    title = "Clientes Activos",
+                    title = stringResource(R.string.encargado_stat_active_clients),
                     value = "$activos",
                     valueColor = ClienteTema.Verde,
                     iconType = StatIconType.PERSON,
@@ -127,7 +129,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 StatCard(
-                    title = "Clientes Inactivos",
+                    title = stringResource(R.string.encargado_stat_inactive_clients),
                     value = "$inactivos",
                     valueColor = ClienteTema.Rojo,
                     iconType = StatIconType.PERSON,
@@ -138,7 +140,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 StatCard(
-                    title = "Ingresos del mes",
+                    title = stringResource(R.string.encargado_stat_month_income),
                     value = ingresosTexto,
                     valueColor = ClienteTema.AzulSel,
                     iconType = StatIconType.MONEY,
@@ -149,7 +151,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 SimpleBarChart(
-                    title = "Personas por hora (hoy)",
+                    title = stringResource(R.string.encargado_chart_hourly_occupancy),
                     entries = datos.map { BarEntry(it.first.take(2), it.second.toFloat()) },
                     barColors = colores,
                     modifier = Modifier.fillMaxWidth()
@@ -159,7 +161,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             if (pico != null) {
                 item {
                     Text(
-                        text = "Hora pico: ${pico.first} (${pico.second} personas). Entradas de hoy: ${datos.sumOf { it.second }}",
+                        text = "${stringResource(R.string.encargado_peak_hour_prefix, pico.first, pico.second)}. Entradas de hoy: ${datos.sumOf { it.second }}",
                         color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )
@@ -168,7 +170,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 GroupedBarChart(
-                    title = "Clientes Activos/Inactivos",
+                    title = stringResource(R.string.encargado_chart_clients_status),
                     entries = clientesMes.map {
                         GroupedBarEntry(
                             ResumenRepository.mesCorto(it.periodo),
@@ -182,7 +184,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 SimpleBarChart(
-                    title = "Ingresos por Día",
+                    title = stringResource(R.string.encargado_chart_income_per_day),
                     // El domingo solo aparece si ese día hubo cobros
                     entries = ingresosDia
                         .filter { it.diaSemana != 7 || it.total > 0.0 }
