@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.data.remote.ClientesMesRow
 import com.example.gymcontrol.data.remote.IngresoDiaRow
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.OcupacionRepository
 import com.example.gymcontrol.data.remote.OcupacionRow
 import com.example.gymcontrol.data.remote.ResumenRepository
@@ -20,7 +21,7 @@ import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SimpleBarChart
 import com.example.gymcontrol.ui.components.StatCard
 import com.example.gymcontrol.ui.components.StatIconType
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -32,6 +33,15 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
     var resumen by remember { mutableStateOf<ResumenRow?>(null) }
     var clientesMes by remember { mutableStateOf<List<ClientesMesRow>>(emptyList()) }
     var ingresosDia by remember { mutableStateOf<List<IngresoDiaRow>>(emptyList()) }
+    var dentro by remember { mutableStateOf<Int?>(null) }
+
+    // Personas dentro ahora (entradas − salidas de hoy), cada 5 segundos
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { dentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
+            delay(5_000)
+        }
+    }
 
     // Se actualiza cada 30 segundos
     LaunchedEffect(Unit) {
@@ -74,10 +84,10 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
     val pico = datos.maxByOrNull { it.second }?.takeIf { it.second > 0 }
     val colores = datos.map { (_, n) ->
         when {
-            maximo == 0 -> GymColors.Gold
-            n * 3 >= maximo * 2 -> GymColors.Red
-            n * 3 >= maximo -> GymColors.Gold
-            else -> GymColors.Green
+            maximo == 0 -> ClienteTema.AzulSel
+            n * 3 >= maximo * 2 -> ClienteTema.Rojo
+            n * 3 >= maximo -> ClienteTema.AzulSel
+            else -> ClienteTema.Verde
         }
     }
 
@@ -95,11 +105,22 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 StatCard(
+                    title = "Personas dentro ahora",
+                    value = dentro?.toString() ?: "—",
+                    valueColor = ClienteTema.AzulSel,
+                    iconType = StatIconType.PERSON,
+                    iconColor = ClienteTema.AzulSel,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            item {
+                StatCard(
                     title = "Clientes Activos",
                     value = "$activos",
-                    valueColor = GymColors.Green,
+                    valueColor = ClienteTema.Verde,
                     iconType = StatIconType.PERSON,
-                    iconColor = GymColors.Green,
+                    iconColor = ClienteTema.Verde,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -108,9 +129,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                 StatCard(
                     title = "Clientes Inactivos",
                     value = "$inactivos",
-                    valueColor = GymColors.Red,
+                    valueColor = ClienteTema.Rojo,
                     iconType = StatIconType.PERSON,
-                    iconColor = GymColors.Red,
+                    iconColor = ClienteTema.Rojo,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -119,9 +140,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                 StatCard(
                     title = "Ingresos del mes",
                     value = ingresosTexto,
-                    valueColor = GymColors.Gold,
+                    valueColor = ClienteTema.AzulSel,
                     iconType = StatIconType.MONEY,
-                    iconColor = GymColors.Gold,
+                    iconColor = ClienteTema.AzulSel,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -139,7 +160,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                 item {
                     Text(
                         text = "Hora pico: ${pico.first} (${pico.second} personas). Entradas de hoy: ${datos.sumOf { it.second }}",
-                        color = GymColors.TextSecondary,
+                        color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )
                 }
@@ -166,7 +187,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     entries = ingresosDia
                         .filter { it.diaSemana != 7 || it.total > 0.0 }
                         .map { BarEntry(ResumenRepository.diaCorto(it.diaSemana), it.total.toFloat()) },
-                    barColor = GymColors.Gold,
+                    barColor = ClienteTema.AzulSel,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

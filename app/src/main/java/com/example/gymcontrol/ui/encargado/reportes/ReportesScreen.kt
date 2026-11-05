@@ -18,13 +18,13 @@ import com.example.gymcontrol.data.remote.ReporteRow
 import com.example.gymcontrol.data.remote.ReportesRepository
 import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
 @Composable
 fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
     var reportes by remember { mutableStateOf<List<ReporteRow>>(emptyList()) }
     var cargando by remember { mutableStateOf(true) }
@@ -52,7 +52,7 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             Text(
                 text = "Reporte mensual",
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -60,25 +60,25 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
             Spacer(Modifier.height(16.dp))
 
             if (cargando) {
-                Text("Cargando...", color = GymColors.TextSecondary)
+                Text("Cargando...", color = ClienteTema.TextoSec)
                 Spacer(Modifier.height(8.dp))
             }
             errorMsg?.let { msg ->
-                Text(msg, color = GymColors.Red)
+                Text(msg, color = ClienteTema.Rojo)
                 Spacer(Modifier.height(8.dp))
             }
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(GymColors.Surface, RoundedCornerShape(16.dp))
+                    .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
                     .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
                     .padding(4.dp)
             ) {
                 Column(Modifier.horizontalScroll(rememberScrollState())) {
                     Row(
                         modifier = Modifier
-                            .background(GymColors.Background, RoundedCornerShape(10.dp))
+                            .background(ClienteTema.Fondo, RoundedCornerShape(10.dp))
                             .padding(vertical = 4.dp)
                     ) {
                         HeaderCell("Periodo", 130)
@@ -94,7 +94,7 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (index % 2 == 0) GymColors.Surface else GymColors.Background.copy(alpha = 0.4f)
+                                    if (index % 2 == 0) ClienteTema.Beige else ClienteTema.Fondo.copy(alpha = 0.4f)
                                 )
                         ) {
                             BodyCell(ReportesRepository.nombrePeriodo(r.periodo), 130)
@@ -113,7 +113,7 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
 private fun HeaderCell(text: String, width: Int) {
     Text(
         text = text,
-        color = GymColors.Gold,
+        color = ClienteTema.AzulSel,
         fontSize = 13.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
@@ -126,7 +126,7 @@ private fun HeaderCell(text: String, width: Int) {
 private fun BodyCell(text: String, width: Int, highlight: Boolean = false) {
     Text(
         text = text,
-        color = if (highlight) GymColors.Gold else GymColors.TextPrimary,
+        color = if (highlight) ClienteTema.AzulSel else ClienteTema.Texto,
         fontSize = 13.sp,
         fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal,
         modifier = Modifier

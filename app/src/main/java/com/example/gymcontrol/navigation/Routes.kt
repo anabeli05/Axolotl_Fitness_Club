@@ -2,11 +2,15 @@ package com.example.gymcontrol.navigation
 
 object Routes {
     const val LOGIN = "login"
+    const val TERMS = "legal_terms"
+    const val PRIVACY = "legal_privacy"
 
     const val CLIENT_ROOT = "client_root"
     const val CLIENT_HOME = "client_home"
     const val CLIENT_ADVISORIES = "client_advisories"
     const val CLIENT_PROFILE = "client_profile"
+
+    const val CLIENT_PAYMENTS = "client_payments"
 
     const val INSTRUCTOR_ROOT = "instructor_root"
     const val INSTRUCTOR_CLIENTS = "instructor_clients"

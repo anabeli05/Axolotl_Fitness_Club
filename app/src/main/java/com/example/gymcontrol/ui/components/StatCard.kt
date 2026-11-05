@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.ui.theme.GymColors
 
 enum class StatIconType { PERSON, MONEY }
 
@@ -27,17 +26,17 @@ fun StatCard(
     title: String,
     value: String,
     modifier: Modifier = Modifier,
-    valueColor: Color = GymColors.TextPrimary,
+    valueColor: Color = ClienteTema.Texto,
     iconType: StatIconType? = null,
-    iconColor: Color = GymColors.Gold
+    iconColor: Color = ClienteTema.AzulSel
 ) {
     val borderBrush = Brush.linearGradient(
-        colors = listOf(GymColors.Purple, GymColors.Gold)
+        colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel)
     )
 
     Box(
         modifier = modifier
-            .background(GymColors.Surface, RoundedCornerShape(16.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
             .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
@@ -70,7 +69,7 @@ fun StatCard(
         ) {
             Text(
                 text = title,
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium
             )

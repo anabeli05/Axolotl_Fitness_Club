@@ -17,18 +17,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.data.model.UserRole
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 
-private val Purple = Color(0xFFA54FD9)
-private val ScreenBackground = Color(0xFF0B0B0E)
-private val CardBackground = Color(0xFF1E1F20)
-private val CardBorder = Color(0xFF4A4B4D)
-private val TextPrimary = Color.White
-private val TextSecondary = Color(0xFFB5B5B5)
-private val ErrorRed = Color(0xFFFF5252)
+private val Acento = ClienteTema.AzulSel
+private val ScreenBackground = ClienteTema.Fondo
+private val CardBackground = ClienteTema.Beige
+private val CardBorder = ClienteTema.Borde
+private val TextPrimary = ClienteTema.Texto
+private val TextSecondary = ClienteTema.TextoSec
+private val ErrorRed = ClienteTema.Rojo
 
 // El nombre debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
@@ -39,11 +40,11 @@ private fun formFieldColors() = OutlinedTextFieldDefaults.colors(
     unfocusedTextColor = TextPrimary,
     focusedContainerColor = CardBackground,
     unfocusedContainerColor = CardBackground,
-    focusedBorderColor = Purple,
+    focusedBorderColor = Acento,
     unfocusedBorderColor = CardBorder,
-    focusedLabelColor = Purple,
+    focusedLabelColor = Acento,
     unfocusedLabelColor = TextSecondary,
-    cursorColor = Purple,
+    cursorColor = Acento,
     errorBorderColor = ErrorRed,
     errorLabelColor = ErrorRed,
     errorTextColor = TextPrimary,
@@ -98,23 +99,27 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            contentAlignment = Alignment.Center
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Regresar", tint = TextPrimary)
             }
             Text(
                 text = "Nuevo personal",
                 color = TextPrimary,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
         }
-        HorizontalDivider(color = Purple, thickness = 1.dp)
+        HorizontalDivider(color = Acento, thickness = 1.dp)
 
         Column(
             modifier = Modifier
@@ -192,10 +197,10 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
                                 onClick = { role = value },
                                 label = { Text(label) },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = Color.Black,
+                                    containerColor = ClienteTema.Navy,
                                     labelColor = TextPrimary,
-                                    selectedContainerColor = Purple,
-                                    selectedLabelColor = Color.Black
+                                    selectedContainerColor = Acento,
+                                    selectedLabelColor = ClienteTema.Navy
                                 )
                             )
                         }
@@ -214,11 +219,11 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
                         Surface(
                             shape = RoundedCornerShape(50),
                             color = Color.Transparent,
-                            border = BorderStroke(1.dp, GymColors.Green)
+                            border = BorderStroke(1.dp, ClienteTema.Verde)
                         ) {
                             Text(
                                 text = "ACTIVO",
-                                color = GymColors.Green,
+                                color = ClienteTema.Verde,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)
@@ -240,10 +245,10 @@ fun NuevoUsuarioScreen(onBack: () -> Unit) {
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Purple,
-                    contentColor = Color.Black,
-                    disabledContainerColor = Purple.copy(alpha = 0.35f),
-                    disabledContentColor = Color.Black.copy(alpha = 0.6f)
+                    containerColor = Acento,
+                    contentColor = ClienteTema.Navy,
+                    disabledContainerColor = Acento.copy(alpha = 0.35f),
+                    disabledContentColor = ClienteTema.Navy.copy(alpha = 0.6f)
                 )
             ) {
                 Text("Guardar personal", fontWeight = FontWeight.Bold)
