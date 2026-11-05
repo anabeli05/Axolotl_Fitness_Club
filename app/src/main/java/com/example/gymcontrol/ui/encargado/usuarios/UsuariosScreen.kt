@@ -80,7 +80,6 @@ private fun mensajeError(e: Exception, porDefecto: String): String =
 @Composable
 fun UsuariosScreen(
     // Se conserva por compatibilidad con GymNavGraph; el alta ahora es un formulario flotante
-    onNewUser: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()

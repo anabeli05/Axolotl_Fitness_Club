@@ -17,6 +17,7 @@
 --    acceso_por_rostro(vector)                  identifica y alterna entrada/salida
 --    registrar_movimiento_manual(cliente, bool) botones Entrada / Salida
 --    ocupacion_actual()                         personas dentro ahora
+--    clientes_dentro()                          quién está dentro y desde qué hora
 -- =====================================================================
 
 -- 1. Rostros ------------------------------------------------------------
@@ -306,7 +307,37 @@ language sql stable security definer
 set search_path = public
 as $$ select rc.cliente_id from rostros_clientes rc $$;
 
+-- 11. Quién está dentro ahora -----------------------------------------
+-- Clientes cuyo último movimiento de hoy es una entrada, con la hora de esa entrada.
+create or replace function public.clientes_dentro()
+returns table (cliente_id bigint, desde timestamptz)
+language sql stable security definer
+set search_path = public
+as $$
+    select ultimo.cliente_id, ultimo.fecha_hora
+    from (
+        select distinct on (ra.cliente_id) ra.cliente_id, ra.es_entrada, ra.fecha_hora
+        from registros_acceso ra
+        where ra.fecha_hora >= _hoy_mx()
+        order by ra.cliente_id, ra.fecha_hora desc, ra.id desc
+    ) ultimo
+    where ultimo.es_entrada
+$$;
+
+-- 12. Tiempo real: la app escucha cada entrada/salida nueva --------------
+do $$
+begin
+    if not exists (
+        select 1 from pg_publication_tables
+        where pubname = 'supabase_realtime'
+          and schemaname = 'public' and tablename = 'registros_acceso'
+    ) then
+        alter publication supabase_realtime add table public.registros_acceso;
+    end if;
+end $$;
+
 -- Permisos para la app
+grant execute on function public.clientes_dentro() to anon, authenticated;
 grant execute on function public.ocupacion_actual() to anon, authenticated;
 grant execute on function public.acceso_por_rostro(real[]) to anon, authenticated;
 grant execute on function public.registrar_movimiento_manual(bigint, boolean) to anon, authenticated;
