@@ -18,10 +18,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.gymcontrol.ui.theme.GymColors
 
 private val LogoutBorder = Brush.linearGradient(
-    listOf(GymColors.Purple, GymColors.Gold, GymColors.Red)
+    listOf(ClienteTema.Azul, ClienteTema.AzulSel)
 )
 
 @Composable
@@ -33,7 +32,7 @@ fun LogoutDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GymColors.Surface, RoundedCornerShape(20.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(20.dp))
                 .border(1.5.dp, LogoutBorder, RoundedCornerShape(20.dp))
                 .padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -41,13 +40,13 @@ fun LogoutDialog(
             Icon(
                 Icons.AutoMirrored.Filled.ExitToApp,
                 contentDescription = null,
-                tint = GymColors.Gold,
+                tint = ClienteTema.AzulSel,
                 modifier = Modifier.size(32.dp)
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 "Cerrar sesión",
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -55,7 +54,7 @@ fun LogoutDialog(
             Spacer(Modifier.height(8.dp))
             Text(
                 "¿Seguro que quieres salir?",
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -65,17 +64,19 @@ fun LogoutDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = onDismiss,
                     shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, GymColors.Purple),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
-                ) { Text("Cancelar") }
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ClienteTema.Rojo,
+                        contentColor = Color.White
+                    )
+                ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
                 Button(
                     onClick = onConfirm,
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GymColors.Red,
+                        containerColor = ClienteTema.Verde,
                         contentColor = Color.White
                     )
                 ) { Text("Salir", fontWeight = FontWeight.Bold) }
@@ -95,7 +96,7 @@ fun BotonCerrarSesion(
         Icon(
             Icons.AutoMirrored.Filled.ExitToApp,
             contentDescription = "Cerrar sesión",
-            tint = GymColors.Red,
+            tint = Color.White,
             modifier = Modifier.size(26.dp)
         )
     }

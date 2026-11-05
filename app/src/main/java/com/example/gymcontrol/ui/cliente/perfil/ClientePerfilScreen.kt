@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -63,8 +64,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 @Composable
 fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
@@ -123,7 +122,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     ClienteScaffoldClaro(
         currentSection = "Perfil",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_pi2
+        logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
             modifier = Modifier
@@ -137,7 +136,9 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     "Mi perfil",
                     color = ClienteTema.Texto,
                     fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -238,11 +239,11 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
     if (showEditDialog) {
         EditDataDialog(
-            initialName = name,
+            name = name,
             initialPhone = phone,
-            initialEmail = email,
+            email = email,
             onDismiss = { showEditDialog = false },
-            onSave = { newName, newPhone, newEmail ->
+            onSave = { newPhone ->
                 val c = cliente
                 if (c == null) {
                     Toast.makeText(context, "Aún no se cargan tus datos", Toast.LENGTH_SHORT).show()
@@ -250,13 +251,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                 }
                 scope.launch {
                     try {
-                        ClientesRepository.editar(c.id, newName.trim(), newPhone.trim(), newEmail.trim(), c.estado)
-                        name = newName.trim()
+                        // Solo el teléfono es editable; nombre y correo se mandan como están
+                        ClientesRepository.editar(c.id, c.nombre, newPhone.trim(), c.gmail, c.estado)
                         phone = newPhone.trim()
-                        email = newEmail.trim()
-                        cliente = c.copy(nombre = name, telefono = phone, gmail = email)
-                        SesionActual.fijarCorreo(email)
-                        SesionActual.fijarNombre(name)
+                        cliente = c.copy(telefono = phone)
                         showEditDialog = false
                         Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
@@ -458,7 +456,14 @@ private fun GymDialog(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(title, color = ClienteTema.Texto, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(
+                title,
+                color = ClienteTema.Texto,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
             content()
         }
     }
@@ -475,7 +480,7 @@ private fun DialogButtons(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
     ) {
         OutlinedButton(
             onClick = onDismiss,
@@ -521,46 +526,40 @@ private fun PhotoDialog(
 
 @Composable
 private fun EditDataDialog(
-    initialName: String,
+    name: String,
     initialPhone: String,
-    initialEmail: String,
+    email: String,
     onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
+    onSave: (String) -> Unit
 ) {
-    var name by remember { mutableStateOf(initialName) }
     var phone by remember { mutableStateOf(initialPhone) }
-    var email by remember { mutableStateOf(initialEmail) }
 
-    var nameWarning by remember { mutableStateOf(false) }
-    var nameTick by remember { mutableStateOf(0) }
     var phoneWarning by remember { mutableStateOf(false) }
     var phoneTick by remember { mutableStateOf(0) }
 
-    LaunchedEffect(nameTick) {
-        if (nameTick > 0) { nameWarning = true; delay(2500); nameWarning = false }
-    }
     LaunchedEffect(phoneTick) {
         if (phoneTick > 0) { phoneWarning = true; delay(2500); phoneWarning = false }
     }
 
-    val nameValid = nameHasMinLetters(name)
-    val nameShort = name.isNotEmpty() && !nameValid
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
-    val isValid = nameValid && phone.length == 10
+    val isValid = phone.length == 10
 
     GymDialog(title = "Editar datos", onDismiss = onDismiss) {
+        // Nombre y correo: solo lectura
         GymTextField(
             value = name,
-            onValueChange = { new ->
-                when {
-                    !new.all { it.isLetter() || it == ' ' } -> nameTick++
-                    new.length <= 40 -> name = new
-                }
-            },
+            onValueChange = {},
             label = "Nombre",
-            isError = nameWarning || nameShort,
-            errorText = if (nameWarning) "Solo se permiten letras" else "Mínimo 3 letras"
+            enabled = false
         )
+        GymTextField(
+            value = email,
+            onValueChange = {},
+            label = "Correo",
+            enabled = false
+        )
+
+        // Único campo editable
         GymTextField(
             value = phone,
             onValueChange = { new ->
@@ -575,17 +574,11 @@ private fun EditDataDialog(
             errorText = if (phoneWarning) "Solo se permiten números"
             else "Deben ser 10 dígitos (${phone.length}/10)"
         )
-        GymTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = "Correo",
-            keyboardType = KeyboardType.Email
-        )
 
         DialogButtons(
             confirmText = "Guardar",
             confirmEnabled = isValid,
-            onConfirm = { onSave(name.trim(), phone, email) },
+            onConfirm = { onSave(phone) },
             onDismiss = onDismiss
         )
     }
@@ -642,11 +635,13 @@ private fun GymTextField(
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     isError: Boolean = false,
-    errorText: String? = null
+    errorText: String? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         label = { Text(label) },
         singleLine = true,
         isError = isError,
@@ -669,7 +664,11 @@ private fun GymTextField(
             errorTextColor = ClienteTema.Texto,
             errorLabelColor = ClienteTema.Rojo,
             errorCursorColor = ClienteTema.Rojo,
-            errorSupportingTextColor = ClienteTema.Rojo
+            errorSupportingTextColor = ClienteTema.Rojo,
+            // Campos de solo lectura (nombre y correo)
+            disabledTextColor = ClienteTema.TextoSec.copy(alpha = 0.6f),
+            disabledBorderColor = ClienteTema.Borde.copy(alpha = 0.4f),
+            disabledLabelColor = ClienteTema.TextoSec.copy(alpha = 0.5f)
         )
     )
 }
