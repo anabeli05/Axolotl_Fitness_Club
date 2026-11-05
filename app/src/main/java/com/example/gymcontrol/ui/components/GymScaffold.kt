@@ -18,12 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import kotlinx.coroutines.launch
 
@@ -63,7 +65,7 @@ fun GymScaffold(
                                     .graphicsLayer(scaleX = 1.4f, scaleY = 1.4f)
                             )
                             Spacer(Modifier.width(16.dp))
-                            Text(currentSection, color = ClienteTema.Texto, fontWeight = FontWeight.Bold)
+                            Text(translatedSection(currentSection), color = ClienteTema.Texto, fontWeight = FontWeight.Bold)
                         }
                     },
                     actions = {
@@ -136,7 +138,7 @@ fun GymScaffold(
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Cerrar sesión",
+                    stringResource(R.string.logout),
                     color = ClienteTema.Texto,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -145,7 +147,7 @@ fun GymScaffold(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "¿Seguro que quieres salir?",
+                    stringResource(R.string.logout_confirmation),
                     color = ClienteTema.TextoSec,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -167,7 +169,7 @@ fun GymScaffold(
                             containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
                         )
-                    ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold) }
 
                     Button(
                         onClick = { confirmarLogout = false; onLogout() },
@@ -179,7 +181,7 @@ fun GymScaffold(
                             containerColor = ClienteTema.Verde,
                             contentColor = Color.White
                         )
-                    ) { Text("Salir", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.exit), fontWeight = FontWeight.Bold) }
                 }
             }
         }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,31 @@ import com.example.gymcontrol.ui.components.ClienteTema
 @Composable
 fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
     var selectedMethod by remember { mutableStateOf<PaymentMethodInfo?>(null) }
+
+    val transTitle = stringResource(R.string.cliente_pago_transferencia_dialog_title)
+    val transInstructions = stringResource(R.string.cliente_pago_transferencia_instructions)
+    val labelBanco = stringResource(R.string.cliente_pago_label_banco)
+    val labelClabe = stringResource(R.string.cliente_pago_label_clabe)
+    val labelCuenta = stringResource(R.string.cliente_pago_label_cuenta)
+    val labelBeneficiario = stringResource(R.string.cliente_pago_label_beneficiario)
+    val labelConcepto = stringResource(R.string.cliente_pago_label_concepto)
+    val valBeneficiarioGym = stringResource(R.string.cliente_pago_val_beneficiario_gym)
+    val valConcepto = stringResource(R.string.cliente_pago_val_concepto)
+
+    val depTitle = stringResource(R.string.cliente_pago_deposito_title)
+    val depInstructions = stringResource(R.string.cliente_pago_deposito_instructions)
+    val labelNoTarjeta = stringResource(R.string.cliente_pago_label_no_tarjeta)
+    val labelCorresponsales = stringResource(R.string.cliente_pago_label_corresponsales)
+    val labelSucursal = stringResource(R.string.cliente_pago_label_sucursal)
+
+    val efecTitle = stringResource(R.string.cliente_pago_efectivo_title)
+    val efecInstructions = stringResource(R.string.cliente_pago_efectivo_instructions)
+    val labelUbicacion = stringResource(R.string.cliente_pago_label_ubicacion)
+    val labelHorario = stringResource(R.string.cliente_pago_label_horario)
+    val labelAtencion = stringResource(R.string.cliente_pago_label_atencion)
+    val valHorario = stringResource(R.string.cliente_pago_val_horario)
+    val valCaja = stringResource(R.string.cliente_pago_val_caja)
+    val valRecepcion = stringResource(R.string.cliente_pago_val_recepcion)
 
     ClienteScaffoldClaro(
         currentSection = "Pagos",
@@ -45,7 +71,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Métodos de Pago",
+                    text = stringResource(R.string.cliente_pagos_title),
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     color = ClienteTema.Texto,
@@ -57,21 +83,21 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 MetodoPagoCard(
                     icon = Icons.AutoMirrored.Filled.CompareArrows,
-                    title = "Pago por\nTransferencia",
+                    title = stringResource(R.string.cliente_pago_transferencia_title),
                     description = null,
-                    subtitle = "Transferencia bancaria directa",
+                    subtitle = stringResource(R.string.cliente_pago_transferencia_sub),
                     onClick = {
                         selectedMethod = PaymentMethodInfo(
                             type = PaymentType.TRANSFERENCIA,
-                            title = "Pago por Transferencia",
+                            title = transTitle,
                             details = listOf(
-                                "Banco:" to "Banco",
-                                "CLABE:" to "012 095 01569158521 0",
-                                "Cuenta:" to "1234567890",
-                                "Beneficiario:" to "Gimnasio Axolotl S.A. de C.V.",
-                                "Concepto:" to "Tu número de Membresía"
+                                labelBanco to "Banco",
+                                labelClabe to "012 095 01569158521 0",
+                                labelCuenta to "1234567890",
+                                labelBeneficiario to valBeneficiarioGym,
+                                labelConcepto to valConcepto
                             ),
-                            instructions = "Ingresa la CLABE en tu banca móvil y coloca tu número de membresía o nombre completo en el concepto de pago."
+                            instructions = transInstructions
                         )
                     }
                 )
@@ -81,20 +107,20 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 MetodoPagoCard(
                     icon = Icons.Filled.AccountBalanceWallet,
-                    title = "Pago por Depósito",
-                    description = "Depósito en sucursal bancaria o corresponsal",
-                    subtitle = "Depósito en sucursal bancaria o corresponsal",
+                    title = stringResource(R.string.cliente_pago_deposito_title),
+                    description = stringResource(R.string.cliente_pago_deposito_sub),
+                    subtitle = stringResource(R.string.cliente_pago_deposito_sub),
                     onClick = {
                         selectedMethod = PaymentMethodInfo(
                             type = PaymentType.DEPOSITO,
-                            title = "Pago por Depósito",
+                            title = depTitle,
                             details = listOf(
-                                "No. Tarjeta:" to "4152 3138 9012 3456",
-                                "Corresponsales:" to "OXXO, 7-Eleven, Farmacias del Ahorro",
-                                "Sucursal:" to "BBVA Bancomer",
-                                "Beneficiario:" to "Gimnasio Axolotl"
+                                labelNoTarjeta to "4152 3138 9012 3456",
+                                labelCorresponsales to "OXXO, 7-Eleven, Farmacias del Ahorro",
+                                labelSucursal to "BBVA Bancomer",
+                                labelBeneficiario to "Gimnasio Axolotl"
                             ),
-                            instructions = "Presenta el número de tarjeta en cualquier sucursal bancaria o tienda de conveniencia para realizar tu depósito."
+                            instructions = depInstructions
                         )
                     }
                 )
@@ -104,19 +130,19 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 MetodoPagoCard(
                     icon = Icons.Filled.Payments,
-                    title = "Pago en Efectivo",
-                    description = "Pago físico en recepción\n(Gimnasio Axolotl)",
-                    subtitle = "Pago físico en recepción (Gimnasio Axolotl)",
+                    title = stringResource(R.string.cliente_pago_efectivo_title),
+                    description = stringResource(R.string.cliente_pago_efectivo_desc),
+                    subtitle = stringResource(R.string.cliente_pago_efectivo_sub),
                     onClick = {
                         selectedMethod = PaymentMethodInfo(
                             type = PaymentType.EFECTIVO,
-                            title = "Pago en Efectivo",
+                            title = efecTitle,
                             details = listOf(
-                                "Ubicación:" to "Recepción - Gimnasio Axolotl",
-                                "Horario:" to "Lunes a Domingo (06:00 - 00:00 hrs)",
-                                "Atención:" to "Caja principal"
+                                labelUbicacion to valRecepcion,
+                                labelHorario to valHorario,
+                                labelAtencion to valCaja
                             ),
-                            instructions = "Acude directamente a la recepción del gimnasio y proporciona tu nombre o número de membresía al encargado."
+                            instructions = efecInstructions
                         )
                     }
                 )
@@ -241,7 +267,7 @@ private fun PaymentDetailDialog(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Cerrar",
+                        contentDescription = stringResource(R.string.common_close),
                         tint = ClienteTema.TextoSec
                     )
                 }
@@ -307,7 +333,7 @@ private fun PaymentDetailDialog(
                     contentColor = Color.White
                 )
             ) {
-                Text("Aceptar", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.common_accept), fontWeight = FontWeight.Bold)
             }
         }
     }

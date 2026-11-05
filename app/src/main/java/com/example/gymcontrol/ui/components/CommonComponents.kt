@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.HourOccupancy
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +54,7 @@ fun SectionTitle(text: String) {
 fun OccupancyChart(data: List<HourOccupancy>, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp)) {
-            Text("Personas por hora", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.common_people_per_hour), fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(12.dp))
             val max = (data.maxOfOrNull { it.people } ?: 1).coerceAtLeast(1)
             data.forEach { item ->

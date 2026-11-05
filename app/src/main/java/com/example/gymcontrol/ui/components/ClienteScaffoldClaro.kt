@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,12 +22,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.R
 
 /** Paleta unisex del cliente: grafito + violeta + dorado suave. */
 object ClienteTema {
@@ -58,6 +62,17 @@ private val LogoutBorderClaro = Brush.linearGradient(
 )
 
 @Composable
+fun translatedTabLabel(label: String): String {
+    return when (label) {
+        "Inicio" -> stringResource(R.string.tab_home)
+        "Asesorías" -> stringResource(R.string.tab_advisories)
+        "Pagos" -> stringResource(R.string.tab_payments)
+        "Perfil" -> stringResource(R.string.tab_profile)
+        else -> label
+    }
+}
+
+@Composable
 fun ClienteScaffoldClaro(
     currentSection: String,
     onNavigate: (String) -> Unit,
@@ -65,6 +80,7 @@ fun ClienteScaffoldClaro(
     onLogout: () -> Unit = LocalOnLogout.current,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
     var confirmarLogout by remember { mutableStateOf(false) }
 
     Column(
@@ -81,12 +97,26 @@ fun ClienteScaffoldClaro(
                 .padding(vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
+            IconButton(
+                onClick = { LocaleHelper.toggleLanguage(context) },
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Language,
+                    contentDescription = stringResource(R.string.change_language),
+                    tint = Color.White,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+
             Image(
                 painter = painterResource(logoRes),
-                contentDescription = "Axolotl Fitness Club",
+                contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier
                     .height(28.dp)
-                    .graphicsLayer(scaleX = 1.6f, scaleY = 1.6f) // baja a 1.4f si se ve cortado o muy grande
+                    .graphicsLayer(scaleX = 1.6f, scaleY = 1.6f)
             )
             IconButton(
                 onClick = { confirmarLogout = true },
@@ -96,7 +126,7 @@ fun ClienteScaffoldClaro(
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = "Cerrar sesión",
+                    contentDescription = stringResource(R.string.logout),
                     tint = Color.White,
                     modifier = Modifier.size(26.dp)
                 )
@@ -105,9 +135,6 @@ fun ClienteScaffoldClaro(
 
         Box(modifier = Modifier.weight(1f)) { content() }
 
-        // Barra inferior recta y baja.
-        // El Box pinta el fondo y deja espacio para la barra de botones del sistema
-        // (si el teléfono usa gestos, ese espacio es mínimo).
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,11 +148,12 @@ fun ClienteScaffoldClaro(
                 windowInsets = WindowInsets(0, 0, 0, 0)
             ) {
                 TABS_CLARO.forEach { tab ->
+                    val translatedLabel = translatedTabLabel(tab.label)
                     NavigationBarItem(
-                        selected = tab.label == currentSection,
+                        selected = translatedLabel == currentSection || tab.label == currentSection,
                         onClick = { onNavigate(tab.label) },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label, fontSize = 12.sp) },
+                        icon = { Icon(tab.icon, contentDescription = translatedLabel) },
+                        label = { Text(translatedLabel, fontSize = 12.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ClienteTema.AzulSel,
                             selectedTextColor = ClienteTema.AzulSel,
@@ -139,7 +167,6 @@ fun ClienteScaffoldClaro(
         }
     }
 
-    // Diálogo de confirmación (estilo claro, texto centrado)
     if (confirmarLogout) {
         Dialog(onDismissRequest = { confirmarLogout = false }) {
             Column(
@@ -157,7 +184,7 @@ fun ClienteScaffoldClaro(
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Cerrar sesión",
+                    stringResource(R.string.logout),
                     color = ClienteTema.Texto,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -166,7 +193,7 @@ fun ClienteScaffoldClaro(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "¿Seguro que quieres salir?",
+                    stringResource(R.string.logout_confirmation),
                     color = ClienteTema.TextoSec,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -187,7 +214,7 @@ fun ClienteScaffoldClaro(
                             containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
                         )
-                    ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold) }
 
                     Button(
                         onClick = { confirmarLogout = false; onLogout() },
@@ -199,7 +226,7 @@ fun ClienteScaffoldClaro(
                             containerColor = ClienteTema.Verde,
                             contentColor = Color.White
                         )
-                    ) { Text("Salir", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.exit), fontWeight = FontWeight.Bold) }
                 }
             }
         }
@@ -214,7 +241,6 @@ private val CLIENTE_TABS = listOf(
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
-// Mismo encabezado, fondo y barra inferior que ClienteScaffoldClaro; solo cambian las pestañas
 @Composable
 fun ClienteScaffold(
     currentSection: String,
@@ -223,6 +249,7 @@ fun ClienteScaffold(
     tabs: List<ScaffoldTab> = CLIENTE_TABS,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -236,9 +263,23 @@ fun ClienteScaffold(
                 .padding(vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
+            IconButton(
+                onClick = { LocaleHelper.toggleLanguage(context) },
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Language,
+                    contentDescription = stringResource(R.string.change_language),
+                    tint = Color.White,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+
             Image(
                 painter = painterResource(logoRes),
-                contentDescription = "Axolotl Fitness Club",
+                contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier
                     .height(28.dp)
                     .graphicsLayer(scaleX = 1.6f, scaleY = 1.6f)
@@ -267,11 +308,12 @@ fun ClienteScaffold(
                 windowInsets = WindowInsets(0, 0, 0, 0)
             ) {
                 tabs.forEach { tab ->
+                    val translatedLabel = translatedTabLabel(tab.label)
                     NavigationBarItem(
-                        selected = tab.label == currentSection,
+                        selected = translatedLabel == currentSection || tab.label == currentSection,
                         onClick = { onNavigate(tab.label) },
-                        icon = { Icon(imageVector = tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label, fontSize = 12.sp) },
+                        icon = { Icon(imageVector = tab.icon, contentDescription = translatedLabel) },
+                        label = { Text(translatedLabel, fontSize = 12.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = ClienteTema.AzulSel,
                             selectedTextColor = ClienteTema.AzulSel,

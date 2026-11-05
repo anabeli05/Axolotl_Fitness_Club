@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -88,7 +89,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                 email = it.gmail
             }
         } catch (e: Exception) {
-            Toast.makeText(context, "No se pudieron cargar tus datos", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.perfil_load_error), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -103,7 +104,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
             scope.launch {
                 val bitmap = withContext(Dispatchers.IO) { loadBitmap(context, uri) }
                 if (bitmap != null) photo = bitmap.asImageBitmap()
-                else Toast.makeText(context, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
+                else Toast.makeText(context, context.getString(R.string.perfil_image_load_error), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -116,7 +117,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) cameraLauncher.launch(null)
-        else Toast.makeText(context, "Se necesita permiso de cámara para tomar la foto", Toast.LENGTH_SHORT).show()
+        else Toast.makeText(context, context.getString(R.string.perfil_camera_permission_required), Toast.LENGTH_SHORT).show()
     }
 
     ClienteScaffoldClaro(
@@ -133,7 +134,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    "Mi perfil",
+                    stringResource(R.string.perfil_title),
                     color = ClienteTema.Texto,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
@@ -160,7 +161,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Text("Membresía : $membership", color = ClienteTema.Texto, fontSize = 15.sp)
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Estado:", color = ClienteTema.Texto, fontSize = 15.sp)
+                        Text(stringResource(R.string.perfil_status_label), color = ClienteTema.Texto, fontSize = 15.sp)
                         Spacer(Modifier.width(8.dp))
                         StatusBadge(isActive = cliente?.let { it.activa && it.estado == "ACTIVO" } ?: true)
                     }
@@ -175,9 +176,9 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    ActionRow(Icons.Filled.Edit, "Editar datos") { showEditDialog = true }
+                    ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_data)) { showEditDialog = true }
                     Spacer(Modifier.height(8.dp))
-                    ActionRow(Icons.Filled.Lock, "Cambiar contraseña") { showPasswordDialog = true }
+                    ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
 
                     Spacer(Modifier.height(12.dp))
 
@@ -188,7 +189,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                             .padding(16.dp)
                     ) {
                         Text(
-                            "Datos Personales",
+                            stringResource(R.string.perfil_personal_data_title),
                             color = Color.White,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
@@ -201,11 +202,11 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                                 .background(Color.White.copy(alpha = 0.5f))
                         )
                         Spacer(Modifier.height(12.dp))
-                        InfoRow(Icons.Filled.Person, "Nombre:", name)
+                        InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
                         Spacer(Modifier.height(14.dp))
-                        InfoRow(Icons.Filled.Phone, "Teléfono:", phone)
+                        InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
                         Spacer(Modifier.height(14.dp))
-                        InfoRow(Icons.Filled.Email, "Correo:", email)
+                        InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), email)
                     }
                 }
             }
@@ -246,7 +247,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
             onSave = { newPhone ->
                 val c = cliente
                 if (c == null) {
-                    Toast.makeText(context, "Aún no se cargan tus datos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.perfil_not_loaded_yet), Toast.LENGTH_SHORT).show()
                     return@EditDataDialog
                 }
                 scope.launch {
@@ -256,10 +257,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         phone = newPhone.trim()
                         cliente = c.copy(telefono = phone)
                         showEditDialog = false
-                        Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.perfil_data_updated), Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         val msg = e.message?.substringBefore("\nCode:") ?: ""
-                        Toast.makeText(context, "No se pudo guardar: $msg", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -274,10 +275,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     try {
                         AuthRepository.cambiarContrasena(email, actual, nueva)
                         showPasswordDialog = false
-                        Toast.makeText(context, "Contraseña actualizada", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.perfil_password_updated), Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         val msg = e.message?.substringBefore("\nCode:") ?: ""
-                        Toast.makeText(context, "No se pudo cambiar: $msg", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -335,7 +336,7 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
             if (photo != null) {
                 Image(
                     bitmap = photo,
-                    contentDescription = "Foto de perfil",
+                    contentDescription = stringResource(R.string.perfil_photo_desc),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -359,7 +360,7 @@ private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> 
         ) {
             Icon(
                 Icons.Filled.Edit,
-                contentDescription = "Cambiar foto",
+                contentDescription = stringResource(R.string.perfil_change_photo_desc),
                 tint = Color.White,
                 modifier = Modifier.size(18.dp)
             )
@@ -431,7 +432,7 @@ private fun StatusBadge(isActive: Boolean) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            if (isActive) "Activo" else "Inactivo",
+            if (isActive) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
             color = Color.White,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold
@@ -488,7 +489,7 @@ private fun DialogButtons(
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
             border = BorderStroke(1.dp, ClienteTema.Rojo)
-        ) { Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+        ) { Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
         Button(
             onClick = onConfirm,
             enabled = confirmEnabled,
@@ -510,17 +511,17 @@ private fun PhotoDialog(
     onGallery: () -> Unit,
     onRemove: () -> Unit
 ) {
-    GymDialog(title = "Foto de perfil", onDismiss = onDismiss) {
-        ActionRow(Icons.Filled.PhotoCamera, "Tomar foto", onCamera)
-        ActionRow(Icons.Filled.PhotoLibrary, "Elegir de la galería", onGallery)
-        if (hasPhoto) ActionRow(Icons.Filled.Delete, "Quitar foto", onRemove)
+    GymDialog(title = stringResource(R.string.perfil_photo_dialog_title), onDismiss = onDismiss) {
+        ActionRow(Icons.Filled.PhotoCamera, stringResource(R.string.perfil_photo_take), onCamera)
+        ActionRow(Icons.Filled.PhotoLibrary, stringResource(R.string.perfil_photo_gallery), onGallery)
+        if (hasPhoto) ActionRow(Icons.Filled.Delete, stringResource(R.string.perfil_photo_remove), onRemove)
         OutlinedButton(
             onClick = onDismiss,
             modifier = Modifier.fillMaxWidth().height(44.dp),
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
             border = BorderStroke(1.dp, ClienteTema.Rojo)
-        ) { Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+        ) { Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
     }
 }
 
@@ -544,18 +545,18 @@ private fun EditDataDialog(
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
     val isValid = phone.length == 10
 
-    GymDialog(title = "Editar datos", onDismiss = onDismiss) {
+    GymDialog(title = stringResource(R.string.perfil_edit_dialog_title), onDismiss = onDismiss) {
         // Nombre y correo: solo lectura
         GymTextField(
             value = name,
             onValueChange = {},
-            label = "Nombre",
+            label = stringResource(R.string.perfil_field_name),
             enabled = false
         )
         GymTextField(
             value = email,
             onValueChange = {},
-            label = "Correo",
+            label = stringResource(R.string.perfil_field_email),
             enabled = false
         )
 
@@ -568,15 +569,15 @@ private fun EditDataDialog(
                     new.length <= 10 -> phone = new
                 }
             },
-            label = "Teléfono",
+            label = stringResource(R.string.perfil_field_phone),
             keyboardType = KeyboardType.Number,
             isError = phoneWarning || phoneIncomplete,
-            errorText = if (phoneWarning) "Solo se permiten números"
+            errorText = if (phoneWarning) stringResource(R.string.perfil_error_phone_digits)
             else "Deben ser 10 dígitos (${phone.length}/10)"
         )
 
         DialogButtons(
-            confirmText = "Guardar",
+            confirmText = stringResource(R.string.save),
             confirmEnabled = isValid,
             onConfirm = { onSave(phone) },
             onDismiss = onDismiss
@@ -595,31 +596,31 @@ private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Un
     val mismatch = confirmPassword.isNotEmpty() && confirmPassword != newPassword
     val canSave = currentPassword.isNotEmpty() && newPassword.length >= 8 && confirmPassword == newPassword
 
-    GymDialog(title = "Cambiar contraseña", onDismiss = onDismiss) {
+    GymDialog(title = stringResource(R.string.change_password), onDismiss = onDismiss) {
         GymTextField(
             value = currentPassword,
             onValueChange = { currentPassword = it },
-            label = "Contraseña actual",
+            label = stringResource(R.string.current_password),
             isPassword = true
         )
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
-            label = "Nueva contraseña",
+            label = stringResource(R.string.new_password),
             isPassword = true,
             isError = tooShort,
-            errorText = "Mínimo 8 caracteres"
+            errorText = stringResource(R.string.perfil_password_min_length)
         )
         GymTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = "Confirmar contraseña",
+            label = stringResource(R.string.perfil_confirm_password),
             isPassword = true,
             isError = mismatch,
-            errorText = "Las contraseñas no coinciden"
+            errorText = stringResource(R.string.passwords_dont_match)
         )
         DialogButtons(
-            confirmText = "Actualizar",
+            confirmText = stringResource(R.string.perfil_confirm_update),
             confirmEnabled = canSave,
             onConfirm = { onSave(currentPassword, newPassword) },
             onDismiss = onDismiss
