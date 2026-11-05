@@ -3,6 +3,7 @@ package com.example.gymcontrol.data.remote
 import com.example.gymcontrol.BuildConfig
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.realtime.Realtime
 
 object SupabaseProvider {
     val client = createSupabaseClient(
@@ -10,5 +11,6 @@ object SupabaseProvider {
         supabaseKey = BuildConfig.SUPABASE_KEY
     ) {
         install(Postgrest)
+        install(Realtime)
     }
 }

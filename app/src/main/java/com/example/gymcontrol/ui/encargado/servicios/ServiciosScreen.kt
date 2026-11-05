@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.launch
