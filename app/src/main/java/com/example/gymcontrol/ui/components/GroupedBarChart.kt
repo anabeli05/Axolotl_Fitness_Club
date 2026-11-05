@@ -26,7 +26,7 @@ fun GroupedBarChart(
     chartHeight: Int = 180
 ) {
     val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
-    val maxValue = entries.maxOf { maxOf(it.activos, it.inactivos) }
+    val maxValue = entries.maxOfOrNull { maxOf(it.activos, it.inactivos) } ?: 1f
     val niceMax = niceCeil(maxValue)
     val labels = axisLabels(maxValue)
 
