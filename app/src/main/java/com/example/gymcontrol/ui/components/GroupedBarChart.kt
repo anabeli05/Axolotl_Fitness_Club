@@ -11,10 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 
 data class GroupedBarEntry(val label: String, val activos: Float, val inactivos: Float)
 
@@ -51,13 +53,13 @@ fun GroupedBarChart(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(10.dp).background(ClienteTema.Verde, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text("Activos", color = ClienteTema.TextoSec, fontSize = 11.sp)
+                    Text(stringResource(R.string.chart_active), color = ClienteTema.TextoSec, fontSize = 11.sp)
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(10.dp).background(ClienteTema.Rojo, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text("Inactivos", color = ClienteTema.TextoSec, fontSize = 11.sp)
+                    Text(stringResource(R.string.chart_inactive), color = ClienteTema.TextoSec, fontSize = 11.sp)
                 }
             }
         }

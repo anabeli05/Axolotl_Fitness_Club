@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 
@@ -86,7 +88,7 @@ fun ClientFormDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isEditing) "Editar cliente" else "Nuevo cliente",
+                    text = if (isEditing) stringResource(R.string.encargado_client_form_edit_title) else stringResource(R.string.encargado_client_form_new_title),
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -96,7 +98,7 @@ fun ClientFormDialog(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = ClienteTema.TextoSec)
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = ClienteTema.TextoSec)
                 }
             }
 
@@ -105,30 +107,30 @@ fun ClientFormDialog(
             RestrictedField(
                 value = name,
                 onValueChange = { name = it },
-                label = "Nombre",
+                label = stringResource(R.string.encargado_client_form_name_label),
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras",
-                errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_client_form_name_warning),
+                errorText = if (name.isNotEmpty() && !nameValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = lastName,
                 onValueChange = { lastName = it },
-                label = "Apellido",
+                label = stringResource(R.string.encargado_client_form_lastname_label),
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras",
-                errorText = if (lastName.isNotEmpty() && !lastNameValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_client_form_name_warning),
+                errorText = if (lastName.isNotEmpty() && !lastNameValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = "Teléfono",
+                label = stringResource(R.string.encargado_client_form_phone_label),
                 accept = { s -> s.all { it in '0'..'9' } },
                 maxLength = 10,
-                warningText = "Solo se permiten números",
+                warningText = stringResource(R.string.encargado_client_form_phone_warning),
                 keyboardType = KeyboardType.Number,
                 errorText = if (phone.isNotEmpty() && phone.length < 10) {
                     "Deben ser 10 dígitos (${phone.length}/10)"
@@ -138,12 +140,12 @@ fun ClientFormDialog(
             RestrictedField(
                 value = email,
                 onValueChange = { email = it },
-                label = "Correo",
+                label = stringResource(R.string.encargado_client_form_email_label),
                 accept = { s -> s.none { it.isWhitespace() } },
                 maxLength = 60,
-                warningText = "El correo no lleva espacios",
+                warningText = stringResource(R.string.encargado_client_form_email_warning),
                 keyboardType = KeyboardType.Email,
-                errorText = if (email.isNotEmpty() && !emailValid) "Correo no válido" else null
+                errorText = if (email.isNotEmpty() && !emailValid) stringResource(R.string.encargado_client_form_email_invalid) else null
             )
             Spacer(Modifier.height(10.dp))
 
@@ -155,8 +157,8 @@ fun ClientFormDialog(
                     value = selectedPlan ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text("Selecciona un plan", color = ClienteTema.TextoSec) },
-                    label = { Text("Plan", color = ClienteTema.TextoSec) },
+                    placeholder = { Text(stringResource(R.string.encargado_client_form_plan_placeholder), color = ClienteTema.TextoSec) },
+                    label = { Text(stringResource(R.string.encargado_client_form_plan_label), color = ClienteTema.TextoSec) },
                     trailingIcon = {
                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ClienteTema.TextoSec)
                     },
@@ -209,7 +211,7 @@ fun ClientFormDialog(
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isEditing) "Guardar" else "Crear Cliente", fontWeight = FontWeight.Bold)
+                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_client_form_create_button), fontWeight = FontWeight.Bold)
             }
         }
     }

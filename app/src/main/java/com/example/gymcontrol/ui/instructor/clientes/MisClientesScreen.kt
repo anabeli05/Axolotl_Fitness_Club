@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -87,7 +88,7 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Usuarios asignados",
+                    text = stringResource(R.string.instructor_assigned_users_title),
                     color = ClienteTema.Texto,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
@@ -110,7 +111,7 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
             if (clientes.isEmpty()) {
                 item {
                     Text(
-                        text = "No tienes clientes asignados",
+                        text = stringResource(R.string.instructor_no_assigned_clients),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         modifier = Modifier
@@ -183,13 +184,13 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = cliente.dias.ifBlank { "Sin días asignados" },
+                text = cliente.dias.ifBlank { stringResource(R.string.instructor_client_no_days) },
                 color = ClienteTema.TextoSec,
                 fontSize = 15.sp
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = "Objetivo: ${cliente.objetivo.ifBlank { "—" }}",
+                text = stringResource(R.string.instructor_client_objective, cliente.objetivo.ifBlank { "—" }),
                 color = ClienteTema.TextoSec,
                 fontSize = 15.sp
             )
@@ -207,7 +208,7 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
             shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text("Editar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.common_edit), fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -267,7 +268,7 @@ private fun EditarClienteDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Días que asistirá",
+                    text = stringResource(R.string.instructor_dialog_days_title),
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -283,7 +284,7 @@ private fun EditarClienteDialog(
                 Spacer(Modifier.height(22.dp))
 
                 Text(
-                    text = "Objetivo",
+                    text = stringResource(R.string.instructor_dialog_objective_title),
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
@@ -305,7 +306,7 @@ private fun EditarClienteDialog(
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Guardar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -319,7 +320,7 @@ private fun EditarClienteDialog(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "Cerrar",
+                    contentDescription = stringResource(R.string.common_close),
                     tint = ClienteTema.TextoSec,
                     modifier = Modifier.size(24.dp)
                 )

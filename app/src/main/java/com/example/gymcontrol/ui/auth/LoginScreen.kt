@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -36,8 +39,9 @@ import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.AuthRepository
-import kotlinx.coroutines.launch
+import com.example.gymcontrol.ui.components.LocaleHelper
 import com.example.gymcontrol.ui.components.SesionActual
+import kotlinx.coroutines.launch
 
 // Paleta tomada del diseño
 private val FondoNegro = Color(0xFF000000)
@@ -65,6 +69,11 @@ fun LoginScreen(
     var mostrarCambio by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val strInvalidCreds = stringResource(R.string.error_invalid_credentials)
+    val strConnErrorPrefix = stringResource(R.string.error_connection_prefix)
+    val strPassUpdated = stringResource(R.string.password_updated_success)
 
     val campoShape = RoundedCornerShape(50)
     val campoColors = OutlinedTextFieldDefaults.colors(
@@ -105,7 +114,7 @@ fun LoginScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo_final),
-                contentDescription = "Axolotl Fitness Club",
+                contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier.size(140.dp)
             )
             Spacer(Modifier.height(24.dp))
@@ -114,7 +123,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = identifier,
                 onValueChange = { identifier = it },
-                label = { Text("Correo") },
+                label = { Text(stringResource(R.string.login_email)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 shape = campoShape,
@@ -125,7 +134,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Contraseña") },
+                label = { Text(stringResource(R.string.login_password)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -138,8 +147,8 @@ fun LoginScreen(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Filled.VisibilityOff
                             else Icons.Filled.Visibility,
-                            contentDescription = if (passwordVisible) "Ocultar contraseña"
-                            else "Mostrar contraseña"
+                            contentDescription = if (passwordVisible) stringResource(R.string.hide_password)
+                            else stringResource(R.string.show_password)
                         )
                     }
                 },
@@ -164,7 +173,7 @@ fun LoginScreen(
                     )
                 )
                 val textoTerminos = buildAnnotatedString {
-                    append("Acepto los ")
+                    append(stringResource(R.string.accept_terms_prefix))
                     withLink(
                         LinkAnnotation.Clickable(
                             tag = "terminos",
@@ -180,9 +189,9 @@ fun LoginScreen(
                             }
                         )
                     ) {
-                        append("Términos y Condiciones")
+                        append(stringResource(R.string.terms_and_conditions))
                     }
-                    append(" y la ")
+                    append(stringResource(R.string.accept_terms_and))
                     withLink(
                         LinkAnnotation.Clickable(
                             tag = "politica",
@@ -198,7 +207,7 @@ fun LoginScreen(
                             }
                         )
                     ) {
-                        append("Política de Privacidad")
+                        append(stringResource(R.string.privacy_policy))
                     }
                 }
                 Text(
@@ -225,11 +234,11 @@ fun LoginScreen(
                                 SesionActual.fijarDatos(fila.id, fila.nombre, fila.codigoQr)
                                 onLogin(rolEncontrado)
                             } else {
-                                error = "Usuario o contraseña incorrectos"
+                                error = strInvalidCreds
                             }
                         } catch (e: Exception) {
                             val msg = e.message?.substringBefore("\nCode:") ?: ""
-                            error = if ("bloqueada" in msg) msg else "Error de conexión: $msg"
+                            error = if ("bloqueada" in msg) msg else "$strConnErrorPrefix$msg"
                         }
                         loading = false
                     }
@@ -245,7 +254,7 @@ fun LoginScreen(
                 border = BorderStroke(1.dp, DoradoBorde),
                 modifier = Modifier.fillMaxWidth(0.6f)
             ) {
-                Text(if (loading) "Entrando..." else "Ingresar")
+                Text(if (loading) stringResource(R.string.logging_in) else stringResource(R.string.login_button))
             }
             error?.let {
                 Spacer(Modifier.height(12.dp))
@@ -257,8 +266,22 @@ fun LoginScreen(
             }
             Spacer(Modifier.height(8.dp))
             TextButton(onClick = { mostrarCambio = true; aviso = null }) {
-                Text("Cambiar contraseña", color = Dorado)
+                Text(stringResource(R.string.change_password), color = Dorado)
             }
+        }
+
+        IconButton(
+            onClick = { LocaleHelper.toggleLanguage(context) },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Language,
+                contentDescription = stringResource(R.string.change_language),
+                tint = Dorado
+            )
         }
     }
 
@@ -269,7 +292,7 @@ fun LoginScreen(
             onListo = {
                 mostrarCambio = false
                 password = ""
-                aviso = "Contraseña actualizada. Ya puedes iniciar sesión."
+                aviso = strPassUpdated
             }
         )
     }
@@ -289,6 +312,8 @@ private fun CambiarContrasenaDialog(
     var error by remember { mutableStateOf<String?>(null) }
     var cargando by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    val strChangeFailed = stringResource(R.string.error_change_failed)
 
     val coincide = nueva == repetir
     val puedeGuardar = !cargando && correo.isNotBlank() && actual.isNotBlank() &&
@@ -313,8 +338,8 @@ private fun CambiarContrasenaDialog(
                         Icon(
                             imageVector = if (visible) Icons.Filled.VisibilityOff
                             else Icons.Filled.Visibility,
-                            contentDescription = if (visible) "Ocultar contraseña"
-                            else "Mostrar contraseña"
+                            contentDescription = if (visible) stringResource(R.string.hide_password)
+                            else stringResource(R.string.show_password)
                         )
                     }
                 }
@@ -340,7 +365,7 @@ private fun CambiarContrasenaDialog(
         containerColor = TarjetaOscura,
         title = {
             Text(
-                "Cambiar contraseña",
+                stringResource(R.string.change_password),
                 color = BlancoTexto,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -348,18 +373,18 @@ private fun CambiarContrasenaDialog(
         },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                campo(correo, { correo = it }, "Correo", false)
-                campo(actual, { actual = it }, "Contraseña actual", true)
-                campo(nueva, { nueva = it }, "Nueva contraseña", true)
-                campo(repetir, { repetir = it }, "Repetir nueva contraseña", true)
+                campo(correo, { correo = it }, stringResource(R.string.login_email), false)
+                campo(actual, { actual = it }, stringResource(R.string.current_password), true)
+                campo(nueva, { nueva = it }, stringResource(R.string.new_password), true)
+                campo(repetir, { repetir = it }, stringResource(R.string.repeat_new_password), true)
                 Text(
-                    "Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.",
+                    stringResource(R.string.password_requirements),
                     color = BlancoTexto.copy(alpha = 0.7f),
                     style = MaterialTheme.typography.bodySmall
                 )
                 if (repetir.isNotEmpty() && !coincide) {
                     Spacer(Modifier.height(6.dp))
-                    Text("Las contraseñas no coinciden", color = RojoError,
+                    Text(stringResource(R.string.passwords_dont_match), color = RojoError,
                         style = MaterialTheme.typography.bodySmall)
                 }
                 error?.let {
@@ -373,7 +398,7 @@ private fun CambiarContrasenaDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
             ) {
-                TextButton(onClick = onDismiss) { Text("Cancelar", color = BlancoTexto) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = BlancoTexto) }
 
                 Button(
                     enabled = puedeGuardar,
@@ -385,13 +410,13 @@ private fun CambiarContrasenaDialog(
                                 AuthRepository.cambiarContrasena(correo, actual, nueva)
                                 onListo()
                             } catch (e: Exception) {
-                                error = e.message?.substringBefore("\nCode:") ?: "No se pudo cambiar"
+                                error = e.message?.substringBefore("\nCode:") ?: strChangeFailed
                             }
                             cargando = false
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MoradoCampo, contentColor = BlancoTexto)
-                ) { Text(if (cargando) "Guardando..." else "Guardar") }
+                ) { Text(if (cargando) stringResource(R.string.saving) else stringResource(R.string.save)) }
             }
         }
     )
