@@ -37,7 +37,6 @@ import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.data.remote.GastoRow
 import com.example.gymcontrol.data.remote.GastosRepository
-import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
 import java.text.SimpleDateFormat

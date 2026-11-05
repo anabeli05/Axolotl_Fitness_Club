@@ -30,7 +30,6 @@ import com.example.gymcontrol.ui.encargado.dashboard.DashboardScreen
 import com.example.gymcontrol.ui.encargado.gastos.GastosScreen
 import com.example.gymcontrol.ui.encargado.reportes.ReportesScreen
 import com.example.gymcontrol.ui.encargado.servicios.ServiciosScreen
-import com.example.gymcontrol.ui.encargado.usuarios.NuevoUsuarioScreen
 import com.example.gymcontrol.ui.encargado.usuarios.UsuariosScreen
 import com.example.gymcontrol.ui.instructor.clientes.MisClientesScreen
 import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
@@ -129,13 +128,7 @@ fun GymNavGraph() {
                     ClientesScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
                 composable(Routes.ADMIN_USERS) {
-                    UsuariosScreen(
-                        onNewUser = { navController.navigate(Routes.ADMIN_NEW_USER) },
-                        onNavigate = { section -> navigateAdmin(navController, section) }
-                    )
-                }
-                composable(Routes.ADMIN_NEW_USER) {
-                    NuevoUsuarioScreen { navController.popBackStack() }
+                    UsuariosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
                 composable(Routes.ADMIN_SERVICES) {
                     ServiciosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
