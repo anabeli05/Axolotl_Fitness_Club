@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.gymcontrol.ui.components.SesionActual
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +44,8 @@ import java.util.Calendar
 
 @Composable
 fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
-    val userName = "Ana López" // TODO: tomar el nombre del cliente en sesión
+    // El nombre del cliente en sesión ya viene del login
+    val userName = SesionActual.nombre ?: ""
 
     // Personas dentro del gimnasio ahora (entradas − salidas de hoy); se actualiza cada 5 s
     var personasDentro by remember { mutableStateOf<Int?>(null) }

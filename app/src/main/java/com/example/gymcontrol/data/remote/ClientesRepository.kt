@@ -60,6 +60,13 @@ object ClientesRepository {
             .select { order("nombre", Order.ASCENDING) }
             .decodeList<ClienteRow>()
 
+    /** Datos del cliente que inició sesión (se busca por su correo). */
+    suspend fun porCorreo(gmail: String): ClienteRow? =
+        SupabaseProvider.client.from("clientes_lista")
+            .select { filter { eq("gmail", gmail.trim()) } }
+            .decodeList<ClienteRow>()
+            .firstOrNull()
+
     suspend fun planes(): List<PlanRow> =
         SupabaseProvider.client.from("tipos_membresia")
             .select { order("precio", Order.DESCENDING) }
