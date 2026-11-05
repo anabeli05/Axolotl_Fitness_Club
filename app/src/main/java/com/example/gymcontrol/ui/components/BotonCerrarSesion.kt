@@ -13,11 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.R
 
 private val LogoutBorder = Brush.linearGradient(
     listOf(ClienteTema.Azul, ClienteTema.AzulSel)
@@ -45,7 +47,7 @@ fun LogoutDialog(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "Cerrar sesión",
+                stringResource(R.string.logout),
                 color = ClienteTema.Texto,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
@@ -53,7 +55,7 @@ fun LogoutDialog(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "¿Seguro que quieres salir?",
+                stringResource(R.string.logout_confirmation),
                 color = ClienteTema.TextoSec,
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
@@ -71,7 +73,7 @@ fun LogoutDialog(
                         containerColor = ClienteTema.Rojo,
                         contentColor = Color.White
                     )
-                ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold) }
                 Button(
                     onClick = onConfirm,
                     shape = RoundedCornerShape(10.dp),
@@ -79,7 +81,7 @@ fun LogoutDialog(
                         containerColor = ClienteTema.Verde,
                         contentColor = Color.White
                     )
-                ) { Text("Salir", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.exit), fontWeight = FontWeight.Bold) }
             }
         }
     }
@@ -95,7 +97,7 @@ fun BotonCerrarSesion(
     IconButton(onClick = { mostrar = true }, modifier = modifier) {
         Icon(
             Icons.AutoMirrored.Filled.ExitToApp,
-            contentDescription = "Cerrar sesión",
+            contentDescription = stringResource(R.string.logout),
             tint = Color.White,
             modifier = Modifier.size(26.dp)
         )

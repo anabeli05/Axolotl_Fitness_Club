@@ -21,13 +21,15 @@ import com.example.gymcontrol.ui.cliente.home.ClienteHomeScreen
 import com.example.gymcontrol.ui.cliente.perfil.ClientePerfilScreen
 import com.example.gymcontrol.ui.theme.GymColors
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
+import com.example.gymcontrol.R
 
-private data class ClienteTabItem(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+private data class ClienteTabItem(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
 private val clienteTabs = listOf(
-    ClienteTabItem(Routes.CLIENT_HOME, "Inicio", Icons.Filled.Home),
-    ClienteTabItem(Routes.CLIENT_ADVISORIES, "Asesorias", Icons.Filled.FitnessCenter),
-    ClienteTabItem(Routes.CLIENT_PROFILE, "Perfil", Icons.Filled.Person)
+    ClienteTabItem(Routes.CLIENT_HOME, R.string.tab_home, Icons.Filled.Home),
+    ClienteTabItem(Routes.CLIENT_ADVISORIES, R.string.tab_advisories, Icons.Filled.FitnessCenter),
+    ClienteTabItem(Routes.CLIENT_PROFILE, R.string.tab_profile, Icons.Filled.Person)
 )
 
 @Composable
@@ -57,7 +59,7 @@ fun ClienteRootScreen() {
                             }
                         },
                         icon = { Icon(tab.icon, contentDescription = null) },
-                        label = { Text(tab.label) },
+                        label = { Text(stringResource(tab.labelRes)) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = GymColors.Gold,
                             selectedTextColor = GymColors.Gold,

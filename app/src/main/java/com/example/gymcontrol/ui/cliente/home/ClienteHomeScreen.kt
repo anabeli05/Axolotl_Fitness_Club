@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -98,7 +99,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 Text(
-                    text = "Acceso con reconocimiento facial",
+                    text = stringResource(R.string.cliente_facial_access_title),
                     color = ClienteTema.Texto,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
@@ -110,7 +111,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
                     AccesoFacialCard(personasDentro = personasDentro)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Mira a la cámara de recepción para entrar y salir",
+                        text = stringResource(R.string.cliente_facial_camera_hint),
                         color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )
@@ -119,14 +120,14 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 BarrasClaro(
-                    titulo = "Clientes ahorita",
+                    titulo = stringResource(R.string.cliente_clients_now_title),
                     datos = datosHora
                 )
             }
 
             item {
                 Text(
-                    text = "Horario del gimnasio: 06:00 - 00:00",
+                    text = stringResource(R.string.cliente_gym_schedule),
                     color = ClienteTema.TextoSec,
                     fontSize = 13.sp
                 )
@@ -137,12 +138,10 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
 @Composable
 private fun WelcomeMessage(name: String) {
-    val greeting = remember {
-        when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-            in 5..11 -> "Buenos días"
-            in 12..18 -> "Buenas tardes"
-            else -> "Buenas noches"
-        }
+    val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+        in 5..11 -> stringResource(R.string.cliente_greeting_morning)
+        in 12..18 -> stringResource(R.string.cliente_greeting_afternoon)
+        else -> stringResource(R.string.cliente_greeting_evening)
     }
     val firstName = name.trim().split(" ").firstOrNull().orEmpty()
 
@@ -161,7 +160,7 @@ private fun WelcomeMessage(name: String) {
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Qué bueno verte por aquí. ¡A darle con todo hoy!",
+            text = stringResource(R.string.cliente_welcome_subtitle),
             color = ClienteTema.TextoSec,
             fontSize = 15.sp,
             textAlign = TextAlign.Center
@@ -335,7 +334,7 @@ private fun AccesoFacialCard(personasDentro: Int?) {
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = if (personasDentro == 1) "persona dentro ahora" else "personas dentro ahora",
+                text = if (personasDentro == 1) stringResource(R.string.cliente_person_inside_now) else stringResource(R.string.cliente_people_inside_now),
                 color = ClienteTema.TextoSec,
                 fontSize = 13.sp
             )

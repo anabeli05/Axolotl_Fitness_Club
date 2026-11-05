@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -75,14 +76,14 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        "Asesorías",
+                        stringResource(R.string.cliente_asesorias_title),
                         color = ClienteTema.Texto,
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        "Elige tu instructor",
+                        stringResource(R.string.cliente_asesorias_choose_instructor),
                         color = ClienteTema.Texto,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
@@ -97,7 +98,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             if (instructors.isEmpty() && mensaje == null) {
                 item {
                     Text(
-                        "Aún no hay instructores disponibles",
+                        stringResource(R.string.cliente_asesorias_no_instructors),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp
                     )
@@ -146,12 +147,12 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            "Cupo: ${instructor.activos}/${instructor.maxClientes}",
+                            stringResource(R.string.cliente_asesorias_quota, instructor.activos, instructor.maxClientes),
                             color = ClienteTema.TextoSec,
                             fontSize = 13.sp
                         )
                         Text(
-                            "${formatPrice(instructor.costo)} /mes",
+                            stringResource(R.string.cliente_asesorias_per_month, formatPrice(instructor.costo)),
                             color = ClienteTema.Texto,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
@@ -165,11 +166,11 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         when {
-                            isApproved -> EstadoChip("Aprobada", ClienteTema.Verde, Color.White)
+                            isApproved -> EstadoChip(stringResource(R.string.cliente_asesorias_status_approved), ClienteTema.Verde, Color.White)
                             isPending -> {
-                                EstadoChip("Pendiente", ClienteTema.AzulClaro, ClienteTema.Texto)
+                                EstadoChip(stringResource(R.string.cliente_asesorias_status_pending), ClienteTema.AzulClaro, ClienteTema.Texto)
                                 Text(
-                                    "Cancelar",
+                                    stringResource(R.string.cliente_asesorias_cancel),
                                     color = ClienteTema.Rojo,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
@@ -205,7 +206,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                 )
                             ) {
                                 Text(
-                                    if (sinCupo) "Sin cupo" else "Solicitar",
+                                    if (sinCupo) stringResource(R.string.cliente_asesorias_no_quota) else stringResource(R.string.cliente_asesorias_request),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -226,7 +227,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
             title = {
                 Text(
-                    "¿Cancelar solicitud?",
+                    stringResource(R.string.cliente_asesorias_cancel_dialog_title),
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -235,7 +236,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             },
             text = {
                 Text(
-                    "Se cancelará tu solicitud de asesoría con ${target.instructorName}.",
+                    stringResource(R.string.cliente_asesorias_cancel_dialog_desc, target.instructorName),
                     color = ClienteTema.TextoSec,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -251,7 +252,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, ClienteTema.Borde),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                    ) { Text("Volver") }
+                    ) { Text(stringResource(R.string.common_back)) }
 
                     Button(
                         onClick = {
@@ -271,7 +272,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                             containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
                         )
-                    ) { Text("Cancelar", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.cliente_asesorias_cancel), fontWeight = FontWeight.Bold) }
                 }
             }
         )

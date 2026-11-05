@@ -1,0 +1,293 @@
+<resources>
+    <!-- App & Login -->
+    <string name="app_name">Axolotl Fitness Club</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="accept_terms_prefix">I accept the </string>
+    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="accept_terms_and"> and the </string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="login_button">Sign In</string>
+    <string name="logging_in">Signing in...</string>
+    <string name="error_invalid_credentials">Incorrect username or password</string>
+    <string name="error_connection_prefix">Connection error: </string>
+    <string name="change_password">Change password</string>
+    <string name="password_updated_success">Password updated. You can now log in.</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="repeat_new_password">Repeat new password</string>
+    <string name="password_requirements">Minimum 8 characters, with uppercase, lowercase, number, and symbol.</string>
+    <string name="passwords_dont_match">Passwords do not match</string>
+    <string name="error_change_failed">Failed to change</string>
+    <string name="cancel">Cancel</string>
+    <string name="saving">Saving...</string>
+    <string name="save">Save</string>
+    <string name="logout">Log out</string>
+    <string name="logout_confirmation">Are you sure you want to log out?</string>
+    <string name="exit">Exit</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_advisories">Advisories</string>
+    <string name="tab_payments">Payments</string>
+    <string name="tab_profile">Profile</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_clients">Clients</string>
+    <string name="tab_requests">Requests</string>
+    <string name="tab_staff">Staff</string>
+    <string name="tab_services">Services</string>
+    <string name="tab_expenses">Expenses</string>
+    <string name="tab_reports">Reports</string>
+
+    <!-- Roles & Language -->
+    <string name="role_reception">Reception</string>
+    <string name="role_manager">Manager</string>
+    <string name="role_instructor">Instructor</string>
+    <string name="role_client">Client</string>
+    <string name="change_language">Change Language</string>
+
+    <!-- Global / Common Components -->
+    <string name="common_people_per_hour">People per hour</string>
+    <string name="chart_active">Active</string>
+    <string name="chart_inactive">Inactive</string>
+    <string name="status_active">Active</string>
+    <string name="status_inactive">Inactive</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_yes_continue">Yes, continue</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_loading">Loading...</string>
+    <string name="common_close">Close</string>
+    <string name="common_accept">Accept</string>
+    <string name="common_back">Back</string>
+    <string name="common_return">Back</string>
+
+    <!-- Cliente: Home -->
+    <string name="cliente_facial_access_title">Facial recognition access</string>
+    <string name="cliente_facial_camera_hint">Look at the reception camera to enter and exit</string>
+    <string name="cliente_clients_now_title">Clients right now</string>
+    <string name="cliente_gym_schedule">Gym hours: 06:00 - 00:00</string>
+    <string name="cliente_greeting_morning">Good morning</string>
+    <string name="cliente_greeting_afternoon">Good afternoon</string>
+    <string name="cliente_greeting_evening">Good evening</string>
+    <string name="cliente_welcome_subtitle">Great to see you here. Let\'s give it all today!</string>
+    <string name="cliente_person_inside_now">person inside now</string>
+    <string name="cliente_people_inside_now">people inside now</string>
+
+    <!-- Cliente: Pagos -->
+    <string name="cliente_pagos_title">Payment Methods</string>
+    <string name="cliente_pago_transferencia_title">Payment by\nTransfer</string>
+    <string name="cliente_pago_transferencia_dialog_title">Payment by Transfer</string>
+    <string name="cliente_pago_transferencia_sub">Direct bank transfer</string>
+    <string name="cliente_pago_transferencia_instructions">Enter the CLABE in your mobile banking app and put your membership number or full name in the payment reference.</string>
+    <string name="cliente_pago_deposito_title">Payment by Deposit</string>
+    <string name="cliente_pago_deposito_sub">Deposit at bank branch or convenience store</string>
+    <string name="cliente_pago_deposito_instructions">Present the card number at any bank branch or convenience store to make your deposit.</string>
+    <string name="cliente_pago_efectivo_title">Cash Payment</string>
+    <string name="cliente_pago_efectivo_desc">Physical payment at reception\n(Axolotl Gym)</string>
+    <string name="cliente_pago_efectivo_sub">Physical payment at reception (Axolotl Gym)</string>
+    <string name="cliente_pago_efectivo_instructions">Go directly to the gym reception and provide your name or membership number to the staff.</string>
+    <string name="cliente_pago_label_banco">Bank:</string>
+    <string name="cliente_pago_label_clabe">CLABE:</string>
+    <string name="cliente_pago_label_cuenta">Account:</string>
+    <string name="cliente_pago_label_beneficiario">Beneficiary:</string>
+    <string name="cliente_pago_label_concepto">Reference:</string>
+    <string name="cliente_pago_label_no_tarjeta">Card No.:</string>
+    <string name="cliente_pago_label_corresponsales">Correspondents:</string>
+    <string name="cliente_pago_label_sucursal">Branch:</string>
+    <string name="cliente_pago_label_ubicacion">Location:</string>
+    <string name="cliente_pago_label_horario">Hours:</string>
+    <string name="cliente_pago_label_atencion">Attention:</string>
+    <string name="cliente_pago_val_horario">Monday to Sunday (06:00 - 00:00 hrs)</string>
+    <string name="cliente_pago_val_caja">Main register</string>
+    <string name="cliente_pago_val_recepcion">Reception - Axolotl Gym</string>
+    <string name="cliente_pago_val_concepto">Your Membership number</string>
+    <string name="cliente_pago_val_beneficiario_gym">Gimnasio Axolotl S.A. de C.V.</string>
+
+    <!-- Cliente: Asesorías -->
+    <string name="cliente_asesorias_title">Advisories</string>
+    <string name="cliente_asesorias_choose_instructor">Choose your instructor</string>
+    <string name="cliente_asesorias_no_instructors">No instructors available yet</string>
+    <string name="cliente_asesorias_quota">Quota: %1$d/%2$d</string>
+    <string name="cliente_asesorias_per_month">%1$s /mo</string>
+    <string name="cliente_asesorias_status_approved">Approved</string>
+    <string name="cliente_asesorias_status_pending">Pending</string>
+    <string name="cliente_asesorias_no_quota">Full</string>
+    <string name="cliente_asesorias_request">Request</string>
+    <string name="cliente_asesorias_cancel_dialog_title">Cancel request?</string>
+    <string name="cliente_asesorias_cancel_dialog_desc">Your advisory request with %1$s will be cancelled.</string>
+
+    <!-- Cliente e Instructor: Perfil -->
+    <string name="perfil_title">My Profile</string>
+    <string name="perfil_status_label">Status:</string>
+    <string name="perfil_action_edit_data">Edit details</string>
+    <string name="perfil_action_change_password">Change password</string>
+    <string name="perfil_personal_data_title">Personal Information</string>
+    <string name="perfil_label_name">Name:</string>
+    <string name="perfil_label_phone">Phone:</string>
+    <string name="perfil_label_email">Email:</string>
+    <string name="perfil_photo_desc">Profile photo</string>
+    <string name="perfil_change_photo_desc">Change photo</string>
+    <string name="perfil_photo_dialog_title">Profile photo</string>
+    <string name="perfil_photo_take">Take photo</string>
+    <string name="perfil_photo_gallery">Choose from gallery</string>
+    <string name="perfil_photo_remove">Remove photo</string>
+    <string name="perfil_edit_dialog_title">Edit details</string>
+    <string name="perfil_field_name">Name</string>
+    <string name="perfil_field_email">Email</string>
+    <string name="perfil_field_phone">Phone</string>
+    <string name="perfil_error_phone_digits">Only numbers allowed</string>
+    <string name="perfil_error_min_letters">Minimum 3 letters</string>
+    <string name="perfil_error_letters_only">Only letters allowed</string>
+    <string name="perfil_confirm_update">Update</string>
+    <string name="perfil_password_min_length">Minimum 8 characters</string>
+    <string name="perfil_confirm_password">Confirm password</string>
+    <string name="perfil_load_error">Failed to load your data</string>
+    <string name="perfil_image_load_error">Failed to load image</string>
+    <string name="perfil_camera_permission_required">Camera permission required to take photo</string>
+    <string name="perfil_not_loaded_yet">Your data is not loaded yet</string>
+    <string name="perfil_data_updated">Data updated</string>
+    <string name="perfil_password_updated">Password updated</string>
+
+    <!-- Instructor: Mis Clientes & Perfil -->
+    <string name="instructor_assigned_users_title">Assigned Users</string>
+    <string name="instructor_no_assigned_clients">You have no assigned clients</string>
+    <string name="instructor_client_no_days">No days assigned</string>
+    <string name="instructor_client_objective">Goal: %1$s</string>
+    <string name="instructor_dialog_days_title">Days attending</string>
+    <string name="instructor_dialog_objective_title">Goal</string>
+    <string name="instructor_max_capacity_label">Max capacity:</string>
+    <string name="instructor_capacity_full">Full</string>
+    <string name="instructor_capacity_available">Slots open</string>
+
+    <!-- Encargado: Dashboard -->
+    <string name="encargado_stat_people_inside_now">People inside now</string>
+    <string name="encargado_stat_active_clients">Active Clients</string>
+    <string name="encargado_stat_inactive_clients">Inactive Clients</string>
+    <string name="encargado_stat_month_income">Month\'s Revenue</string>
+    <string name="encargado_chart_hourly_occupancy">People per hour (today)</string>
+    <string name="encargado_chart_clients_status">Active/Inactive Clients</string>
+    <string name="encargado_chart_income_per_day">Income per Day</string>
+    <string name="encargado_peak_hour_prefix">Peak hour today: %1$s (%2$d people)</string>
+
+    <!-- Encargado / Recepción: Clientes Form & List -->
+    <string name="encargado_clients_search_placeholder">Name or membership</string>
+    <string name="encargado_clients_new_client_button">New Client</string>
+    <string name="encargado_clients_not_found">No clients found</string>
+    <string name="encargado_clients_renew_button">Renew</string>
+    <string name="encargado_clients_choose_plan">Choose plan:</string>
+    <string name="encargado_client_form_edit_title">Edit client</string>
+    <string name="encargado_client_form_new_title">New client</string>
+    <string name="encargado_client_form_name_label">Name</string>
+    <string name="encargado_client_form_name_warning">Only letters allowed</string>
+    <string name="encargado_client_form_min_letters">Minimum 3 letters</string>
+    <string name="encargado_client_form_lastname_label">Last Name</string>
+    <string name="encargado_client_form_phone_label">Phone</string>
+    <string name="encargado_client_form_phone_warning">Only numbers allowed</string>
+    <string name="encargado_client_form_email_label">Email</string>
+    <string name="encargado_client_form_email_warning">Email cannot contain spaces</string>
+    <string name="encargado_client_form_email_invalid">Invalid email</string>
+    <string name="encargado_client_form_plan_placeholder">Select a plan</string>
+    <string name="encargado_client_form_plan_label">Plan</string>
+    <string name="encargado_client_form_create_button">Create Client</string>
+
+    <!-- Encargado: Gastos -->
+    <string name="encargado_gastos_new_button">New Expense</string>
+    <string name="encargado_gastos_delete_confirm_title">Delete expense?</string>
+    <string name="encargado_gastos_edit_title">Edit expense</string>
+    <string name="encargado_gastos_new_title">New expense</string>
+    <string name="encargado_gastos_concept_label">Concept</string>
+    <string name="encargado_gastos_concept_warning">Only letters and numbers allowed</string>
+    <string name="encargado_gastos_category_label">Category</string>
+    <string name="encargado_gastos_category_warning">Only letters allowed</string>
+    <string name="encargado_gastos_amount_label">Amount</string>
+    <string name="encargado_gastos_date_label">Date</string>
+    <string name="encargado_gastos_create_button">Create Expense</string>
+    <string name="encargado_gastos_choose_date">Select date</string>
+
+    <!-- Encargado: Reportes -->
+    <string name="encargado_reportes_title">Monthly report</string>
+    <string name="encargado_reportes_col_periodo">Period</string>
+    <string name="encargado_reportes_col_servicios">Services</string>
+    <string name="encargado_reportes_col_asesorias">Advisories</string>
+    <string name="encargado_reportes_col_gastos">Expenses</string>
+    <string name="encargado_reportes_col_total">Total</string>
+
+    <!-- Encargado: Servicios -->
+    <string name="encargado_servicios_new_button">New Service</string>
+    <string name="encargado_servicios_delete_confirm_title">Delete service?</string>
+    <string name="encargado_servicios_edit_title">Edit service</string>
+    <string name="encargado_servicios_new_title">New service</string>
+    <string name="encargado_servicios_name_label">Name</string>
+    <string name="encargado_servicios_name_warning">Only letters and numbers allowed</string>
+    <string name="encargado_servicios_duration_label">Duration (days)</string>
+    <string name="encargado_servicios_duration_warning">Only numbers allowed</string>
+    <string name="encargado_servicios_duration_error">Must be greater than 0</string>
+    <string name="encargado_servicios_cost_label">Cost</string>
+    <string name="encargado_servicios_create_button">Create Service</string>
+
+    <!-- Encargado: Usuarios / Personal -->
+    <string name="encargado_usuarios_add_button">Add Staff</string>
+    <string name="encargado_usuarios_delete_confirm_title">Delete staff member?</string>
+    <string name="encargado_usuarios_new_staff_title">New staff member</string>
+    <string name="encargado_usuarios_edit_staff_title">Edit staff member</string>
+    <string name="encargado_usuarios_email_assigned">Assigned email</string>
+    <string name="encargado_usuarios_initial_pwd_notice">Initial password is Axolotl2026 and was sent to user\'s email.</string>
+    <string name="encargado_usuarios_role_label">Role</string>
+    <string name="encargado_usuarios_advisory_cost_label">Advisory cost</string>
+    <string name="encargado_usuarios_max_capacity_label">Max capacity</string>
+    <string name="encargado_usuarios_create_staff_button">Create Staff</string>
+    <string name="encargado_usuarios_status_label">Status</string>
+
+    <!-- Recepción: Clientes Screen -->
+    <string name="recepcion_clients_inside_since">Inside · since %1$s</string>
+    <string name="recepcion_clients_outside">Outside</string>
+
+    <!-- Recepción: Registro Rostro -->
+    <string name="recepcion_face_reg_look_camera">Ask the client to look at the camera</string>
+    <string name="recepcion_face_reg_save_error">Could not save face</string>
+    <string name="recepcion_face_reg_update_title">Update face</string>
+    <string name="recepcion_face_reg_register_title">Register face</string>
+    <string name="recepcion_face_model_load_error">Could not load facial model</string>
+
+    <!-- Recepción: Acceso Facial Scanner -->
+    <string name="recepcion_scanner_title">Facial recognition</string>
+    <string name="recepcion_scanner_scan_face_title">Scan face</string>
+    <string name="recepcion_scanner_stand_in_front">Stand in front of the camera</string>
+    <string name="recepcion_scanner_verifying">Verifying…</string>
+    <string name="recepcion_scanner_client_info_title">Client information</string>
+    <string name="recepcion_scanner_empty_prompt">Scan a face to see client information</string>
+    <string name="recepcion_scanner_membership_prefix">Membership: %1$s</string>
+    <string name="recepcion_scanner_inside_since">Inside since %1$s</string>
+    <string name="recepcion_scanner_entry_btn">Entry</string>
+    <string name="recepcion_scanner_exit_btn">Exit</string>
+    <string name="recepcion_scanner_inside_count">Inside: %1$d</string>
+    <string name="recepcion_scanner_db_error">No database connection</string>
+    <string name="recepcion_scanner_denied_inactive">Access denied: inactive membership. Please renew</string>
+    <string name="recepcion_scanner_repeated">%1$s was already registered a moment ago</string>
+    <string name="recepcion_scanner_already_inside">%1$s already has an active entry</string>
+    <string name="recepcion_scanner_no_entry">%1$s does not have an open entry</string>
+    <string name="recepcion_scanner_denied_unregistered">Access denied: face not registered</string>
+    <string name="recepcion_scanner_entry_success">%1$s entered · %2$s</string>
+    <string name="recepcion_scanner_exit_success">%1$s exited</string>
+    <string name="recepcion_scanner_duration_less_min">less than 1 min</string>
+
+    <!-- Recepción: Solicitudes -->
+    <string name="recepcion_solicitudes_pending_badge">%1$d pending</string>
+    <string name="recepcion_solicitudes_empty">No requests</string>
+    <string name="recepcion_solicitudes_confirm_title">Confirm</string>
+    <string name="recepcion_solicitudes_confirm_approve_text">Are you sure you want to approve %1$s\'s request with %2$s?</string>
+    <string name="recepcion_solicitudes_confirm_reject_text">Are you sure you want to reject %1$s\'s request with %2$s?</string>
+    <string name="recepcion_solicitudes_approve_btn">Approve</string>
+    <string name="recepcion_solicitudes_reject_btn">Reject</string>
+    <string name="recepcion_solicitudes_status_approved">Approved</string>
+    <string name="recepcion_solicitudes_status_rejected">Rejected</string>
+    <string name="recepcion_solicitudes_status_pending">Pending</string>
+    <string name="cliente_asesorias_cancel">Cancel</string>
+
+    <!-- Legal -->
+    <string name="legal_back">Back</string>
+    <string name="legal_last_updated">Last updated: November 2026</string>
+</resources>
