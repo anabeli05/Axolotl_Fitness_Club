@@ -37,10 +37,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
+import com.example.gymcontrol.data.remote.OcupacionRepository
+import com.example.gymcontrol.data.remote.OcupacionRow
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import java.util.Calendar
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 @Composable
 fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
@@ -54,6 +58,27 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
             try { personasDentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
             delay(5_000)
         }
+    }
+
+    // Entradas de hoy por hora (vista ocupacion_por_hora); se actualiza cada 30 s
+    var ocupacion by remember { mutableStateOf<List<OcupacionRow>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { ocupacion = OcupacionRepository.hoy() } catch (_: Exception) { }
+            delay(30_000)
+        }
+    }
+
+    // Bloques de 2 horas de 6am a 12am, con 0 donde no hubo entradas
+    val conteo = ocupacion.associate { it.hora to it.personas }
+    val datosHora = (6..22 step 2).map { h ->
+        val etiqueta = when {
+            h < 12 -> "${h}am"
+            h == 12 -> "12pm"
+            else -> "${h - 12}pm"
+        }
+        val total = (conteo["%02d:00".format(h)] ?: 0) + (conteo["%02d:00".format(h + 1)] ?: 0)
+        etiqueta to total.toFloat()
     }
 
     ClienteScaffoldClaro(
@@ -95,11 +120,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 BarrasClaro(
                     titulo = "Clientes ahorita",
-                    datos = listOf(
-                        "6am" to 25f, "8am" to 35f, "10am" to 25f, "12pm" to 10f,
-                        "2pm" to 27f, "4pm" to 42f, "6pm" to 47f, "8pm" to 55f,
-                        "10pm" to 55f, "12am" to 25f
-                    )
+                    datos = datosHora
                 )
             }
 
@@ -150,9 +171,10 @@ private fun WelcomeMessage(name: String) {
 
 @Composable
 private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
-    val max = 100f
+    // Escala según el valor más alto (múltiplo de 5, mínimo 5)
+    val max = ceil(maxOf(datos.maxOfOrNull { it.second } ?: 0f, 5f) / 5f) * 5f
     val altoMax = 150.dp
-    val marcas = listOf(0, 20, 40, 60, 80, 100)
+    val marcas = (0..5).map { (max * it / 5).roundToInt() }
     var seleccionado by remember { mutableStateOf<Int?>(null) }
 
     Column(modifier = Modifier.fillMaxWidth()) {

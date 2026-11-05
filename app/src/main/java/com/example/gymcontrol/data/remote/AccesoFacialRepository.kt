@@ -2,6 +2,17 @@ package com.example.gymcontrol.data.remote
 
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.rpc
+import io.github.jan.supabase.realtime.PostgresAction
+import io.github.jan.supabase.realtime.channel
+import io.github.jan.supabase.realtime.postgresChangeFlow
+import io.github.jan.supabase.realtime.realtime
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -26,6 +37,12 @@ data class MovimientoRow(
 
 @Serializable
 data class RostroRegistradoRow(@SerialName("cliente_id") val clienteId: Long)
+
+@Serializable
+data class ClienteDentroRow(
+    @SerialName("cliente_id") val clienteId: Long,
+    val desde: String
+)
 
 @Serializable
 private data class AccesoParams(val p_embedding: List<Float>)
@@ -70,4 +87,25 @@ object AccesoFacialRepository {
         SupabaseProvider.client.postgrest
             .rpc("ocupacion_actual")
             .decodeAs<Int>()
+
+    /** Clientes dentro ahora → hora de su entrada (ISO). */
+    suspend fun clientesDentro(): Map<Long, String> =
+        SupabaseProvider.client.postgrest
+            .rpc("clientes_dentro")
+            .decodeList<ClienteDentroRow>()
+            .associate { it.clienteId to it.desde }
+
+    /** Emite cada vez que se registra una entrada o salida (Supabase Realtime). */
+    fun movimientos(): Flow<Unit> = channelFlow {
+        val canal = SupabaseProvider.client.channel("registros_acceso_${System.nanoTime()}")
+        canal.postgresChangeFlow<PostgresAction.Insert>(schema = "public") {
+            table = "registros_acceso"
+        }.onEach { send(Unit) }.launchIn(this)
+        canal.subscribe()
+        try {
+            awaitCancellation()
+        } finally {
+            withContext(NonCancellable) { SupabaseProvider.client.realtime.removeChannel(canal) }
+        }
+    }
 }

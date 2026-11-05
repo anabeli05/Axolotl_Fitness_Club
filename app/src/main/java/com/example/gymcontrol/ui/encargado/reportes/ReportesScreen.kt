@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import com.example.gymcontrol.data.remote.ReporteRow
 import com.example.gymcontrol.data.remote.ReportesRepository
-import com.example.gymcontrol.GymApp
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
 

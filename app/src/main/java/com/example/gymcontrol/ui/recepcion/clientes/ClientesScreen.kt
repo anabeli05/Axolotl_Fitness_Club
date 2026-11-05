@@ -33,7 +33,12 @@ import com.example.gymcontrol.data.remote.PlanRow
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
@@ -54,6 +59,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     // Reconocimiento facial: clientes con rostro y a quién se le registra ahora
     var conRostro by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var registrandoRostro by remember { mutableStateOf<ClienteRow?>(null) }
+    // Quién está dentro del gym ahora (cliente -> hora de entrada)
+    var dentro by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     // Pregunta "¿Estás seguro?" pendiente: mensaje + acción
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
@@ -73,6 +80,22 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     LaunchedEffect(Unit) {
         recargar()
         try { planes = ClientesRepository.planes() } catch (_: Exception) {}
+    }
+
+    // Dentro / Fuera en tiempo real: se recarga en cuanto la cámara registra una
+    // entrada o salida, y cada 30 s por si se pierde la conexión de Realtime
+    LaunchedEffect(Unit) {
+        launch {
+            try {
+                AccesoFacialRepository.movimientos().collect {
+                    try { dentro = AccesoFacialRepository.clientesDentro() } catch (_: Exception) {}
+                }
+            } catch (_: Exception) {}
+        }
+        while (true) {
+            try { dentro = AccesoFacialRepository.clientesDentro() } catch (_: Exception) {}
+            delay(30_000)
+        }
     }
 
     val clients = todos.filter {
@@ -144,6 +167,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
                         tieneRostro = client.id in conRostro,
+                        dentroDesde = dentro[client.id],
                         onRostro = { registrandoRostro = client },
                         onEdit = {
                             editing = client
@@ -305,6 +329,7 @@ private fun ClientCard(
     registrationDate: String,
     isActive: Boolean,
     tieneRostro: Boolean,
+    dentroDesde: String?,
     onRostro: () -> Unit,
     onEdit: () -> Unit,
     onRenovar: () -> Unit
@@ -353,6 +378,8 @@ private fun ClientCard(
             Text("Membresía: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
             Text("Registro: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Spacer(Modifier.height(6.dp))
+            AccesoBadge(dentroDesde)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -403,6 +430,28 @@ private fun IconSquareButton(
         }
     }
 }
+
+// Punto verde "Dentro · desde 10:32 AM" o gris "Fuera"
+@Composable
+private fun AccesoBadge(dentroDesde: String?) {
+    val color = if (dentroDesde != null) ClienteTema.Verde else ClienteTema.TextoSec
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(10.dp).background(color, CircleShape))
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = if (dentroDesde != null) "Dentro · desde ${horaEntrada(dentroDesde)}" else "Fuera",
+            color = color,
+            fontSize = 15.sp,
+            fontWeight = if (dentroDesde != null) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+private val HORA = DateTimeFormatter.ofPattern("hh:mm a", Locale.forLanguageTag("es-MX"))
+
+private fun horaEntrada(iso: String): String =
+    runCatching { OffsetDateTime.parse(iso).atZoneSameInstant(ZoneId.systemDefault()).format(HORA) }
+        .getOrDefault("—")
 
 @Composable
 private fun StatusBadge(isActive: Boolean) {
