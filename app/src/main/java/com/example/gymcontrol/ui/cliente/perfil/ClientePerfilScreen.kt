@@ -158,7 +158,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(12.dp))
                     Text(name, color = ClienteTema.Texto, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(2.dp))
-                    Text("Membresía : $membership", color = ClienteTema.Texto, fontSize = 15.sp)
+                    Text("${stringResource(R.string.label_membership)} : $membership", color = ClienteTema.Texto, fontSize = 15.sp)
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.perfil_status_label), color = ClienteTema.Texto, fontSize = 15.sp)
@@ -167,8 +167,11 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     }
                     cliente?.let {
                         Spacer(Modifier.height(4.dp))
+                        val planName = translatedPlanName(it.plan)
+                        val planPrefix = stringResource(R.string.label_plan_prefix, planName)
+                        val expiresLabel = stringResource(R.string.label_expires)
                         Text(
-                            "Plan: ${it.plan ?: "—"} · Vence: ${ClientesRepository.fechaApp(it.fechaFin)}",
+                            "$planPrefix · $expiresLabel: ${ClientesRepository.fechaApp(it.fechaFin)}",
                             color = ClienteTema.TextoSec,
                             fontSize = 13.sp
                         )
@@ -672,4 +675,14 @@ private fun GymTextField(
             disabledLabelColor = ClienteTema.TextoSec.copy(alpha = 0.5f)
         )
     )
+}
+
+@Composable
+private fun translatedPlanName(plan: String?): String {
+    return when (plan?.lowercase()?.trim()) {
+        "trimestral", "quarterly" -> stringResource(R.string.plan_quarterly)
+        "mensual", "monthly" -> stringResource(R.string.plan_monthly)
+        "visita", "día", "day", "day pass" -> stringResource(R.string.plan_day)
+        else -> plan ?: "—"
+    }
 }

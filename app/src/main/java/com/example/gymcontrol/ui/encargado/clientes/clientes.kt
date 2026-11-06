@@ -279,6 +279,9 @@ private fun ClientCard(
     onEdit: () -> Unit,
     onRenovar: () -> Unit
 ) {
+    val labelMembership = stringResource(R.string.label_membership)
+    val labelRegistration = stringResource(R.string.label_registration)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -295,9 +298,9 @@ private fun ClientCard(
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
-            Text("Membresía: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text("$labelMembership: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Registro: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -380,7 +383,7 @@ private fun RenovarDialog(
         onDismissRequest = onDismiss,
         containerColor = ClienteTema.Beige,
         shape = RoundedCornerShape(16.dp),
-        title = { Text("Renovar a ${cliente.nombre}", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.encargado_clients_renew_title, cliente.nombre), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 Text(stringResource(R.string.encargado_clients_choose_plan), color = ClienteTema.TextoSec)

@@ -10,10 +10,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ReporteRow
 import com.example.gymcontrol.data.remote.ReportesRepository
 import com.example.gymcontrol.ui.components.GymScaffold
@@ -50,7 +52,7 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Reporte mensual",
+                text = stringResource(R.string.encargado_reportes_title),
                 color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -59,7 +61,7 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
             Spacer(Modifier.height(16.dp))
 
             if (cargando) {
-                Text("Cargando...", color = ClienteTema.TextoSec)
+                Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec)
                 Spacer(Modifier.height(8.dp))
             }
             errorMsg?.let { msg ->
@@ -80,11 +82,11 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                             .background(ClienteTema.Fondo, RoundedCornerShape(10.dp))
                             .padding(vertical = 4.dp)
                     ) {
-                        HeaderCell("Periodo", 130)
-                        HeaderCell("Servicios", 110)
-                        HeaderCell("Asesorías", 110)
-                        HeaderCell("Gastos", 110)
-                        HeaderCell("Total", 110)
+                        HeaderCell(stringResource(R.string.encargado_reportes_col_periodo), 130)
+                        HeaderCell(stringResource(R.string.encargado_reportes_col_servicios), 110)
+                        HeaderCell(stringResource(R.string.encargado_reportes_col_asesorias), 110)
+                        HeaderCell(stringResource(R.string.encargado_reportes_col_gastos), 110)
+                        HeaderCell(stringResource(R.string.encargado_reportes_col_total), 110)
                     }
 
                     reportes.forEachIndexed { index, r ->

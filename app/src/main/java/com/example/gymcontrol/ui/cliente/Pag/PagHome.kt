@@ -35,6 +35,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
     val transTitle = stringResource(R.string.cliente_pago_transferencia_dialog_title)
     val transInstructions = stringResource(R.string.cliente_pago_transferencia_instructions)
     val labelBanco = stringResource(R.string.cliente_pago_label_banco)
+    val bankTitle = stringResource(R.string.bank_title)
     val labelClabe = stringResource(R.string.cliente_pago_label_clabe)
     val labelCuenta = stringResource(R.string.cliente_pago_label_cuenta)
     val labelBeneficiario = stringResource(R.string.cliente_pago_label_beneficiario)
@@ -91,7 +92,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                             type = PaymentType.TRANSFERENCIA,
                             title = transTitle,
                             details = listOf(
-                                labelBanco to "Banco",
+                                labelBanco to bankTitle,
                                 labelClabe to "012 095 01569158521 0",
                                 labelCuenta to "1234567890",
                                 labelBeneficiario to valBeneficiarioGym,
