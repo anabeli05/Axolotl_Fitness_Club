@@ -31,6 +31,7 @@ import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
+import java.util.Locale
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
@@ -49,9 +50,12 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var errorForm by remember { mutableStateOf<String?>(null) }
     var renovando by remember { mutableStateOf<ClienteRow?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
-    // Pregunta "¿Estás seguro?" pendiente: mensaje + acción
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
+
+    val msgRegisterFormat = stringResource(R.string.encargado_confirm_register_client, "%s")
+    val msgSaveFormat = stringResource(R.string.encargado_confirm_save_client, "%s")
+    val msgRenewFormat = stringResource(R.string.encargado_confirm_renew_client, "%s", "%s")
 
     suspend fun recargar() {
         try {
@@ -90,7 +94,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     OutlinedTextField(
                         value = search,
                         onValueChange = { search = it },
-                        placeholder = { Text(stringResource(R.string.encargado_clients_search_placeholder), color = ClienteTema.TextoSec) },
+                        placeholder = { Text(stringResource(R.string.placeholder_search_client), color = ClienteTema.TextoSec) },
                         leadingIcon = {
                             Icon(Icons.Filled.Search, contentDescription = null, tint = ClienteTema.TextoSec)
                         },
@@ -120,7 +124,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.encargado_clients_new_client_button), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_new_client), fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -130,9 +134,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 itemsIndexed(clients) { _, client ->
                     ClientCard(
                         name = client.nombre,
-                        membership = client.numeroMembresia.ifBlank { "—" } +
-                                if (client.fechaFin != null) " · vence ${ClientesRepository.fechaApp(client.fechaFin)}"
-                                else " · sin membresía",
+                        membershipNum = client.numeroMembresia,
+                        fechaFin = client.fechaFin,
                         registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
                         onEdit = {
@@ -177,7 +180,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     },
                     onSave = { nombre, telefono, correo, plan ->
                         if (c == null) {
-                            confirmar = "¿Estás seguro de registrar a $nombre?" to {
+                            confirmar = String.format(Locale.getDefault(), msgRegisterFormat, nombre) to {
                                 scope.launch {
                                     try {
                                         val nuevo = ClientesRepository.crear(
@@ -197,7 +200,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 Unit
                             }
                         } else {
-                            confirmar = "¿Estás seguro de guardar los cambios de ${c.nombre}?" to {
+                            confirmar = String.format(Locale.getDefault(), msgSaveFormat, c.nombre) to {
                                 scope.launch {
                                     try {
                                         ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado)
@@ -223,7 +226,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     onDismiss = { renovando = null },
                     onRenovar = { plan ->
                         renovando = null
-                        confirmar = "¿Estás seguro de renovar a ${cl.nombre} con el plan $plan?" to {
+                        confirmar = String.format(Locale.getDefault(), msgRenewFormat, cl.nombre, plan) to {
                             scope.launch {
                                 try {
                                     val vence = ClientesRepository.renovar(cl.id, plan, SesionActual.correo ?: "")
@@ -273,7 +276,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 @Composable
 private fun ClientCard(
     name: String,
-    membership: String,
+    membershipNum: String,
+    fechaFin: String?,
     registrationDate: String,
     isActive: Boolean,
     onEdit: () -> Unit,
@@ -297,8 +301,20 @@ private fun ClientCard(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(8.dp))
-            Text("$labelMembership: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "$labelMembership: " + membershipNum.ifBlank { "—" },
+                color = ClienteTema.TextoSec,
+                fontSize = 17.sp
+            )
+            if (fechaFin != null) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(fechaFin)),
+                    color = ClienteTema.TextoSec,
+                    fontSize = 17.sp
+                )
+            }
             Spacer(Modifier.height(2.dp))
             Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
         }

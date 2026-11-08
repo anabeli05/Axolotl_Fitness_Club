@@ -43,13 +43,13 @@ import com.example.gymcontrol.data.model.Status
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.CorreoRepository
 import com.example.gymcontrol.data.remote.PersonalRepository
-import java.util.Locale
 import com.example.gymcontrol.data.remote.PersonalRow
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
@@ -62,6 +62,20 @@ private val DeleteBorder = Brush.linearGradient(
 private val STAFF_ROLES = listOf(UserRole.RECEPCION, UserRole.INSTRUCTOR, UserRole.ENCARGADO)
 
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
+
+@Composable
+fun UserRole.toTranslatedString(): String = when (this) {
+    UserRole.RECEPCION -> stringResource(R.string.role_reception)
+    UserRole.INSTRUCTOR -> stringResource(R.string.role_instructor)
+    UserRole.ENCARGADO -> stringResource(R.string.role_manager)
+    else -> this.name
+}
+
+@Composable
+private fun Status.etiqueta(): String = when (this) {
+    Status.ACTIVO -> stringResource(R.string.status_active)
+    Status.INACTIVO -> stringResource(R.string.status_inactive)
+}
 
 private class StaffItem(
     val id: Long,
@@ -159,8 +173,8 @@ fun UsuariosScreen(
                 showNewForm = false
                 errorAlta = null
             },
-            onSave = { nombre, tel, correo, rol, costo, cap ->
-                val msg = String.format(Locale.getDefault(), confirmCreateMsg, nombre, rol.name)
+            onSave = { nombre, tel, correo, rol, costo, cap, roleName ->
+                val msg = String.format(Locale.getDefault(), confirmCreateMsg, nombre, roleName)
                 pendiente = Pendiente(msg) {
                     scope.launch {
                         try {
@@ -226,7 +240,7 @@ fun UsuariosScreen(
     }
 
     deleting?.let { target ->
-        val deleteMsg = stringResource(R.string.encargado_usuarios_delete_confirm_message, target.name)
+        val deleteMsg = stringResource(R.string.delete_staff_confirm, target.name)
         AlertDialog(
             onDismissRequest = {
                 deleting = null
@@ -238,7 +252,7 @@ fun UsuariosScreen(
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
             title = {
                 Text(
-                    stringResource(R.string.encargado_usuarios_delete_confirm_title),
+                    stringResource(R.string.title_delete_staff),
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -347,6 +361,8 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
 @Composable
 private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit) {
     val statusColor = if (item.status == Status.ACTIVO) ClienteTema.Verde else ClienteTema.Rojo
+    val statusText = item.status.etiqueta()
+    val roleText = item.role.toTranslatedString()
 
     Row(
         modifier = Modifier
@@ -385,7 +401,7 @@ private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit)
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "${item.role}",
+                text = roleText,
                 color = ClienteTema.AzulSel,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
@@ -406,7 +422,7 @@ private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit)
                     .padding(horizontal = 10.dp, vertical = 2.dp)
             ) {
                 Text(
-                    text = "${item.status}",
+                    text = statusText,
                     color = statusColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -490,7 +506,7 @@ private fun StaffDialog(
 private fun NewStaffDialog(
     error: String?,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, UserRole, String, String) -> Unit
+    onSave: (String, String, String, UserRole, String, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -503,6 +519,8 @@ private fun NewStaffDialog(
     val canSave = nameHasMinLetters(name) && phone.length == 10 &&
             email.isNotBlank() &&
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
+
+    val roleName = role.toTranslatedString()
 
     StaffDialog(title = stringResource(R.string.encargado_usuarios_new_staff_title), onDismiss = onDismiss) {
         NameField(name, { name = it })
@@ -552,9 +570,10 @@ private fun NewStaffDialog(
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
         ) {
             listOf(
-                UserRole.RECEPCION to stringResource(R.string.role_reception),
-                UserRole.INSTRUCTOR to stringResource(R.string.role_instructor)
-            ).forEach { (value, label) ->
+                UserRole.RECEPCION,
+                UserRole.INSTRUCTOR
+            ).forEach { value ->
+                val label = value.toTranslatedString()
                 FilterChip(
                     selected = role == value,
                     onClick = { role = value },
@@ -588,7 +607,7 @@ private fun NewStaffDialog(
         Spacer(Modifier.height(18.dp))
 
         Button(
-            onClick = { onSave(name.trim(), phone, email, role, cost, capacity) },
+            onClick = { onSave(name.trim(), phone, email, role, cost, capacity, roleName) },
             enabled = canSave,
             colors = ButtonDefaults.buttonColors(
                 containerColor = ClienteTema.Azul,
@@ -655,7 +674,7 @@ private fun EditStaffDialog(
 
         ExposedDropdownMenuBox(expanded = roleExpanded, onExpandedChange = { roleExpanded = it }) {
             OutlinedTextField(
-                value = role.name,
+                value = role.toTranslatedString(),
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(stringResource(R.string.label_role), color = ClienteTema.TextoSec) },
@@ -675,7 +694,7 @@ private fun EditStaffDialog(
             ) {
                 STAFF_ROLES.forEach { r ->
                     DropdownMenuItem(
-                        text = { Text(r.name, color = ClienteTema.Texto) },
+                        text = { Text(r.toTranslatedString(), color = ClienteTema.Texto) },
                         onClick = {
                             role = r
                             roleExpanded = false
@@ -689,7 +708,7 @@ private fun EditStaffDialog(
 
         ExposedDropdownMenuBox(expanded = statusExpanded, onExpandedChange = { statusExpanded = it }) {
             OutlinedTextField(
-                value = status.name,
+                value = status.etiqueta(),
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(stringResource(R.string.encargado_usuarios_status_label), color = ClienteTema.TextoSec) },
@@ -709,7 +728,7 @@ private fun EditStaffDialog(
             ) {
                 Status.values().forEach { s ->
                     DropdownMenuItem(
-                        text = { Text(s.name, color = ClienteTema.Texto) },
+                        text = { Text(s.etiqueta(), color = ClienteTema.Texto) },
                         onClick = {
                             status = s
                             statusExpanded = false
