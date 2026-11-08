@@ -47,6 +47,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
     val depInstructions = stringResource(R.string.cliente_pago_deposito_instructions)
     val labelNoTarjeta = stringResource(R.string.cliente_pago_label_no_tarjeta)
     val labelCorresponsales = stringResource(R.string.cliente_pago_label_corresponsales)
+    val corresponsalesFormatted = stringResource(R.string.corresponsales_formatted)
     val labelSucursal = stringResource(R.string.cliente_pago_label_sucursal)
 
     val efecTitle = stringResource(R.string.cliente_pago_efectivo_title)
@@ -76,7 +77,10 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     color = ClienteTema.Texto,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 )
             }
 
@@ -117,7 +121,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                             title = depTitle,
                             details = listOf(
                                 labelNoTarjeta to "4152 3138 9012 3456",
-                                labelCorresponsales to "OXXO, 7-Eleven, Farmacias del Ahorro",
+                                labelCorresponsales to corresponsalesFormatted,
                                 labelSucursal to "BBVA Bancomer",
                                 labelBeneficiario to "Gimnasio Axolotl"
                             ),
@@ -151,7 +155,6 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 
-    // Modal de detalles del método de pago
     selectedMethod?.let { info ->
         PaymentDetailDialog(
             info = info,
@@ -254,18 +257,22 @@ private fun PaymentDetailDialog(
                 .border(1.5.dp, ClienteTema.Borde, RoundedCornerShape(20.dp))
                 .padding(20.dp)
         ) {
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = info.title,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = ClienteTema.Texto
+                    color = ClienteTema.Texto,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                IconButton(onClick = onDismiss) {
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.common_close),
@@ -296,7 +303,8 @@ private fun PaymentDetailDialog(
                         text = value,
                         fontSize = 13.sp,
                         color = ClienteTema.Texto,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.End
                     )
                 }
             }
@@ -317,7 +325,9 @@ private fun PaymentDetailDialog(
                     text = info.instructions,
                     fontSize = 12.sp,
                     color = ClienteTema.TextoSec,
-                    lineHeight = 16.sp
+                    lineHeight = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 

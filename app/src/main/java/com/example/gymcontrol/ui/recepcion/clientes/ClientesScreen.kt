@@ -64,7 +64,6 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
 
-    val labelExpires = stringResource(R.string.label_expires)
     val msgRegister = stringResource(R.string.encargado_confirm_register_client, "%s")
     val msgSave = stringResource(R.string.encargado_confirm_save_client, "%s")
     val msgRenew = stringResource(R.string.encargado_confirm_renew_client, "%s", "%s")
@@ -161,12 +160,10 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 info?.let { msg -> item { Text(msg, color = ClienteTema.Verde, fontSize = 13.sp) } }
 
                 itemsIndexed(clients) { _, client ->
-                    val membershipStr = client.numeroMembresia.ifBlank { "—" } +
-                            if (client.fechaFin != null) " · $labelExpires ${ClientesRepository.fechaApp(client.fechaFin)}"
-                            else " · sin membresía"
                     ClientCard(
                         name = client.nombre,
-                        membership = membershipStr,
+                        membershipNum = client.numeroMembresia,
+                        fechaFin = client.fechaFin,
                         registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
                         tieneRostro = client.id in conRostro,
@@ -327,12 +324,13 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 @Composable
 private fun ClientCard(
     name: String,
-    membership: String,
+    membershipNum: String,
+    fechaFin: String?,
     registrationDate: String,
     isActive: Boolean,
-    tieneRostro: Boolean,
-    dentroDesde: String?,
-    onRostro: () -> Unit,
+    tieneRostro: Boolean = false,
+    dentroDesde: String? = null,
+    onRostro: () -> Unit = {},
     onEdit: () -> Unit,
     onRenovar: () -> Unit
 ) {
@@ -377,8 +375,20 @@ private fun ClientCard(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(8.dp))
-            Text("$labelMembership: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "$labelMembership: " + membershipNum.ifBlank { "—" },
+                color = ClienteTema.TextoSec,
+                fontSize = 17.sp
+            )
+            if (fechaFin != null) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(fechaFin)),
+                    color = ClienteTema.TextoSec,
+                    fontSize = 17.sp
+                )
+            }
             Spacer(Modifier.height(2.dp))
             Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(6.dp))
@@ -488,7 +498,7 @@ private fun RenovarDialog(
         onDismissRequest = onDismiss,
         containerColor = ClienteTema.Beige,
         shape = RoundedCornerShape(16.dp),
-        title = { Text("Renovar a ${cliente.nombre}", color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.encargado_clients_renew_title, cliente.nombre), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 Text(stringResource(R.string.encargado_clients_choose_plan), color = ClienteTema.TextoSec)

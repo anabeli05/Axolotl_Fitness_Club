@@ -179,7 +179,7 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
     deleting?.let { target ->
         DeleteConfirmDialog(
             title = stringResource(R.string.encargado_servicios_delete_confirm_title),
-            message = stringResource(R.string.encargado_servicios_delete_confirm_message, target.nombre),
+            message = stringResource(R.string.delete_service_confirm, target.nombre),
             onConfirm = {
                 scope.launch {
                     try {
@@ -279,13 +279,13 @@ private fun ServiceCard(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                text = stringResource(R.string.encargado_servicios_card_duration, duration),
+                text = stringResource(R.string.label_duration_format, duration),
                 color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.encargado_servicios_card_price, price),
+                text = stringResource(R.string.label_price_format, price),
                 color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold

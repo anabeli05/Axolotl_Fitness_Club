@@ -319,7 +319,7 @@
     <string name="recepcion_solicitudes_instructor_prefix">Instructor: %1$s</string>
     <string name="recepcion_solicitudes_date_prefix">Fecha: %1$s</string>
     <!-- General & Status -->
-    <string name="label_expires">vence</string>
+    <string name="label_expires">Vence</string>
     <string name="label_membership">Membresía</string>
     <string name="label_registration">Registro</string>
     <string name="label_inside">Dentro</string>
@@ -435,4 +435,23 @@
     <string name="privacy_13_content">La Política de Privacidad y los Términos y Condiciones se muestran en la pantalla de inicio de sesión mediante enlaces, y el usuario debe marcar una casilla de aceptación para poder iniciar sesión.</string>
     <string name="privacy_14_title">14. Marco Legal</string>
     <string name="privacy_14_content">El tratamiento de los datos personales se rige por la legislación mexicana de protección de datos personales en posesión de particulares.</string>
+
+    <string name="label_membership_format">Membresía: %s</string>
+    <string name="label_expires_format">Vence: %s</string>
+    <string name="title_delete_staff">¿Eliminar al personal?</string>
+    <string name="delete_staff_confirm">%s se eliminará definitivamente del sistema. Esta acción no se puede deshacer.</string>
+    <string name="label_duration_format">Duración: %s</string>
+    <string name="label_price_format">Precio: %s</string>
+    <string name="label_category_format">Categoría: %s</string>
+    <string name="label_amount_format">Monto: %s</string>
+    <string name="label_date_format">Fecha: %s</string>
+    <string name="unit_day">día</string>
+    <string name="unit_days">días</string>
+    <string name="corresponsales_formatted">OXXO, 7-Eleven\nFarmacias del Ahorro</string>
+    <string name="title_monthly_report">Reporte mensual</string>
+    <string name="label_services">Servicios</string>
+    <string name="label_advisories">Asesorías</string>
+    <string name="label_expenses">Gastos</string>
+    <string name="label_total">Total</string>
+    <string name="label_total_format">Total: $%s</string>
 </resources>

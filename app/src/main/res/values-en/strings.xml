@@ -6,9 +6,9 @@
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show password</string>
     <string name="accept_terms_prefix">I accept the </string>
-    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="terms_and_conditions"> Terms and Conditions </string>
     <string name="accept_terms_and"> and the </string>
-    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy"> Privacy Policy </string>
     <string name="login_button">Sign In</string>
     <string name="logging_in">Signing in...</string>
     <string name="error_invalid_credentials">Incorrect username or password</string>
@@ -292,13 +292,13 @@
     <string name="legal_last_updated">Last updated: November 2026</string>
 
     <!-- General & Status -->
-    <string name="label_expires">expires</string>
+    <string name="label_expires">Expires</string>
     <string name="label_membership">Membership</string>
     <string name="label_registration">Registration</string>
     <string name="label_inside">Inside</string>
     <string name="label_outside">Outside</string>
     <string name="label_inside_since">Inside · since %s</string>
-    <string name="btn_new_client">+ New client</string>
+    <string name="btn_new_client">New client</string>
     <string name="placeholder_search_client">Name or membership</string>
 
     <!-- Planes -->
@@ -417,4 +417,23 @@
     <string name="privacy_13_content">The Privacy Policy and Terms and Conditions are displayed on the login screen via links, and the user must check an acceptance box to sign in.</string>
     <string name="privacy_14_title">14. Legal Framework</string>
     <string name="privacy_14_content">The processing of personal data is governed by Mexican legislation on the protection of personal data held by private parties.</string>
+
+    <string name="label_membership_format">Membership: %s</string>
+    <string name="label_expires_format">Expires: %s</string>
+    <string name="title_delete_staff">Delete staff member?</string>
+    <string name="delete_staff_confirm">%s will be permanently removed from the system. This action cannot be undone.</string>
+    <string name="label_duration_format">Duration: %s</string>
+    <string name="label_price_format">Price: %s</string>
+    <string name="label_category_format">Category: %s</string>
+    <string name="label_amount_format">Amount: %s</string>
+    <string name="label_date_format">Date: %s</string>
+    <string name="unit_day">day</string>
+    <string name="unit_days">days</string>
+    <string name="corresponsales_formatted">OXXO, 7-Eleven\nFarmacias del Ahorro</string>
+    <string name="title_monthly_report">Monthly report</string>
+    <string name="label_services">Services</string>
+    <string name="label_advisories">Advisories</string>
+    <string name="label_expenses">Expenses</string>
+    <string name="label_total">Total</string>
+    <string name="label_total_format">Total: $%s</string>
 </resources>

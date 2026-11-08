@@ -192,7 +192,7 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
 
     deleting?.let { target ->
         val deleteTitle = stringResource(R.string.encargado_gastos_delete_confirm_title)
-        val deleteMessage = stringResource(R.string.encargado_gastos_delete_confirm_message, target.concepto)
+        val deleteMessage = stringResource(R.string.delete_expense_confirm, target.concepto)
         DeleteConfirmDialog(
             title = deleteTitle,
             message = deleteMessage,
@@ -296,20 +296,20 @@ private fun ExpenseCard(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                text = stringResource(R.string.encargado_gastos_card_category, category),
+                text = stringResource(R.string.label_category_format, category),
                 color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.encargado_gastos_card_amount, amount),
+                text = stringResource(R.string.label_amount_format, amount),
                 color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.encargado_gastos_card_date, date),
+                text = stringResource(R.string.label_date_format, date),
                 color = ClienteTema.TextoSec,
                 fontSize = 14.sp
             )
