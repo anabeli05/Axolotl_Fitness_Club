@@ -17,10 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ClientesRepository
 import com.example.gymcontrol.data.remote.SolicitudAdminRow
 import com.example.gymcontrol.data.remote.SolicitudesRepository
@@ -30,12 +32,10 @@ import kotlinx.coroutines.launch
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
-// Mismo tamaño que en ClientesScreen: badge, chip de costo y botones de acción
 private val ChipWidth = 96.dp
 private val ChipHeight = 36.dp
-private val ActionWidth = 44.dp // dos botones (44 + 8 + 44) = 96.dp
+private val ActionWidth = 44.dp
 
-// Resolución pendiente de confirmar
 private class Resolucion(val solicitud: SolicitudAdminRow, val estado: String)
 
 @Composable
@@ -70,7 +70,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Pendientes: $pendientes",
+                    text = stringResource(R.string.recepcion_solicitudes_pending_badge, pendientes),
                     color = ClienteTema.TextoSec,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -97,7 +97,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
             if (requests.isEmpty() && mensaje == null) {
                 item {
                     Text(
-                        text = "No hay solicitudes",
+                        text = stringResource(R.string.recepcion_solicitudes_empty),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         modifier = Modifier
@@ -112,13 +112,19 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
 
     confirmar?.let { r ->
         val aprobar = r.estado == "APROBADA"
+        val confirmTitle = stringResource(R.string.common_confirm)
+        val confirmText = if (aprobar) {
+            stringResource(R.string.recepcion_solicitudes_confirm_approve_text, r.solicitud.cliente, r.solicitud.instructor)
+        } else {
+            stringResource(R.string.recepcion_solicitudes_confirm_reject_text, r.solicitud.cliente, r.solicitud.instructor)
+        }
         AlertDialog(
             onDismissRequest = { confirmar = null },
             containerColor = ClienteTema.Beige,
             shape = RoundedCornerShape(16.dp),
             title = {
                 Text(
-                    "Confirmar",
+                    confirmTitle,
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -127,8 +133,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
             },
             text = {
                 Text(
-                    "¿Estás seguro de ${if (aprobar) "aprobar" else "rechazar"} la solicitud de " +
-                            "${r.solicitud.cliente} con ${r.solicitud.instructor}?",
+                    confirmText,
                     color = ClienteTema.TextoSec,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -144,7 +149,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                         shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, ClienteTema.Borde),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                    ) { Text("Cancelar") }
+                    ) { Text(stringResource(R.string.cancel)) }
 
                     Button(
                         onClick = {
@@ -164,7 +169,7 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                             containerColor = if (aprobar) ClienteTema.Verde else ClienteTema.Rojo,
                             contentColor = Color.White
                         )
-                    ) { Text(if (aprobar) "Aprobar" else "Rechazar", fontWeight = FontWeight.Bold) }
+                    ) { Text(if (aprobar) stringResource(R.string.recepcion_solicitudes_approve_btn) else stringResource(R.string.recepcion_solicitudes_reject_btn), fontWeight = FontWeight.Bold) }
                 }
             }
         )
@@ -198,11 +203,11 @@ private fun SolicitudCard(
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
-            Text("Membresía: $membership", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text(stringResource(R.string.recepcion_scanner_membership_prefix, membership), color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Instructor: $instructor", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text(stringResource(R.string.recepcion_solicitudes_instructor_prefix, instructor), color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Fecha: $date", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text(stringResource(R.string.recepcion_solicitudes_date_prefix, date), color = ClienteTema.TextoSec, fontSize = 17.sp)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -212,20 +217,19 @@ private fun SolicitudCard(
             Spacer(Modifier.height(10.dp))
             CostChip(cost = cost)
 
-            // Los botones solo aparecen mientras la solicitud está pendiente
             if (status == "PENDIENTE") {
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     IconSquareButton(
                         icon = Icons.Filled.Check,
                         color = ClienteTema.Verde,
-                        description = "Aprobar",
+                        description = stringResource(R.string.recepcion_solicitudes_approve_btn),
                         onClick = onApprove
                     )
                     IconSquareButton(
                         icon = Icons.Filled.Close,
                         color = ClienteTema.Rojo,
-                        description = "Rechazar",
+                        description = stringResource(R.string.recepcion_solicitudes_reject_btn),
                         onClick = onReject
                     )
                 }
@@ -242,9 +246,9 @@ private fun StatusChip(status: String) {
         else -> ClienteTema.AzulSel
     }
     val label = when (status) {
-        "APROBADA" -> "Aprobada"
-        "RECHAZADA" -> "Rechazada"
-        else -> "Pendiente"
+        "APROBADA" -> stringResource(R.string.recepcion_solicitudes_status_approved)
+        "RECHAZADA" -> stringResource(R.string.recepcion_solicitudes_status_rejected)
+        else -> stringResource(R.string.recepcion_solicitudes_status_pending)
     }
 
     Box(

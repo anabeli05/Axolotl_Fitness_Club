@@ -41,14 +41,21 @@ private val INSTRUCTOR_TABS = listOf(
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
-// Días que se pueden elegir (de lunes a sábado)
-private val DIAS = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb")
-
 private data class ClienteAsignado(
     val id: Long,
     val nombre: String,
     val dias: String,
     val objetivo: String
+)
+
+@Composable
+private fun getDias(): List<String> = listOf(
+    stringResource(R.string.day_mon),
+    stringResource(R.string.day_tue),
+    stringResource(R.string.day_wed),
+    stringResource(R.string.day_thu),
+    stringResource(R.string.day_fri),
+    stringResource(R.string.day_sat)
 )
 
 @Composable
@@ -70,8 +77,8 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
 
     LaunchedEffect(Unit) { recargar() }
 
-    // null = formulario cerrado, número = índice del cliente que se edita
     var indiceEditando by remember { mutableStateOf<Int?>(null) }
+    val diasList = getDias()
 
     ClienteScaffold(
         currentSection = "Mis clientes",
@@ -130,6 +137,7 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
         EditarClienteDialog(
             diasInicial = cliente.dias,
             objetivoInicial = cliente.objetivo,
+            diasList = diasList,
             onDismiss = { indiceEditando = null },
             onGuardar = { nuevosDias, nuevoObjetivo ->
                 indiceEditando = null
@@ -157,7 +165,6 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Círculo con iniciales (luego se puede reemplazar por la foto del cliente)
         Box(
             modifier = Modifier
                 .size(60.dp)
@@ -219,22 +226,20 @@ private fun iniciales(nombre: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
 
-// "Lun, Mié, Vie" -> {Lun, Mié, Vie} | "Lun a Vie" -> {Lun, Mar, Mié, Jue, Vie}
-private fun parsearDias(texto: String): Set<String> {
+private fun parsearDias(texto: String, dias: List<String>): Set<String> {
     val limpio = texto.trim()
     if (" a " in limpio) {
         val partes = limpio.split(" a ", limit = 2).map { it.trim() }
-        val desde = DIAS.indexOf(partes[0])
-        val hasta = DIAS.indexOf(partes[1])
-        if (desde >= 0 && hasta >= desde) return DIAS.subList(desde, hasta + 1).toSet()
+        val desde = dias.indexOf(partes[0])
+        val hasta = dias.indexOf(partes[1])
+        if (desde >= 0 && hasta >= desde) return dias.subList(desde, hasta + 1).toSet()
     }
-    return limpio.split(",").map { it.trim() }.filter { it in DIAS }.toSet()
+    return limpio.split(",").map { it.trim() }.filter { it in dias }.toSet()
 }
 
-// {Lun, Mar, Mié, Jue, Vie} -> "Lun a Vie" | {Lun, Mié, Vie} -> "Lun, Mié, Vie"
-private fun formatearDias(seleccionados: Set<String>): String {
-    val ordenados = DIAS.filter { it in seleccionados }
-    val indices = ordenados.map { DIAS.indexOf(it) }
+private fun formatearDias(seleccionados: Set<String>, dias: List<String>): String {
+    val ordenados = dias.filter { it in seleccionados }
+    val indices = ordenados.map { dias.indexOf(it) }
     val consecutivos = indices.zipWithNext().all { (a, b) -> b == a + 1 }
     return if (ordenados.size >= 3 && consecutivos) {
         "${ordenados.first()} a ${ordenados.last()}"
@@ -247,10 +252,11 @@ private fun formatearDias(seleccionados: Set<String>): String {
 private fun EditarClienteDialog(
     diasInicial: String,
     objetivoInicial: String,
+    diasList: List<String>,
     onDismiss: () -> Unit,
     onGuardar: (dias: String, objetivo: String) -> Unit
 ) {
-    var seleccionados by remember { mutableStateOf(parsearDias(diasInicial)) }
+    var seleccionados by remember { mutableStateOf(parsearDias(diasInicial, diasList)) }
     var objetivo by remember { mutableStateOf(objetivoInicial) }
     val esValido = seleccionados.isNotEmpty() && objetivo.isNotBlank()
 
@@ -275,6 +281,7 @@ private fun EditarClienteDialog(
                 )
                 Spacer(Modifier.height(10.dp))
                 SelectorDias(
+                    diasList = diasList,
                     seleccionados = seleccionados,
                     onToggle = { dia ->
                         seleccionados = if (dia in seleccionados) seleccionados - dia else seleccionados + dia
@@ -295,7 +302,7 @@ private fun EditarClienteDialog(
                 Spacer(Modifier.height(28.dp))
 
                 Button(
-                    onClick = { onGuardar(formatearDias(seleccionados), objetivo.trim()) },
+                    onClick = { onGuardar(formatearDias(seleccionados, diasList), objetivo.trim()) },
                     enabled = esValido,
                     modifier = Modifier.size(width = 160.dp, height = 44.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -310,7 +317,6 @@ private fun EditarClienteDialog(
                 }
             }
 
-            // X para cerrar el formulario
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
@@ -329,11 +335,10 @@ private fun EditarClienteDialog(
     }
 }
 
-// Botones Lun a Sáb en dos filas de tres; tocar uno lo marca o lo desmarca
 @Composable
-private fun SelectorDias(seleccionados: Set<String>, onToggle: (String) -> Unit) {
+private fun SelectorDias(diasList: List<String>, seleccionados: Set<String>, onToggle: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DIAS.chunked(3).forEach { fila ->
+        diasList.chunked(3).forEach { fila ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
