@@ -1,19 +1,24 @@
 package com.example.gymcontrol.ui.encargado.reportes
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.*
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ReporteRow
 import com.example.gymcontrol.data.remote.ReportesRepository
 import com.example.gymcontrol.ui.components.GymScaffold
@@ -21,10 +26,16 @@ import com.example.gymcontrol.ui.components.ClienteTema
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
+data class ReporteMensualItem(
+    val periodo: String,
+    val servicios: Double,
+    val asesorias: Double,
+    val gastos: Double,
+    val total: Double
+)
+
 @Composable
 fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
-    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
-
     var reportes by remember { mutableStateOf<List<ReporteRow>>(emptyList()) }
     var cargando by remember { mutableStateOf(true) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
@@ -50,16 +61,21 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Reporte mensual",
+                text = stringResource(R.string.title_monthly_report),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
                 color = ClienteTema.Texto,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 22.sp
             )
 
             Spacer(Modifier.height(16.dp))
 
             if (cargando) {
-                Text("Cargando...", color = ClienteTema.TextoSec)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec)
+                }
                 Spacer(Modifier.height(8.dp))
             }
             errorMsg?.let { msg ->
@@ -67,69 +83,81 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                 Spacer(Modifier.height(8.dp))
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
-                    .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
-                    .padding(4.dp)
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                Column(Modifier.horizontalScroll(rememberScrollState())) {
-                    Row(
-                        modifier = Modifier
-                            .background(ClienteTema.Fondo, RoundedCornerShape(10.dp))
-                            .padding(vertical = 4.dp)
-                    ) {
-                        HeaderCell("Periodo", 130)
-                        HeaderCell("Servicios", 110)
-                        HeaderCell("Asesorías", 110)
-                        HeaderCell("Gastos", 110)
-                        HeaderCell("Total", 110)
-                    }
-
-                    reportes.forEachIndexed { index, r ->
-                        val total = r.servicios + r.asesorias - r.gastos
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (index % 2 == 0) ClienteTema.Beige else ClienteTema.Fondo.copy(alpha = 0.4f)
-                                )
-                        ) {
-                            BodyCell(ReportesRepository.nombrePeriodo(r.periodo), 130)
-                            BodyCell("$${r.servicios}", 110)
-                            BodyCell("$${r.asesorias}", 110)
-                            BodyCell("$${r.gastos}", 110)
-                            BodyCell("$$total", 110, highlight = true)
-                        }
-                    }
+                items(reportes) { r ->
+                    val total = r.servicios + r.asesorias - r.gastos
+                    MonthlyReportCard(
+                        item = ReporteMensualItem(
+                            periodo = ReportesRepository.nombrePeriodo(r.periodo),
+                            servicios = r.servicios,
+                            asesorias = r.asesorias,
+                            gastos = r.gastos,
+                            total = total
+                        )
+                    )
                 }
             }
         }
     }
 }
+
 @Composable
-private fun HeaderCell(text: String, width: Int) {
-    Text(
-        text = text,
-        color = ClienteTema.AzulSel,
-        fontSize = 13.sp,
-        fontWeight = FontWeight.Bold,
+fun MonthlyReportCard(item: ReporteMensualItem) {
+    Card(
         modifier = Modifier
-            .width(width.dp)
-            .padding(horizontal = 10.dp, vertical = 10.dp)
-    )
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = ClienteTema.Beige),
+        border = BorderStroke(1.5.dp, ClienteTema.Borde),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = item.periodo,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = ClienteTema.Texto
+                )
+                val totalColor = if (item.total >= 0) ClienteTema.Verde else ClienteTema.Rojo
+                Text(
+                    text = stringResource(R.string.label_total_format, item.total),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = totalColor
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 10.dp),
+                color = ClienteTema.Borde.copy(alpha = 0.5f)
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                ReportDetailItem(label = stringResource(R.string.label_services), value = item.servicios)
+                ReportDetailItem(label = stringResource(R.string.label_advisories), value = item.asesorias)
+                ReportDetailItem(label = stringResource(R.string.label_expenses), value = item.gastos)
+            }
+        }
+    }
 }
 
 @Composable
-private fun BodyCell(text: String, width: Int, highlight: Boolean = false) {
-    Text(
-        text = text,
-        color = if (highlight) ClienteTema.AzulSel else ClienteTema.Texto,
-        fontSize = 13.sp,
-        fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal,
-        modifier = Modifier
-            .width(width.dp)
-            .padding(horizontal = 10.dp, vertical = 12.dp)
-    )
+fun ReportDetailItem(label: String, value: Double) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, fontSize = 12.sp, color = ClienteTema.TextoSec)
+        Spacer(Modifier.height(2.dp))
+        Text(text = "$${value}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ClienteTema.Texto)
+    }
 }

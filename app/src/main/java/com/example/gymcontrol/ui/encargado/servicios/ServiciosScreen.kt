@@ -25,12 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.launch
@@ -39,12 +41,10 @@ import com.example.gymcontrol.data.remote.ServiciosRepository
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
-// Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), ClienteTema.Rojo, Color(0xFF7A0A0A))
 )
 
-// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 @Composable
@@ -112,12 +112,12 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Nuevo Servicio", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.encargado_servicios_new_button), fontWeight = FontWeight.Bold)
                     }
                 }
 
                 if (cargando) {
-                    item { Text("Cargando...", color = ClienteTema.TextoSec) }
+                    item { Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec) }
                 }
                 errorMsg?.let { msg ->
                     item { Text(msg, color = ClienteTema.Rojo) }
@@ -178,8 +178,8 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
 
     deleting?.let { target ->
         DeleteConfirmDialog(
-            title = "¿Eliminar servicio?",
-            message = "Se eliminará el servicio ${target.nombre}. Esta acción no se puede deshacer.",
+            title = stringResource(R.string.encargado_servicios_delete_confirm_title),
+            message = stringResource(R.string.delete_service_confirm, target.nombre),
             onConfirm = {
                 scope.launch {
                     try {
@@ -237,7 +237,7 @@ private fun DeleteConfirmDialog(
                     shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, ClienteTema.Borde),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                ) { Text(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = onConfirm,
@@ -246,7 +246,7 @@ private fun DeleteConfirmDialog(
                         containerColor = ClienteTema.Rojo,
                         contentColor = Color.White
                     )
-                ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.common_delete), fontWeight = FontWeight.Bold) }
             }
         }
     )
@@ -279,13 +279,13 @@ private fun ServiceCard(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "Duración: $duration",
+                text = stringResource(R.string.label_duration_format, duration),
                 color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Precio: $price",
+                text = stringResource(R.string.label_price_format, price),
                 color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
@@ -366,7 +366,7 @@ private fun ServiceFormDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isEditing) "Editar servicio" else "Nuevo servicio",
+                    text = if (isEditing) stringResource(R.string.encargado_servicios_edit_title) else stringResource(R.string.encargado_servicios_new_title),
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -376,7 +376,7 @@ private fun ServiceFormDialog(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = ClienteTema.TextoSec)
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = ClienteTema.TextoSec)
                 }
             }
 
@@ -385,31 +385,31 @@ private fun ServiceFormDialog(
             RestrictedField(
                 value = name,
                 onValueChange = onNameChange,
-                label = "Nombre",
+                label = stringResource(R.string.encargado_servicios_name_label),
                 accept = { s -> s.all { it.isLetterOrDigit() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras y números",
-                errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_servicios_name_warning),
+                errorText = if (name.isNotEmpty() && !nameValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = duration,
                 onValueChange = onDurationChange,
-                label = "Duración (días)",
+                label = stringResource(R.string.encargado_servicios_duration_label),
                 accept = { s -> s.all { it in '0'..'9' } },
                 maxLength = 3,
-                warningText = "Solo se permiten números",
+                warningText = stringResource(R.string.encargado_servicios_duration_warning),
                 keyboardType = KeyboardType.Number,
-                errorText = if (duration.isNotEmpty() && duration.toInt() == 0) "Debe ser mayor a 0" else null
+                errorText = if (duration.isNotEmpty() && duration.toInt() == 0) stringResource(R.string.encargado_servicios_duration_error) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = price,
                 onValueChange = onPriceChange,
-                label = "Costo",
+                label = stringResource(R.string.encargado_servicios_cost_label),
                 accept = { s -> MONEY_REGEX.matches(s) },
                 maxLength = 9,
-                warningText = "Solo números (máx. 2 decimales)",
+                warningText = stringResource(R.string.encargado_servicios_amount_warning),
                 keyboardType = KeyboardType.Decimal,
                 prefix = "$"
             )
@@ -430,7 +430,7 @@ private fun ServiceFormDialog(
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isEditing) "Guardar" else "Crear Servicio", fontWeight = FontWeight.Bold)
+                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_servicios_create_button), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -451,8 +451,6 @@ private fun fieldColors() = OutlinedTextFieldDefaults.colors(
     errorSupportingTextColor = ClienteTema.Rojo
 )
 
-// Campo que rechaza lo que no cumple `accept` (muestra un aviso unos segundos)
-// y limita la longitud. `errorText` es un error fijo (ej. "faltan dígitos").
 @Composable
 private fun RestrictedField(
     value: String,

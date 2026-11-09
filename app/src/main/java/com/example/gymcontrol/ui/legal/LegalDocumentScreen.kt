@@ -10,9 +10,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.theme.GymColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,8 +42,17 @@ fun LegalDocumentScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Regresar",
+                            contentDescription = stringResource(R.string.legal_back),
                             tint = GymColors.Gold
+                        )
+                    }
+                },
+                actions = {
+                    TextButton(onClick = onBack) {
+                        Text(
+                            text = stringResource(R.string.btn_accept),
+                            color = GymColors.Gold,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 },
@@ -97,7 +108,7 @@ fun LegalDocumentScreen(
             item {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Última actualización: Noviembre 2026",
+                    text = stringResource(R.string.legal_last_updated),
                     color = GymColors.TextSecondary,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(horizontal = 4.dp)

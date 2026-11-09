@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.Status
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.CorreoRepository
@@ -47,22 +49,34 @@ import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
-// Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), ClienteTema.Rojo, Color(0xFF7A0A0A))
 )
 
 private val STAFF_ROLES = listOf(UserRole.RECEPCION, UserRole.INSTRUCTOR, UserRole.ENCARGADO)
 
-// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
-// Datos mínimos de la persona seleccionada para editar o dar de baja
+@Composable
+fun UserRole.toTranslatedString(): String = when (this) {
+    UserRole.RECEPCION -> stringResource(R.string.role_reception)
+    UserRole.INSTRUCTOR -> stringResource(R.string.role_instructor)
+    UserRole.ENCARGADO -> stringResource(R.string.role_manager)
+    else -> this.name
+}
+
+@Composable
+private fun Status.etiqueta(): String = when (this) {
+    Status.ACTIVO -> stringResource(R.string.status_active)
+    Status.INACTIVO -> stringResource(R.string.status_inactive)
+}
+
 private class StaffItem(
     val id: Long,
     val name: String,
@@ -71,7 +85,6 @@ private class StaffItem(
     val status: Status
 )
 
-// Acción que espera la confirmación "¿Estás seguro?"
 private class Pendiente(val mensaje: String, val accion: () -> Unit)
 
 private fun mensajeError(e: Exception, porDefecto: String): String =
@@ -79,7 +92,6 @@ private fun mensajeError(e: Exception, porDefecto: String): String =
 
 @Composable
 fun UsuariosScreen(
-    // Se conserva por compatibilidad con GymNavGraph; el alta ahora es un formulario flotante
     onNavigate: (String) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -125,7 +137,7 @@ fun UsuariosScreen(
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Agregar personal", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_add_staff), fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -154,14 +166,16 @@ fun UsuariosScreen(
     }
 
     if (showNewForm) {
+        val confirmCreateMsg = stringResource(R.string.encargado_usuarios_confirm_create, "%s", "%s")
         NewStaffDialog(
             error = errorAlta,
             onDismiss = {
                 showNewForm = false
                 errorAlta = null
             },
-            onSave = { nombre, tel, correo, rol, costo, cap ->
-                pendiente = Pendiente("¿Estás seguro de dar de alta a $nombre como ${rol.name}?") {
+            onSave = { nombre, tel, correo, rol, costo, cap, roleName ->
+                val msg = String.format(Locale.getDefault(), confirmCreateMsg, nombre, roleName)
+                pendiente = Pendiente(msg) {
                     scope.launch {
                         try {
                             PersonalRepository.crear(
@@ -184,6 +198,7 @@ fun UsuariosScreen(
     }
 
     editing?.let { target ->
+        val confirmSaveMsg = stringResource(R.string.encargado_usuarios_confirm_save, "%s")
         EditStaffDialog(
             target = target,
             error = errorEditar,
@@ -192,7 +207,8 @@ fun UsuariosScreen(
                 errorEditar = null
             },
             onSave = { nombre, correo, rol, estado, tel, costo, cap ->
-                pendiente = Pendiente("¿Estás seguro de guardar los cambios de ${target.name}?") {
+                val msg = String.format(Locale.getDefault(), confirmSaveMsg, target.name)
+                pendiente = Pendiente(msg) {
                     scope.launch {
                         try {
                             PersonalRepository.editar(
@@ -224,6 +240,7 @@ fun UsuariosScreen(
     }
 
     deleting?.let { target ->
+        val deleteMsg = stringResource(R.string.delete_staff_confirm, target.name)
         AlertDialog(
             onDismissRequest = {
                 deleting = null
@@ -235,7 +252,7 @@ fun UsuariosScreen(
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
             title = {
                 Text(
-                    "¿Eliminar al personal?",
+                    stringResource(R.string.title_delete_staff),
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -245,7 +262,7 @@ fun UsuariosScreen(
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        "${target.name} se eliminará definitivamente del sistema. Esta acción no se puede deshacer.",
+                        deleteMsg,
                         color = ClienteTema.TextoSec,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -269,7 +286,7 @@ fun UsuariosScreen(
                         shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, ClienteTema.Borde),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                    ) { Text("Cancelar") }
+                    ) { Text(stringResource(R.string.cancel)) }
 
                     Button(
                         onClick = {
@@ -289,14 +306,12 @@ fun UsuariosScreen(
                             containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
                         )
-                    ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.common_delete), fontWeight = FontWeight.Bold) }
                 }
             }
         )
     }
 }
-
-// ---------- Confirmación genérica ----------
 
 @Composable
 private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAceptar: () -> Unit) {
@@ -306,7 +321,7 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
         shape = RoundedCornerShape(16.dp),
         title = {
             Text(
-                "Confirmar",
+                stringResource(R.string.common_confirm),
                 color = ClienteTema.Texto,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -331,23 +346,23 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
                     shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, ClienteTema.Borde),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                ) { Text(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = onAceptar,
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-                ) { Text("Sí, continuar", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.common_yes_continue), fontWeight = FontWeight.Bold) }
             }
         }
     )
 }
 
-// ---------- Tarjeta (mismo estilo que ServiceCard) ----------
-
 @Composable
 private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit) {
     val statusColor = if (item.status == Status.ACTIVO) ClienteTema.Verde else ClienteTema.Rojo
+    val statusText = item.status.etiqueta()
+    val roleText = item.role.toTranslatedString()
 
     Row(
         modifier = Modifier
@@ -386,7 +401,7 @@ private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit)
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "${item.role}",
+                text = roleText,
                 color = ClienteTema.AzulSel,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
@@ -407,7 +422,7 @@ private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit)
                     .padding(horizontal = 10.dp, vertical = 2.dp)
             ) {
                 Text(
-                    text = "${item.status}",
+                    text = statusText,
                     color = statusColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -439,8 +454,6 @@ private fun IconCircleButton(icon: ImageVector, color: Color, onClick: () -> Uni
         }
     }
 }
-
-// ---------- Formularios (mismo estilo que ServiceFormDialog) ----------
 
 @Composable
 private fun StaffDialog(
@@ -480,7 +493,7 @@ private fun StaffDialog(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = ClienteTema.TextoSec)
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = ClienteTema.TextoSec)
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -493,7 +506,7 @@ private fun StaffDialog(
 private fun NewStaffDialog(
     error: String?,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, UserRole, String, String) -> Unit
+    onSave: (String, String, String, UserRole, String, String, String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -507,12 +520,14 @@ private fun NewStaffDialog(
             email.isNotBlank() &&
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
 
-    StaffDialog(title = "Nuevo personal", onDismiss = onDismiss) {
+    val roleName = role.toTranslatedString()
+
+    StaffDialog(title = stringResource(R.string.encargado_usuarios_new_staff_title), onDismiss = onDismiss) {
         NameField(name, { name = it })
         Spacer(Modifier.height(10.dp))
         PhoneField(phone, { phone = it })
         Spacer(Modifier.height(10.dp))
-        GymTextField(email, { email = it }, "Correo asignado", KeyboardType.Email)
+        GymTextField(email, { email = it }, stringResource(R.string.encargado_usuarios_email_assigned), KeyboardType.Email)
         Spacer(Modifier.height(12.dp))
         Surface(
             shape = RoundedCornerShape(10.dp),
@@ -532,7 +547,7 @@ private fun NewStaffDialog(
                 )
                 Spacer(Modifier.width(10.dp))
                 Text(
-                    "La contraseña inicial es Axolotl2026 y se envía al correo del usuario.",
+                    stringResource(R.string.encargado_usuarios_initial_pwd_notice),
                     color = ClienteTema.TextoSec,
                     fontSize = 12.sp,
                     lineHeight = 16.sp
@@ -542,7 +557,7 @@ private fun NewStaffDialog(
 
         Spacer(Modifier.height(16.dp))
         Text(
-            "Rol",
+            stringResource(R.string.label_role),
             color = ClienteTema.Texto,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
@@ -555,9 +570,10 @@ private fun NewStaffDialog(
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
         ) {
             listOf(
-                UserRole.RECEPCION to "Recepción",
-                UserRole.INSTRUCTOR to "Instructor"
-            ).forEach { (value, label) ->
+                UserRole.RECEPCION,
+                UserRole.INSTRUCTOR
+            ).forEach { value ->
+                val label = value.toTranslatedString()
                 FilterChip(
                     selected = role == value,
                     onClick = { role = value },
@@ -578,9 +594,9 @@ private fun NewStaffDialog(
 
         if (isInstructor) {
             Spacer(Modifier.height(10.dp))
-            DigitsField(cost, { cost = it }, "Costo asesoría", maxLength = 6)
+            DigitsField(cost, { cost = it }, stringResource(R.string.encargado_usuarios_advisory_cost_label), maxLength = 6)
             Spacer(Modifier.height(10.dp))
-            DigitsField(capacity, { capacity = it }, "Capacidad máxima", maxLength = 3)
+            DigitsField(capacity, { capacity = it }, stringResource(R.string.encargado_usuarios_max_capacity_label), maxLength = 3)
         }
 
         error?.let {
@@ -591,7 +607,7 @@ private fun NewStaffDialog(
         Spacer(Modifier.height(18.dp))
 
         Button(
-            onClick = { onSave(name.trim(), phone, email, role, cost, capacity) },
+            onClick = { onSave(name.trim(), phone, email, role, cost, capacity, roleName) },
             enabled = canSave,
             colors = ButtonDefaults.buttonColors(
                 containerColor = ClienteTema.Azul,
@@ -602,7 +618,7 @@ private fun NewStaffDialog(
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Crear personal", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.encargado_usuarios_create_staff_button), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -613,7 +629,6 @@ private fun EditStaffDialog(
     target: StaffItem,
     error: String?,
     onDismiss: () -> Unit,
-    // teléfono, costo y capacidad van en null si no se pudieron cargar (así no se borran en la BD)
     onSave: (String, String, UserRole, Status, String?, Double?, Int?) -> Unit
 ) {
     var name by remember { mutableStateOf(target.name) }
@@ -647,22 +662,22 @@ private fun EditStaffDialog(
     val instructorOk = !isInstructor || !detalleCargado ||
             ((cost.toDoubleOrNull() ?: -1.0) >= 0.0 && (capacity.toIntOrNull() ?: 0) >= 1)
 
-    StaffDialog(title = "Editar personal", onDismiss = onDismiss) {
+    StaffDialog(title = stringResource(R.string.encargado_usuarios_edit_staff_title), onDismiss = onDismiss) {
         NameField(name, { name = it })
         Spacer(Modifier.height(10.dp))
         if (detalleCargado) {
             PhoneField(phone, { phone = it })
             Spacer(Modifier.height(10.dp))
         }
-        GymTextField(email, { email = it }, "Correo", KeyboardType.Email)
+        GymTextField(email, { email = it }, stringResource(R.string.label_email), KeyboardType.Email)
         Spacer(Modifier.height(10.dp))
 
         ExposedDropdownMenuBox(expanded = roleExpanded, onExpandedChange = { roleExpanded = it }) {
             OutlinedTextField(
-                value = role.name,
+                value = role.toTranslatedString(),
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Rol", color = ClienteTema.TextoSec) },
+                label = { Text(stringResource(R.string.label_role), color = ClienteTema.TextoSec) },
                 trailingIcon = {
                     Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ClienteTema.TextoSec)
                 },
@@ -679,7 +694,7 @@ private fun EditStaffDialog(
             ) {
                 STAFF_ROLES.forEach { r ->
                     DropdownMenuItem(
-                        text = { Text(r.name, color = ClienteTema.Texto) },
+                        text = { Text(r.toTranslatedString(), color = ClienteTema.Texto) },
                         onClick = {
                             role = r
                             roleExpanded = false
@@ -693,10 +708,10 @@ private fun EditStaffDialog(
 
         ExposedDropdownMenuBox(expanded = statusExpanded, onExpandedChange = { statusExpanded = it }) {
             OutlinedTextField(
-                value = status.name,
+                value = status.etiqueta(),
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Estado", color = ClienteTema.TextoSec) },
+                label = { Text(stringResource(R.string.encargado_usuarios_status_label), color = ClienteTema.TextoSec) },
                 trailingIcon = {
                     Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ClienteTema.TextoSec)
                 },
@@ -713,7 +728,7 @@ private fun EditStaffDialog(
             ) {
                 Status.values().forEach { s ->
                     DropdownMenuItem(
-                        text = { Text(s.name, color = ClienteTema.Texto) },
+                        text = { Text(s.etiqueta(), color = ClienteTema.Texto) },
                         onClick = {
                             status = s
                             statusExpanded = false
@@ -725,9 +740,9 @@ private fun EditStaffDialog(
 
         if (isInstructor && detalleCargado) {
             Spacer(Modifier.height(10.dp))
-            DigitsField(cost, { cost = it }, "Costo asesoría", maxLength = 6)
+            DigitsField(cost, { cost = it }, stringResource(R.string.encargado_usuarios_advisory_cost_label), maxLength = 6)
             Spacer(Modifier.height(10.dp))
-            DigitsField(capacity, { capacity = it }, "Capacidad máxima", maxLength = 3)
+            DigitsField(capacity, { capacity = it }, stringResource(R.string.encargado_usuarios_max_capacity_label), maxLength = 3)
         }
 
         (error ?: errorDetalle)?.let {
@@ -751,7 +766,7 @@ private fun EditStaffDialog(
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Guardar", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -771,7 +786,6 @@ private fun fieldColors() = OutlinedTextFieldDefaults.colors(
     errorSupportingTextColor = ClienteTema.Rojo
 )
 
-// Nombre: solo letras y espacios (acepta acentos y ñ), máximo 40 caracteres, mínimo 3 letras
 @Composable
 private fun NameField(value: String, onValueChange: (String) -> Unit) {
     var warning by remember { mutableStateOf(false) }
@@ -786,6 +800,7 @@ private fun NameField(value: String, onValueChange: (String) -> Unit) {
     }
 
     val tooShort = value.isNotEmpty() && !nameHasMinLetters(value)
+    val labelName = stringResource(R.string.perfil_field_name)
 
     GymTextField(
         value = value,
@@ -795,13 +810,12 @@ private fun NameField(value: String, onValueChange: (String) -> Unit) {
                 new.length <= 40 -> onValueChange(new)
             }
         },
-        label = "Nombre",
+        label = labelName,
         isError = warning || tooShort,
-        errorText = if (warning) "Solo se permiten letras" else "Mínimo 3 letras"
+        errorText = if (warning) stringResource(R.string.perfil_error_letters_only) else stringResource(R.string.perfil_error_min_letters)
     )
 }
 
-// Teléfono: solo números, exactamente 10 dígitos
 @Composable
 private fun PhoneField(value: String, onValueChange: (String) -> Unit) {
     var warning by remember { mutableStateOf(false) }
@@ -816,6 +830,7 @@ private fun PhoneField(value: String, onValueChange: (String) -> Unit) {
     }
 
     val incomplete = value.isNotEmpty() && value.length < 10
+    val labelPhone = stringResource(R.string.label_phone)
 
     GymTextField(
         value = value,
@@ -825,15 +840,14 @@ private fun PhoneField(value: String, onValueChange: (String) -> Unit) {
                 new.length <= 10 -> onValueChange(new)
             }
         },
-        label = "Teléfono",
+        label = labelPhone,
         keyboardType = KeyboardType.Number,
         isError = warning || incomplete,
-        errorText = if (warning) "Solo se permiten números"
+        errorText = if (warning) stringResource(R.string.perfil_error_phone_digits)
         else "Deben ser 10 dígitos (${value.length}/10)"
     )
 }
 
-// Campo numérico genérico (costo, capacidad)
 @Composable
 private fun DigitsField(
     value: String,
@@ -852,6 +866,8 @@ private fun DigitsField(
         }
     }
 
+    val errorDigits = stringResource(R.string.perfil_error_phone_digits)
+
     GymTextField(
         value = value,
         onValueChange = { new ->
@@ -863,7 +879,7 @@ private fun DigitsField(
         label = label,
         keyboardType = KeyboardType.Number,
         isError = warning,
-        errorText = "Solo se permiten números"
+        errorText = errorDigits
     )
 }
 

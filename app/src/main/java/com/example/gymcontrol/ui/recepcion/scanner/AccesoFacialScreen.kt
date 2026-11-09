@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.CapturaFacial
 import com.example.gymcontrol.data.biometria.PasoFacial
 import com.example.gymcontrol.data.biometria.ReconocedorFacial
@@ -50,7 +52,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
-// ---------- Modelo de UI ----------
 data class ClienteScan(
     val id: Long,
     val nombre: String,
@@ -60,14 +61,8 @@ data class ClienteScan(
     val fotoUrl: String? = null
 )
 
-// Aviso que aparece unos segundos después de registrar (o rechazar) una entrada/salida
 private data class Aviso(val texto: String, val esError: Boolean, val id: Long = System.nanoTime())
 
-/**
- * Acceso por reconocimiento facial (reemplaza al escáner QR).
- * La cámara detecta el rostro más cercano, lo identifica y registra
- * ENTRADA (1) o SALIDA (0) sola, sin botones. Los botones quedan para corregir a mano.
- */
 @Composable
 fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
@@ -77,16 +72,22 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     var cliente by remember { mutableStateOf<ClienteScan?>(null) }
     var aviso by remember { mutableStateOf<Aviso?>(null) }
     var dentro by remember { mutableStateOf(0) }
-    var indicacion by remember { mutableStateOf("Colócate frente a la cámara") }
     var progreso by remember { mutableStateOf(0f) }
+    var indicacion by remember { mutableStateOf("") }
+    val initialIndicacion = stringResource(R.string.recepcion_scanner_stand_in_front)
+    LaunchedEffect(Unit) { if (indicacion.isEmpty()) indicacion = initialIndicacion }
 
-    // Motor facial (MobileFaceNet) y captura: 3 muestras seguidas del rostro más cercano
     val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
     val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 3) } }
     val pausa = remember { AtomicBoolean(false) }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 
-    // Personas dentro: se consulta cada 5 s (además de actualizarse con cada movimiento)
+    val msgDbError = stringResource(R.string.recepcion_scanner_db_error)
+    val msgDeniedInactive = stringResource(R.string.recepcion_scanner_denied_inactive)
+    val msgUnregistered = stringResource(R.string.recepcion_scanner_denied_unregistered)
+    val msgVerifying = stringResource(R.string.recepcion_scanner_verifying)
+    val msgModelError = stringResource(R.string.recepcion_face_model_load_error)
+
     LaunchedEffect(Unit) {
         while (true) {
             try { dentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
@@ -94,7 +95,6 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 
-    // El aviso se quita solo; si fue un registro exitoso también se limpia la tarjeta del cliente
     LaunchedEffect(aviso) {
         val actual = aviso
         if (actual != null) {
@@ -121,25 +121,23 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 "$nombre ha salido" + (duracion(r.entradaDesde, r.fechaHora)?.let { " · Estuvo $it" } ?: ""),
                 esError = false
             )
-            "DENEGADO" -> Aviso("Acceso denegado: membresía inactiva. Pasa a renovar", esError = true)
+            "DENEGADO" -> Aviso(msgDeniedInactive, esError = true)
             "REPETIDO" -> Aviso("$nombre ya fue registrado hace un momento", esError = false)
             "YA_DENTRO" -> Aviso("$nombre ya tiene una entrada registrada", esError = true)
             "SIN_ENTRADA" -> Aviso("$nombre no tiene una entrada abierta", esError = true)
-            else -> Aviso("Acceso denegado: rostro no registrado", esError = true)
+            else -> Aviso(msgUnregistered, esError = true)
         }
     }
 
-    // Se llama cuando la captura entregó un vector
     fun identificar(vector: FloatArray) {
         scope.launch {
             try {
                 val r = AccesoFacialRepository.acceso(vector)
                 mostrar(r)
-                // Si no lo reconoció se le deja intentar de nuevo con el mismo rostro
                 if (r.resultado == "NO_RECONOCIDO") captura?.olvidarProcesado()
             } catch (e: Exception) {
                 captura?.olvidarProcesado()
-                aviso = Aviso("Sin conexión con la base de datos", esError = true)
+                aviso = Aviso(msgDbError, esError = true)
             }
             delay(2_500)
             progreso = 0f
@@ -147,7 +145,6 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 
-    // Se ejecuta en el hilo de la cámara
     val onFrame: (Bitmap, List<Face>) -> Unit = onFrame@{ frame, rostros ->
         val c = captura ?: return@onFrame
         if (pausa.get()) return@onFrame
@@ -160,7 +157,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 pausa.set(true)
                 c.marcarProcesado()
                 main.post {
-                    indicacion = "Verificando…"
+                    indicacion = msgVerifying
                     progreso = 1f
                     identificar(paso.vector)
                 }
@@ -174,7 +171,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
             try {
                 mostrar(AccesoFacialRepository.manual(c.id, esEntrada))
             } catch (e: Exception) {
-                aviso = Aviso("Sin conexión con la base de datos", esError = true)
+                aviso = Aviso(msgDbError, esError = true)
             }
         }
     }
@@ -195,7 +192,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Reconocimiento facial",
+                    stringResource(R.string.facial_recognition_title),
                     color = ClienteTema.Texto,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -204,10 +201,9 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 AforoChip(personas = dentro)
             }
 
-            // ---------- Tarjeta: Escanear rostro (cámara real) ----------
             GymCard {
                 Text(
-                    "Escanear rostro",
+                    stringResource(R.string.scan_face),
                     color = ClienteTema.Texto,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -232,7 +228,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
 
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    if (captura == null) "No se pudo cargar el modelo facial" else indicacion,
+                    if (captura == null) msgModelError else indicacion,
                     color = if (captura == null) ClienteTema.Rojo else ClienteTema.TextoSec,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
@@ -250,10 +246,9 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
-            // ---------- Tarjeta: Información del cliente ----------
             GymCard {
                 Text(
-                    "Información del cliente",
+                    stringResource(R.string.client_info),
                     color = ClienteTema.Texto,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -265,7 +260,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 val actual = cliente
                 if (actual == null) {
                     Text(
-                        "Escanea un rostro para ver la información del cliente",
+                        stringResource(R.string.scan_prompt),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -299,11 +294,11 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(Modifier.height(6.dp))
-                            Text("Membresía: ${actual.membresia}", color = ClienteTema.TextoSec, fontSize = 14.sp)
+                            Text(stringResource(R.string.recepcion_scanner_membership_prefix, actual.membresia), color = ClienteTema.TextoSec, fontSize = 14.sp)
                             Row {
-                                Text("Estado: ", color = ClienteTema.TextoSec, fontSize = 14.sp)
+                                Text(stringResource(R.string.label_status), color = ClienteTema.TextoSec, fontSize = 14.sp)
                                 Text(
-                                    if (actual.activo) "Activo" else "Inactivo",
+                                    if (actual.activo) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
                                     color = if (actual.activo) ClienteTema.Verde else ClienteTema.Rojo,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Medium
@@ -311,7 +306,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                             }
                             actual.dentroDesde?.let { desde ->
                                 Text(
-                                    "Dentro desde ${formatHora(desde)}",
+                                    stringResource(R.string.recepcion_scanner_inside_since, formatHora(desde)),
                                     color = ClienteTema.AzulSel,
                                     fontSize = 14.sp
                                 )
@@ -324,7 +319,6 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 HorizontalDivider(color = ClienteTema.Borde.copy(alpha = 0.6f))
                 Spacer(Modifier.height(16.dp))
 
-                // Aviso de resultado (éxito o error)
                 aviso?.let {
                     AvisoBanner(it)
                     Spacer(Modifier.height(12.dp))
@@ -335,14 +329,14 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     SolidButton(
-                        text = "Entrada",
+                        text = stringResource(R.string.recepcion_scanner_entry_btn),
                         color = ClienteTema.Verde,
                         enabled = cliente != null,
                         onClick = { manual(esEntrada = true) },
                         modifier = Modifier.weight(1f)
                     )
                     SolidButton(
-                        text = "Salida",
+                        text = stringResource(R.string.recepcion_scanner_exit_btn),
                         color = ClienteTema.Rojo,
                         enabled = cliente != null,
                         onClick = { manual(esEntrada = false) },
@@ -354,15 +348,13 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     }
 }
 
-// ---------- Utilidades ----------
-
-private val HORA = DateTimeFormatter.ofPattern("hh:mm a", Locale.forLanguageTag("es-MX"))
-
 private fun instante(iso: String?): OffsetDateTime? =
     iso?.let { runCatching { OffsetDateTime.parse(it) }.getOrNull() }
 
-private fun formatHora(iso: String?): String =
-    instante(iso)?.atZoneSameInstant(ZoneId.systemDefault())?.format(HORA) ?: "—"
+private fun formatHora(iso: String?): String {
+    val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault())
+    return instante(iso)?.atZoneSameInstant(ZoneId.systemDefault())?.format(formatter) ?: "—"
+}
 
 private fun duracion(desdeIso: String?, hastaIso: String?): String? {
     val desde = instante(desdeIso) ?: return null
@@ -375,9 +367,6 @@ private fun duracion(desdeIso: String?, hastaIso: String?): String? {
     }
 }
 
-// ---------- Componentes reutilizables ----------
-
-/** Contador de personas dentro del gimnasio. */
 @Composable
 private fun AforoChip(personas: Int) {
     val shape = RoundedCornerShape(50)
@@ -388,7 +377,7 @@ private fun AforoChip(personas: Int) {
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
-            text = "Dentro: $personas",
+            text = stringResource(R.string.recepcion_scanner_inside_count, personas),
             color = ClienteTema.Texto,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold
@@ -396,7 +385,6 @@ private fun AforoChip(personas: Int) {
     }
 }
 
-/** Mensaje verde (éxito) o rojo (error) con fondo tintado. */
 @Composable
 private fun AvisoBanner(aviso: Aviso) {
     val color = if (aviso.esError) ClienteTema.Rojo else ClienteTema.Verde
@@ -419,7 +407,6 @@ private fun AvisoBanner(aviso: Aviso) {
     }
 }
 
-/** Tarjeta grafito con borde degradado dorado (igual que el resto de la app del cliente). */
 @Composable
 private fun GymCard(content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(16.dp)
@@ -434,7 +421,6 @@ private fun GymCard(content: @Composable ColumnScope.() -> Unit) {
     )
 }
 
-/** Las 4 esquinas doradas del visor. */
 @Composable
 internal fun ScannerCorners(modifier: Modifier = Modifier) {
     Canvas(modifier) {
@@ -465,7 +451,6 @@ private fun SolidButton(
         modifier = modifier
             .height(44.dp)
             .clip(shape)
-            // Un solo fondo: opaco si está activo, apagado si no
             .background(if (enabled) color else color.copy(alpha = 0.3f), shape)
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center

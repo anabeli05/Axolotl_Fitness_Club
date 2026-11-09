@@ -4,6 +4,10 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Serializable
 data class ResumenRow(
@@ -23,15 +27,22 @@ data class IngresoDiaRow(
 )
 
 object ResumenRepository {
-    private val mesesCortos = listOf("Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
-    private val diasCortos = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
+    // "2026-09" -> "Sep" (localized according to device Locale.getDefault())
+    fun mesCorto(periodo: String): String {
+        val parts = periodo.split("-")
+        val year = parts.getOrNull(0)?.toIntOrNull() ?: 2026
+        val month = parts.getOrNull(1)?.toIntOrNull() ?: 1
+        val date = LocalDate.of(year, month, 1)
+        return date.format(DateTimeFormatter.ofPattern("MMM", Locale.getDefault()))
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    }
 
-    // "2026-09" -> "Sep"
-    fun mesCorto(periodo: String): String =
-        periodo.split("-").getOrNull(1)?.toIntOrNull()?.let { mesesCortos.getOrNull(it - 1) } ?: periodo
-
-    // 1 -> "Lun" … 7 -> "Dom"
-    fun diaCorto(diaSemana: Int): String = diasCortos.getOrElse(diaSemana - 1) { "" }
+    // 1 -> "Lun" / "Mon" … 7 -> "Dom" / "Sun" (localized according to device Locale.getDefault())
+    fun diaCorto(diaSemana: Int): String {
+        val dayOfWeek = java.time.DayOfWeek.of(diaSemana.coerceIn(1, 7))
+        return dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    }
 
     suspend fun obtener(): ResumenRow =
         SupabaseProvider.client.from("resumen_dashboard")
