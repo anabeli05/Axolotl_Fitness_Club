@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.GastoRow
 import com.example.gymcontrol.data.remote.GastosRepository
 import com.example.gymcontrol.ui.components.GymScaffold
@@ -46,15 +48,10 @@ import java.util.TimeZone
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
-// Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), ClienteTema.Rojo, Color(0xFF7A0A0A))
 )
 
-// Gasto seleccionado para eliminar: clave única para ocultarlo y concepto para mostrarlo en el aviso
-private class DeleteTarget(val key: String, val concept: String)
-
-// El texto debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 @Composable
@@ -125,12 +122,12 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Nuevo Gasto", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.encargado_gastos_new_button), fontWeight = FontWeight.Bold)
                     }
                 }
 
                 if (cargando) {
-                    item { Text("Cargando...", color = ClienteTema.TextoSec) }
+                    item { Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec) }
                 }
                 errorMsg?.let { msg ->
                     item { Text(msg, color = ClienteTema.Rojo) }
@@ -194,9 +191,11 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
     }
 
     deleting?.let { target ->
+        val deleteTitle = stringResource(R.string.encargado_gastos_delete_confirm_title)
+        val deleteMessage = stringResource(R.string.delete_expense_confirm, target.concepto)
         DeleteConfirmDialog(
-            title = "¿Eliminar gasto?",
-            message = "Se eliminará el gasto ${target.concepto}. Esta acción no se puede deshacer.",
+            title = deleteTitle,
+            message = deleteMessage,
             onConfirm = {
                 scope.launch {
                     try {
@@ -254,7 +253,7 @@ private fun DeleteConfirmDialog(
                     shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, ClienteTema.Borde),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text("Cancelar") }
+                ) { Text(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = onConfirm,
@@ -263,7 +262,7 @@ private fun DeleteConfirmDialog(
                         containerColor = ClienteTema.Rojo,
                         contentColor = Color.White
                     )
-                ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.common_delete), fontWeight = FontWeight.Bold) }
             }
         }
     )
@@ -297,20 +296,20 @@ private fun ExpenseCard(
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "Categoría: $category",
+                text = stringResource(R.string.label_category_format, category),
                 color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Monto: $amount",
+                text = stringResource(R.string.label_amount_format, amount),
                 color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Fecha: $date",
+                text = stringResource(R.string.label_date_format, date),
                 color = ClienteTema.TextoSec,
                 fontSize = 14.sp
             )
@@ -393,7 +392,7 @@ private fun ExpenseFormDialog(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isEditing) "Editar gasto" else "Nuevo gasto",
+                    text = if (isEditing) stringResource(R.string.encargado_gastos_edit_title) else stringResource(R.string.encargado_gastos_new_title),
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -403,7 +402,7 @@ private fun ExpenseFormDialog(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = ClienteTema.TextoSec)
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = ClienteTema.TextoSec)
                 }
             }
 
@@ -412,35 +411,35 @@ private fun ExpenseFormDialog(
             RestrictedField(
                 value = concept,
                 onValueChange = onConceptChange,
-                label = "Concepto",
+                label = stringResource(R.string.encargado_gastos_concept_label),
                 accept = { s -> s.all { it.isLetterOrDigit() || it == ' ' } },
                 maxLength = 40,
-                warningText = "Solo se permiten letras y números",
-                errorText = if (concept.isNotEmpty() && !conceptValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_gastos_concept_warning),
+                errorText = if (concept.isNotEmpty() && !conceptValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = category,
                 onValueChange = onCategoryChange,
-                label = "Categoría",
+                label = stringResource(R.string.encargado_gastos_category_label),
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras",
-                errorText = if (category.isNotEmpty() && !categoryValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_gastos_category_warning),
+                errorText = if (category.isNotEmpty() && !categoryValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = amount,
                 onValueChange = onAmountChange,
-                label = "Monto",
+                label = stringResource(R.string.encargado_gastos_amount_label),
                 accept = { s -> MONEY_REGEX.matches(s) },
                 maxLength = 9,
-                warningText = "Solo números (máx. 2 decimales)",
+                warningText = stringResource(R.string.encargado_gastos_amount_warning),
                 keyboardType = KeyboardType.Decimal,
                 prefix = "$"
             )
             Spacer(Modifier.height(10.dp))
-            DateField(value = date, onValueChange = onDateChange, label = "Fecha")
+            DateField(value = date, onValueChange = onDateChange, label = stringResource(R.string.encargado_gastos_date_label))
 
             Spacer(Modifier.height(18.dp))
 
@@ -459,7 +458,7 @@ private fun ExpenseFormDialog(
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isEditing) "Guardar" else "Crear Gasto", fontWeight = FontWeight.Bold)
+                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_gastos_create_button), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -480,8 +479,6 @@ private fun fieldColors() = OutlinedTextFieldDefaults.colors(
     errorSupportingTextColor = ClienteTema.Rojo
 )
 
-// Campo que rechaza lo que no cumple `accept` (muestra un aviso unos segundos)
-// y limita la longitud. `errorText` es un error fijo (ej. "faltan dígitos").
 @Composable
 private fun RestrictedField(
     value: String,
@@ -535,7 +532,6 @@ private val MONEY_REGEX = Regex("^\\d{0,6}(\\.\\d{0,2})?$")
 
 private const val DATE_PATTERN = "dd/MM/yyyy"
 
-// El calendario trabaja en UTC, por eso se formatea y se lee en UTC
 private fun formatDate(millis: Long): String =
     SimpleDateFormat(DATE_PATTERN, Locale.US)
         .apply { timeZone = TimeZone.getTimeZone("UTC") }
@@ -552,7 +548,6 @@ private fun parseDate(text: String): Long? = try {
     null
 }
 
-// Campo de fecha: no se escribe, se elige en un calendario con el ícono (o tocando el campo)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DateField(value: String, onValueChange: (String) -> Unit, label: String) {
@@ -565,12 +560,12 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
             readOnly = true,
             singleLine = true,
             label = { Text(label, color = ClienteTema.TextoSec) },
-            placeholder = { Text("dd/mm/aaaa", color = ClienteTema.TextoSec) },
+            placeholder = { Text(stringResource(R.string.common_date_placeholder), color = ClienteTema.TextoSec) },
             trailingIcon = {
                 IconButton(onClick = { showPicker = true }) {
                     Icon(
                         Icons.Filled.CalendarMonth,
-                        contentDescription = "Elegir fecha",
+                        contentDescription = stringResource(R.string.encargado_gastos_choose_date),
                         tint = ClienteTema.AzulSel
                     )
                 }
@@ -579,7 +574,6 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
             shape = RoundedCornerShape(10.dp),
             colors = fieldColors()
         )
-        // Capa transparente para que tocar el campo también abra el calendario
         Box(
             modifier = Modifier
                 .matchParentSize()
@@ -601,11 +595,11 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
                         pickerState.selectedDateMillis?.let { onValueChange(formatDate(it)) }
                         showPicker = false
                     }
-                ) { Text("Aceptar", color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.common_accept), color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
                 TextButton(onClick = { showPicker = false }) {
-                    Text("Cancelar", color = ClienteTema.TextoSec)
+                    Text(stringResource(R.string.cancel), color = ClienteTema.TextoSec)
                 }
             }
         ) {
