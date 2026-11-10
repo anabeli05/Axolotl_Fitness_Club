@@ -1,19 +1,7 @@
 package com.example.gymcontrol.ui.instructor.perfil
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.ExifInterface
-import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,14 +13,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,11 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -53,17 +35,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.InstructorRepository
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ScaffoldTab
 import com.example.gymcontrol.ui.components.ClienteTema
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 private val InnerBackground = Color.Black.copy(alpha = 0.35f)
@@ -73,9 +52,6 @@ private val INSTRUCTOR_TABS = listOf(
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
-// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
-private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
-
 @Composable
 fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
@@ -84,7 +60,6 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     var name by remember { mutableStateOf(SesionActual.nombre ?: "") }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf(SesionActual.correo ?: "") }
-    var photo by remember { mutableStateOf<ImageBitmap?>(null) }
 
     var activo by remember { mutableStateOf(true) }
     var capacity by remember { mutableStateOf(0) }
@@ -110,34 +85,6 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     }
 
     var showEditDialog by remember { mutableStateOf(false) }
-    var showPhotoDialog by remember { mutableStateOf(false) }
-
-    // Galería (selector de fotos del sistema, no necesita permisos)
-    val galleryLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            scope.launch {
-                val bitmap = withContext(Dispatchers.IO) { loadBitmap(context, uri) }
-                if (bitmap != null) photo = bitmap.asImageBitmap()
-                else Toast.makeText(context, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    // Cámara (toma la foto en el momento)
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) photo = bitmap.asImageBitmap()
-    }
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) cameraLauncher.launch(null)
-        else Toast.makeText(context, "Se necesita permiso de cámara para tomar la foto", Toast.LENGTH_SHORT).show()
-    }
 
     ClienteScaffold(
         currentSection = "Perfil",
@@ -172,11 +119,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfileAvatar(
-                        name = name,
-                        photo = photo,
-                        onEditPhoto = { showPhotoDialog = true }
-                    )
+                    ProfileAvatar(name = name)
 
                     Spacer(Modifier.height(14.dp))
 
@@ -274,46 +217,18 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
         }
     }
 
-    if (showPhotoDialog) {
-        PhotoDialog(
-            hasPhoto = photo != null,
-            onDismiss = { showPhotoDialog = false },
-            onCamera = {
-                showPhotoDialog = false
-                val granted = ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.CAMERA
-                ) == PackageManager.PERMISSION_GRANTED
-                if (granted) cameraLauncher.launch(null)
-                else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-            },
-            onGallery = {
-                showPhotoDialog = false
-                galleryLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            },
-            onRemove = {
-                showPhotoDialog = false
-                photo = null
-            }
-        )
-    }
-
     if (showEditDialog) {
         EditDataDialog(
-            initialName = name,
+            name = name,
             initialPhone = phone,
-            initialEmail = email,
+            email = email,
             onDismiss = { showEditDialog = false },
-            onSave = { newName, newPhone, newEmail ->
+            onSave = { newPhone ->
                 scope.launch {
                     try {
-                        InstructorRepository.editarPerfil(email, newName.trim(), newPhone.trim(), newEmail.trim())
-                        name = newName.trim()
+                        // Solo el teléfono es editable; nombre y correo se mandan como están
+                        InstructorRepository.editarPerfil(email, name, newPhone.trim(), email)
                         phone = newPhone.trim()
-                        email = newEmail.trim()
-                        SesionActual.fijarCorreo(email)
-                        SesionActual.fijarNombre(name)
                         showEditDialog = false
                         Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
@@ -332,87 +247,23 @@ private fun formatPhone(phone: String): String =
         "+52 ${phone.substring(0, 3)} ${phone.substring(3, 6)} ${phone.substring(6)}"
     } else phone
 
-// Lee la imagen reduciendo su tamaño y corrigiendo la rotación
-private fun loadBitmap(context: Context, uri: Uri, maxSize: Int = 600): Bitmap? = try {
-    val resolver = context.contentResolver
-
-    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
-
-    var sample = 1
-    while (bounds.outWidth / sample > maxSize * 2 || bounds.outHeight / sample > maxSize * 2) {
-        sample *= 2
-    }
-
-    val options = BitmapFactory.Options().apply { inSampleSize = sample }
-    val bitmap = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
-
-    val orientation = resolver.openInputStream(uri)?.use {
-        ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-    } ?: ExifInterface.ORIENTATION_NORMAL
-
-    val degrees = when (orientation) {
-        ExifInterface.ORIENTATION_ROTATE_90 -> 90f
-        ExifInterface.ORIENTATION_ROTATE_180 -> 180f
-        ExifInterface.ORIENTATION_ROTATE_270 -> 270f
-        else -> 0f
-    }
-
-    if (bitmap != null && degrees != 0f) {
-        Bitmap.createBitmap(
-            bitmap, 0, 0, bitmap.width, bitmap.height,
-            Matrix().apply { postRotate(degrees) }, true
-        )
-    } else bitmap
-} catch (e: Exception) {
-    null
-}
-
-// Foto (o iniciales si no hay foto) con el lápiz para cambiarla
+// Avatar fijo con las iniciales del instructor (sin opción de cambiar foto)
 @Composable
-private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> Unit) {
-    Box(modifier = Modifier.size(124.dp)) {
-        Box(
-            modifier = Modifier
-                .size(116.dp)
-                .align(Alignment.BottomStart)
-                .clip(CircleShape)
-                .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
-                .border(3.dp, CardBorder, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (photo != null) {
-                Image(
-                    bitmap = photo,
-                    contentDescription = stringResource(R.string.perfil_photo_desc),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Text(
-                    text = initials(name),
-                    color = ClienteTema.Texto,
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .align(Alignment.TopEnd)
-                .background(ClienteTema.Borde, CircleShape)
-                .clickable(onClick = onEditPhoto),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = stringResource(R.string.perfil_change_photo_desc),
-                tint = ClienteTema.Texto,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+private fun ProfileAvatar(name: String) {
+    Box(
+        modifier = Modifier
+            .size(116.dp)
+            .clip(CircleShape)
+            .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
+            .border(3.dp, CardBorder, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = initials(name),
+            color = ClienteTema.Texto,
+            fontSize = 40.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -551,47 +402,19 @@ private fun GymDialog(
 }
 
 @Composable
-private fun PhotoDialog(
-    hasPhoto: Boolean,
-    onDismiss: () -> Unit,
-    onCamera: () -> Unit,
-    onGallery: () -> Unit,
-    onRemove: () -> Unit
-) {
-    GymDialog(title = stringResource(R.string.perfil_photo_dialog_title), onDismiss = onDismiss) {
-        ActionRow(icon = Icons.Filled.PhotoCamera, label = stringResource(R.string.perfil_photo_take), onClick = onCamera)
-        ActionRow(icon = Icons.Filled.PhotoLibrary, label = stringResource(R.string.perfil_photo_gallery), onClick = onGallery)
-        if (hasPhoto) {
-            ActionRow(icon = Icons.Filled.Delete, label = stringResource(R.string.perfil_photo_remove), onClick = onRemove)
-        }
-    }
-}
-
-@Composable
 private fun EditDataDialog(
-    initialName: String,
+    name: String,
     initialPhone: String,
-    initialEmail: String,
+    email: String,
     onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
+    onSave: (String) -> Unit
 ) {
-    var name by remember { mutableStateOf(initialName) }
     var phone by remember { mutableStateOf(initialPhone) }
-    var email by remember { mutableStateOf(initialEmail) }
 
-    // Avisos que aparecen unos segundos cuando se intenta escribir un carácter no permitido
-    var nameWarning by remember { mutableStateOf(false) }
-    var nameTick by remember { mutableStateOf(0) }
+    // Aviso que aparece unos segundos cuando se intenta escribir algo que no es número
     var phoneWarning by remember { mutableStateOf(false) }
     var phoneTick by remember { mutableStateOf(0) }
 
-    LaunchedEffect(nameTick) {
-        if (nameTick > 0) {
-            nameWarning = true
-            delay(2500)
-            nameWarning = false
-        }
-    }
     LaunchedEffect(phoneTick) {
         if (phoneTick > 0) {
             phoneWarning = true
@@ -600,25 +423,26 @@ private fun EditDataDialog(
         }
     }
 
-    // Reglas: nombre solo letras y espacios (mínimo 3 letras); teléfono exactamente 10 dígitos
-    val nameValid = nameHasMinLetters(name)
-    val nameShort = name.isNotEmpty() && !nameValid
+    // Regla: teléfono exactamente 10 dígitos numéricos
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
-    val isValid = nameValid && phone.length == 10
+    val isValid = phone.length == 10
 
     GymDialog(title = stringResource(R.string.perfil_edit_dialog_title), onDismiss = onDismiss) {
+        // Nombre y correo: solo lectura
         GymTextField(
             value = name,
-            onValueChange = { new ->
-                when {
-                    !new.all { it.isLetter() || it == ' ' } -> nameTick++
-                    new.length <= 40 -> name = new
-                }
-            },
+            onValueChange = {},
             label = stringResource(R.string.perfil_field_name),
-            isError = nameWarning || nameShort,
-            errorText = if (nameWarning) stringResource(R.string.perfil_error_letters_only) else stringResource(R.string.perfil_error_min_letters)
+            enabled = false
         )
+        GymTextField(
+            value = email,
+            onValueChange = {},
+            label = stringResource(R.string.perfil_field_email),
+            enabled = false
+        )
+
+        // Único campo editable
         GymTextField(
             value = phone,
             onValueChange = { new ->
@@ -632,12 +456,6 @@ private fun EditDataDialog(
             isError = phoneWarning || phoneIncomplete,
             errorText = if (phoneWarning) stringResource(R.string.perfil_error_phone_digits)
             else "Deben ser 10 dígitos (${phone.length}/10)"
-        )
-        GymTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = stringResource(R.string.perfil_field_email),
-            keyboardType = KeyboardType.Email
         )
 
         Row(
@@ -658,7 +476,7 @@ private fun EditDataDialog(
                 Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             Button(
-                onClick = { onSave(name.trim(), phone, email) },
+                onClick = { onSave(phone) },
                 enabled = isValid,
                 modifier = Modifier
                     .weight(1f)
@@ -682,11 +500,13 @@ private fun GymTextField(
     label: String,
     keyboardType: KeyboardType = KeyboardType.Text,
     isError: Boolean = false,
-    errorText: String? = null
+    errorText: String? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         label = { Text(label) },
         singleLine = true,
         isError = isError,
@@ -708,7 +528,11 @@ private fun GymTextField(
             errorTextColor = ClienteTema.Texto,
             errorLabelColor = ClienteTema.Rojo,
             errorCursorColor = ClienteTema.Rojo,
-            errorSupportingTextColor = ClienteTema.Rojo
+            errorSupportingTextColor = ClienteTema.Rojo,
+            // Campos de solo lectura (nombre y correo)
+            disabledTextColor = ClienteTema.TextoSec.copy(alpha = 0.6f),
+            disabledBorderColor = ClienteTema.Borde.copy(alpha = 0.4f),
+            disabledLabelColor = ClienteTema.TextoSec.copy(alpha = 0.5f)
         )
     )
 }

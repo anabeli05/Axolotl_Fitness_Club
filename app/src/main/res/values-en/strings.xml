@@ -6,9 +6,9 @@
     <string name="hide_password">Hide password</string>
     <string name="show_password">Show password</string>
     <string name="accept_terms_prefix">I accept the </string>
-    <string name="terms_and_conditions">Terms and Conditions</string>
+    <string name="terms_and_conditions"> Terms and Conditions </string>
     <string name="accept_terms_and"> and the </string>
-    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy"> Privacy Policy </string>
     <string name="login_button">Sign In</string>
     <string name="logging_in">Signing in...</string>
     <string name="error_invalid_credentials">Incorrect username or password</string>
@@ -290,4 +290,150 @@
     <!-- Legal -->
     <string name="legal_back">Back</string>
     <string name="legal_last_updated">Last updated: November 2026</string>
+
+    <!-- General & Status -->
+    <string name="label_expires">Expires</string>
+    <string name="label_membership">Membership</string>
+    <string name="label_registration">Registration</string>
+    <string name="label_inside">Inside</string>
+    <string name="label_outside">Outside</string>
+    <string name="label_inside_since">Inside · since %s</string>
+    <string name="btn_new_client">New client</string>
+    <string name="placeholder_search_client">Name or membership</string>
+
+    <!-- Planes -->
+    <string name="plan_day">Day Pass</string>
+    <string name="plan_monthly">Monthly</string>
+    <string name="plan_quarterly">Quarterly</string>
+    <string name="label_plan_prefix">Plan: %s</string>
+    <string name="bank_title">Bank</string>
+
+    <!-- Recepción / Scanner / Facial -->
+    <string name="facial_recognition_title">Facial Recognition</string>
+    <string name="scan_face">Scan face</string>
+    <string name="client_info">Client information</string>
+    <string name="scan_prompt">Scan a face to display client information</string>
+    <string name="label_instructor">Instructor</string>
+    <string name="label_date">Date</string>
+
+    <!-- Instructor -->
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+    <string name="day_sun">Sun</string>
+
+    <!-- Encargado: Personal / Staff -->
+    <string name="btn_add_staff">Add staff</string>
+    <string name="label_role">Role</string>
+    <string name="label_email">Email</string>
+    <string name="label_phone">Phone</string>
+
+    <!-- Encargado: Servicios -->
+    <string name="label_duration">Duration</string>
+    <string name="label_days">days</string>
+    <string name="label_price">Price</string>
+    <string name="delete_service_confirm">The service %s will be deleted. This action cannot be undone.</string>
+
+    <!-- Encargado: Gastos -->
+    <string name="label_category">Category</string>
+    <string name="label_amount">Amount</string>
+    <string name="delete_expense_confirm">The expense %s will be deleted. This action cannot be undone.</string>
+
+    <!-- Buttons & Labels -->
+    <string name="btn_accept">Accept</string>
+    <string name="btn_understood">Understood</string>
+    <string name="label_status">Status: </string>
+    <string name="encargado_clients_renew_title">Renew %1$s</string>
+
+    <!-- Terms and Conditions -->
+    <string name="term_1_title">1. Acceptance of Terms</string>
+    <string name="term_1_content">By accessing and using the Axolotl Fitness Club (GymControl) application, the user declares that they have read, understood, and fully accepted these Terms and Conditions of Responsible Use. If you do not agree, you must refrain from using the platform. Acceptance is made on the login screen by checking a box required to sign in.</string>
+    <string name="term_2_title">2. Purpose of the Service</string>
+    <string name="term_2_content">The application is a mobile service for Android by Axolotl Fitness Club, which has multiple branches. It allows controlling client access, managing memberships, requesting advisories with instructors, recording payments, and generating reports.</string>
+    <string name="term_3_title">3. User Roles</string>
+    <string name="term_3_content">The application has four user types (client, instructor, reception, and owner/manager), and each only accesses the functions corresponding to their role.</string>
+    <string name="term_4_title">4. Eligibility to Use the Application</string>
+    <string name="term_4_content">Only persons aged 18 or older may use the application.</string>
+    <string name="term_5_title">5. Responsible Account Use</string>
+    <string name="term_5_content">Account access credentials are personal and non-transferable. The user is solely responsible for maintaining the confidentiality of their credentials and for all activities performed from their account. Accounts are created by staff; there is no self-registration. Passwords must be at least 8 characters long, including uppercase, lowercase, numbers, and symbols. An inactive account cannot log in. After 5 failed attempts, the account is locked for 15 minutes.</string>
+    <string name="term_6_title">6. Payments, Memberships, and Cancellations</string>
+    <string name="term_6_content">Tariffs, subscription validity, and renewal conditions are governed by the contracted plan. Facility access is subject to being current with the corresponding membership payment.\n\nDay, monthly, and quarterly memberships are available. A membership is active when its status is active and its expiration date is today or later. If expired, entry is not permitted until renewed. Renewals are handled by reception or the manager.\n\nOnly the manager can deactivate a client, leaving the account inactive. An account inactive for a specified time may be manually deleted by reception or the manager.\n\nCash, card, and transfer payments are accepted. Reception confirms cash and card payments; the manager confirms transfers and can also confirm the other two. A payment is pending, accepted, or rejected. Amounts are expressed in Mexican pesos. The application records payments and does not process online charges. Additional services, such as instructor use, are billed separately.</string>
+    <string name="term_7_title">7. Gym Access</string>
+    <string name="term_7_content">The client is identified at reception through facial recognition. Reception accepts or rejects entry and reserves the right to deny it. The application records entry and exit. Attempting to enter by impersonating another person is strictly prohibited.</string>
+    <string name="term_8_title">8. Capacity and Traffic Hours</string>
+    <string name="term_8_content">The application shows an approximate number of people inside the gym, calculated from entry and exit records. It is informative and may not match real-time numbers exactly.</string>
+    <string name="term_9_title">9. Instructor Advisories</string>
+    <string name="term_9_content">The client requests an advisory with an instructor, and the request is approved or rejected. The cost is defined by each instructor, and each instructor has a maximum client capacity. The instructor defines attendance days and goals with each client.</string>
+    <string name="term_10_title">10. Notices and Notifications</string>
+    <string name="term_10_content">Membership expiration notices are sent to the client outside of the application.</string>
+    <string name="term_11_title">11. Facility Rules and Safety</string>
+    <string name="term_11_content">Gym use requires respecting internal rules of hygiene, safety, and proper use of equipment and weights. Offensive behavior or any action threatening the physical integrity of users and staff is strictly prohibited.</string>
+    <string name="term_12_title">12. Health and Physical Condition</string>
+    <string name="term_12_content">The user acknowledges that physical activity involves inherent risks. It is the user\'s responsibility to consult a physician before starting any training program and to notify instructors of any relevant medical condition. The application does not track physical progress or substitute medical advice.</string>
+    <string name="term_13_title">13. Acceptable Use of the Application</string>
+    <string name="term_13_content">Users must not share accounts, attempt to access features of another role, manipulate system data, or use the application for illicit purposes.</string>
+    <string name="term_14_title">14. Intellectual Property</string>
+    <string name="term_14_content">The application, its design, code, name, and Axolotl logo are protected by copyright. © 2026 Axolotl. All rights reserved. Copying, modifying, distributing, or reverse engineering the application without written authorization from Axolotl is prohibited.</string>
+    <string name="term_15_title">15. Service Availability</string>
+    <string name="term_15_content">The application relies on the internet and a cloud service, so uninterrupted operation or availability during maintenance is not guaranteed.</string>
+    <string name="term_16_title">16. Personal Data</string>
+    <string name="term_16_content">The processing of personal data is governed by the Privacy Policy.</string>
+    <string name="term_17_title">17. Suspension and Termination</string>
+    <string name="term_17_content">Client deactivation is performed by the manager and leaves the account inactive.</string>
+    <string name="term_18_title">18. Modifications to Terms</string>
+    <string name="term_18_content">The gym reserves the right to modify these terms at any time. Modifications will take effect upon publication in the application.</string>
+    <string name="term_19_title">19. Contact</string>
+    <string name="term_19_content">Phone: +52 314 139 7633\nEmail: contacto@axolotlgym.com</string>
+
+    <!-- Privacy Policy -->
+    <string name="privacy_1_title">1. Data Controller</string>
+    <string name="privacy_1_content">Axolotl Fitness Club, gym with multiple branches. Data processing applies to all branches. Controller contact means are the phone and email indicated in section 12.</string>
+    <string name="privacy_2_title">2. Information We Collect</string>
+    <string name="privacy_2_content">We collect information necessary to provide the service:\na) For all users: full name, email, phone number, password (stored with hashing and unreadable), role, account status, registration date, failed login attempts, and temporary lockout date.\nb) Profile photo, which can be set by the client and instructor.\nc) For clients: membership type, start and expiration dates, and membership status; attendance records (date, time, entry/exit type, and registration method); payments (amount, payment type, status, who confirmed it, and date); advisory requests and active advisories (instructor, attendance days, and goal); and an emergency contact. The client declares having authorization from the person provided as an emergency contact.\nd) Biometric data: numerical representation of the face, used to identify the client upon entry.\ne) For instructors: specialty, schedule, advisory cost, and maximum client capacity.\nf) Payment data: amount, type, and payment status.\ng) Date of birth and medical conditions are not collected.</string>
+    <string name="privacy_3_title">3. Purpose of Data Processing</string>
+    <string name="privacy_3_content">Personal data is used exclusively for Axolotl purposes:\n(a) client authentication and identification for access control via facial recognition;\n(b) membership and payment management;\n(c) assignment and tracking of instructor advisories;\n(d) calculation of the number of people inside the gym and generation of income and expense reports;\n(e) sending important service notifications, such as membership expiration notices, outside the application; and\n(f) contacting the designated person in case of a client emergency.\n\nData is not used for any other purpose and there are no secondary purposes, such as promotions or advertising.</string>
+    <string name="privacy_4_title">4. Biometric Data (Facial Recognition)</string>
+    <string name="privacy_4_content">Facial data is used solely to identify the client upon entering the gym. Consent is requested explicitly and separately when registering the client\'s face.</string>
+    <string name="privacy_5_title">5. Who Can View Data</string>
+    <string name="privacy_5_content">a) Clients view their own data.\nb) Instructors view their assigned clients: name, attendance days, and goal.\nc) Reception views client name, membership type, expiration date, and photo upon identification, and can create, edit, and renew clients.\nd) The owner or manager administers users, memberships, payments, services, and expenses and views reports.</string>
+    <string name="privacy_6_title">6. We Do Not Share Your Data with Third Parties</string>
+    <string name="privacy_6_content">Data is not sold, shared, or transferred to third parties for any purpose. The database is hosted on Supabase, a cloud service provider, solely for storage.</string>
+    <string name="privacy_7_title">7. Security and Confidentiality</string>
+    <string name="privacy_7_content">We implement technical and administrative security measures to protect personal information against unauthorized access, alteration, loss, or improper disclosure. Specifically: passwords are stored with hashes; the application cannot read them or modify user and role tables; the role is validated both in the application and in database functions; and accounts are locked for 15 minutes after 5 failed attempts.</string>
+    <string name="privacy_8_title">8. Data Retention and Deletion</string>
+    <string name="privacy_8_content">Upon deactivating a client, their account becomes inactive. An account inactive for a specified time may be manually deleted by reception or the manager.</string>
+    <string name="privacy_9_title">9. ARCO Rights (Access, Rectification, Cancellation, and Opposition)</string>
+    <string name="privacy_9_content">The data subject has the right to access, rectify, or request deletion of their personal information, oppose its processing, and revoke consent. To do so, you may contact the reception of any branch or call +52 314 139 7633 or email contacto@axolotlgym.com.</string>
+    <string name="privacy_10_title">10. Age of Majority</string>
+    <string name="privacy_10_content">The application is intended solely for persons aged 18 or older and does not collect data from minors.</string>
+    <string name="privacy_11_title">11. Changes to the Privacy Policy</string>
+    <string name="privacy_11_content">We reserve the right to update this Privacy Policy at any time. Any changes will be notified promptly through the platform.</string>
+    <string name="privacy_12_title">12. Privacy Contact</string>
+    <string name="privacy_12_content">Phone: +52 314 139 7633\nEmail: contacto@axolotlgym.com</string>
+    <string name="privacy_13_title">13. Acceptance</string>
+    <string name="privacy_13_content">The Privacy Policy and Terms and Conditions are displayed on the login screen via links, and the user must check an acceptance box to sign in.</string>
+    <string name="privacy_14_title">14. Legal Framework</string>
+    <string name="privacy_14_content">The processing of personal data is governed by Mexican legislation on the protection of personal data held by private parties.</string>
+
+    <string name="label_membership_format">Membership: %s</string>
+    <string name="label_expires_format">Expires: %s</string>
+    <string name="title_delete_staff">Delete staff member?</string>
+    <string name="delete_staff_confirm">%s will be permanently removed from the system. This action cannot be undone.</string>
+    <string name="label_duration_format">Duration: %s</string>
+    <string name="label_price_format">Price: %s</string>
+    <string name="label_category_format">Category: %s</string>
+    <string name="label_amount_format">Amount: %s</string>
+    <string name="label_date_format">Date: %s</string>
+    <string name="unit_day">day</string>
+    <string name="unit_days">days</string>
+    <string name="corresponsales_formatted">OXXO, 7-Eleven\nFarmacias del Ahorro</string>
+    <string name="title_monthly_report">Monthly report</string>
+    <string name="label_services">Services</string>
+    <string name="label_advisories">Advisories</string>
+    <string name="label_expenses">Expenses</string>
+    <string name="label_total">Total</string>
+    <string name="label_total_format">Total: $%s</string>
 </resources>
