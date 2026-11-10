@@ -48,7 +48,7 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 

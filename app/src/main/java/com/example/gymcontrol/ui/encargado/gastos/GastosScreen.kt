@@ -44,7 +44,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 // Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(

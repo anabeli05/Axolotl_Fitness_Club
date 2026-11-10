@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 import com.example.gymcontrol.data.remote.ServicioRow
 import com.example.gymcontrol.data.remote.ServiciosRepository
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 // Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(

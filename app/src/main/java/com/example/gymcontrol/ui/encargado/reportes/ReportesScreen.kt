@@ -19,7 +19,7 @@ import com.example.gymcontrol.data.remote.ReportesRepository
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 @Composable
 fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
