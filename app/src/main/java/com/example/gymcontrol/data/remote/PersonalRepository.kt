@@ -40,17 +40,70 @@ private data class EditarPersonalParams(
 )
 @Serializable
 private data class EliminarPersonalParams(val p_actor_gmail: String, val p_id: Long)
+
+@Serializable
+data class PerfilPersonalRow(
+    @SerialName("r_id") val id: Long,
+    @SerialName("r_nombre") val nombre: String,
+    @SerialName("r_gmail") val gmail: String,
+    @SerialName("r_telefono") val telefono: String = "",
+    @SerialName("r_estado") val estado: String = "ACTIVO",
+    @SerialName("r_fecha_registro") val fechaRegistro: String? = null
+)
+
+@Serializable
+private data class MiTelefonoParams(val p_gmail: String, val p_telefono: String)
+
+@Serializable
+private data class FotoUsuarioParams(val p_usuario_id: Long)
+
+@Serializable
+private data class FotoPersonalParams(val p_gmail: String)
+
+@Serializable
+private data class GuardarFotoParams(val p_actor_gmail: String, val p_usuario_id: Long, val p_foto: String)
 object PersonalRepository {
     suspend fun listar(): List<PersonalRow> =
         SupabaseProvider.client.from("personal_lista")
             .select { order("id", Order.ASCENDING) }
             .decodeList<PersonalRow>()
 
-    suspend fun crear(nombre: String, telefono: String, gmail: String, rol: String, costo: Double?, capacidad: Int?) {
+    /** Devuelve el id del nuevo usuario (para tomarle su foto enseguida). */
+    suspend fun crear(nombre: String, telefono: String, gmail: String, rol: String, costo: Double?, capacidad: Int?): Long =
         SupabaseProvider.client.postgrest.rpc(
             "crear_personal",
             CrearPersonalParams(nombre, telefono, gmail, rol, costo, capacidad)
-        )
+        ).decodeAs<Long>()
+
+    /** Foto de perfil (JPEG en base64) de un miembro del personal; null si no tiene. */
+    suspend fun foto(usuarioId: Long): String? =
+        SupabaseProvider.client.postgrest
+            .rpc("foto_usuario", FotoUsuarioParams(usuarioId))
+            .decodeAs<String?>()
+
+    /** Foto del miembro del personal que inició sesión. */
+    suspend fun fotoPorCorreo(gmail: String): String? =
+        SupabaseProvider.client.postgrest
+            .rpc("foto_personal", FotoPersonalParams(gmail.trim()))
+            .decodeAs<String?>()
+
+    /** Datos del miembro del personal que inició sesión (perfil de Recepción). */
+    suspend fun miPerfil(gmail: String): PerfilPersonalRow? =
+        SupabaseProvider.client.postgrest
+            .rpc("perfil_personal", FotoPersonalParams(gmail.trim()))
+            .decodeList<PerfilPersonalRow>()
+            .firstOrNull()
+
+    /** Recepción cambia su propio teléfono. */
+    suspend fun editarMiTelefono(gmail: String, telefono: String) {
+        SupabaseProvider.client.postgrest
+            .rpc("editar_mi_telefono", MiTelefonoParams(gmail.trim(), telefono))
+    }
+
+    /** Solo el Encargado: toma o actualiza la foto de un miembro del personal. */
+    suspend fun guardarFoto(actorGmail: String, usuarioId: Long, foto: String) {
+        SupabaseProvider.client.postgrest
+            .rpc("guardar_foto_personal", GuardarFotoParams(actorGmail, usuarioId, foto))
     }
 
     /** Teléfono, costo y capacidad (no vienen en personal_lista). */

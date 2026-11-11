@@ -155,8 +155,17 @@
     <string name="perfil_camera_permission_required">Camera permission required to take photo</string>
     <string name="perfil_not_loaded_yet">Your data is not loaded yet</string>
     <string name="perfil_data_updated">Data updated</string>
+    <string name="perfil_action_edit_phone">Change phone</string>
+    <string name="perfil_staff_photo_hint">Your profile photo is taken by the Manager</string>
     <string name="foto_cliente_close">Close</string>
     <string name="foto_cliente_update_face">Update face</string>
+    <string name="foto_update">Update photo</string>
+    <string name="foto_retake">Retake</string>
+    <string name="foto_face_hint">Stand in front of the camera</string>
+    <string name="foto_ready_hint">Face detected. Tap “Take photo”.</string>
+    <string name="foto_preview_hint">Does it look good? Save it or retake it.</string>
+    <string name="foto_no_face">No face was detected. Try again.</string>
+    <string name="foto_save_error">Could not save the photo</string>
     <string name="perfil_emergency_title">Emergency contact</string>
     <string name="perfil_action_edit_contact">Edit emergency contact</string>
     <string name="perfil_contact_not_set">Not set</string>
@@ -411,7 +420,7 @@
     <string name="privacy_1_title">1. Data Controller</string>
     <string name="privacy_1_content">Axolotl Fitness Club, gym with multiple branches. Data processing applies to all branches. Controller contact means are the phone and email indicated in section 12.</string>
     <string name="privacy_2_title">2. Information We Collect</string>
-    <string name="privacy_2_content">We collect information necessary to provide the service:\na) For all users: full name, email, phone number, password (stored with hashing and unreadable), role, account status, registration date, failed login attempts, and temporary lockout date.\nb) Profile photo. The client\'s photo is taken at reception when their face is registered and cannot be changed.\nc) For clients: membership type, start and expiration dates, and membership status; attendance records (date, time, entry/exit type, and registration method); payments (amount, payment type, status, who confirmed it, and date); advisory requests and active advisories (instructor, attendance days, and goal); and an emergency contact. The client declares having authorization from the person provided as an emergency contact.\nd) Biometric data: numerical representation of the face, used to identify the client upon entry.\ne) For instructors: specialty, schedule, advisory cost, and maximum client capacity.\nf) Payment data: amount, type, and payment status.\ng) Date of birth and medical conditions are not collected.</string>
+    <string name="privacy_2_content">We collect information necessary to provide the service:\na) For all users: full name, email, phone number, password (stored with hashing and unreadable), role, account status, registration date, failed login attempts, and temporary lockout date.\nb) Profile photo. The client\'s photo is taken at reception when their face is registered and only reception can update it; staff photos are taken by the manager when they are added and can be updated by the manager.\nc) For clients: membership type, start and expiration dates, and membership status; attendance records (date, time, entry/exit type, and registration method); payments (amount, payment type, status, who confirmed it, and date); advisory requests and active advisories (instructor, attendance days, and goal); and an emergency contact. The client declares having authorization from the person provided as an emergency contact.\nd) Biometric data: numerical representation of the face, used to identify the client upon entry.\ne) For instructors: specialty, schedule, advisory cost, and maximum client capacity.\nf) Payment data: amount, type, and payment status.\ng) Date of birth and medical conditions are not collected.</string>
     <string name="privacy_3_title">3. Purpose of Data Processing</string>
     <string name="privacy_3_content">Personal data is used exclusively for Axolotl purposes:\n(a) client authentication and identification for access control via facial recognition;\n(b) membership and payment management;\n(c) assignment and tracking of instructor advisories;\n(d) calculation of the number of people inside the gym and generation of income and expense reports;\n(e) sending important service notifications, such as membership expiration notices, outside the application; and\n(f) contacting the designated person in case of a client emergency.\n\nData is not used for any other purpose and there are no secondary purposes, such as promotions or advertising.</string>
     <string name="privacy_4_title">4. Biometric Data (Facial Recognition)</string>
