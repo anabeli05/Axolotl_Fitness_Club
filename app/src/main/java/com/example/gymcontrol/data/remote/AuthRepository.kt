@@ -43,10 +43,12 @@ object AuthRepository {
             .decodeList<LoginRow>()
             .firstOrNull()
 
+    /** La base regresa "OK" o el motivo del error (los intentos fallidos cuentan para el bloqueo). */
     suspend fun cambiarContrasena(gmail: String, actual: String, nueva: String) {
-        SupabaseProvider.client.postgrest.rpc(
+        val r = SupabaseProvider.client.postgrest.rpc(
             "cambiar_contrasena",
             CambiarParams(gmail.trim(), actual, nueva)
-        )
+        ).decodeAs<String>()
+        if (r != "OK") throw IllegalStateException(r)
     }
 }

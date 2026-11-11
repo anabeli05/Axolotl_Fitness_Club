@@ -21,7 +21,15 @@ data class SolicitudAdminRow(
 @Serializable
 private data class ResolverParams(val p_id: Long, val p_estado: String)
 
+@Serializable
+private data class CancelarAsesoriaParams(val p_actor_gmail: String, val p_id: Long, val p_motivo: String)
+
 object SolicitudesRepository {
+    /** Recepción o Encargado cancelan una asesoría pendiente o aprobada (queda registrada). */
+    suspend fun cancelar(actorGmail: String, id: Long, motivo: String) {
+        SupabaseProvider.client.postgrest.rpc("cancelar_asesoria", CancelarAsesoriaParams(actorGmail, id, motivo))
+    }
+
     suspend fun listar(): List<SolicitudAdminRow> =
         SupabaseProvider.client.from("solicitudes_lista")
             .select { order("id", Order.DESCENDING) }

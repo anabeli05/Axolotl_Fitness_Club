@@ -30,9 +30,14 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.data.remote.CorreoRepository
 import com.example.gymcontrol.data.remote.PlanRow
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.FotoClienteAvatar
+import com.example.gymcontrol.ui.components.FotoClienteDialog
+import com.example.gymcontrol.ui.components.FotosClientes
+import androidx.compose.ui.graphics.ImageBitmap
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.delay
@@ -62,6 +67,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var info by remember { mutableStateOf<String?>(null) }
     var conRostro by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var registrandoRostro by remember { mutableStateOf<ClienteRow?>(null) }
+    var viendoFoto by remember { mutableStateOf<Pair<ClienteRow, ImageBitmap>?>(null) }
     var dentro by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
@@ -167,6 +173,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 
                 itemsIndexed(clients) { _, client ->
                     ClientCard(
+                        clienteId = client.id,
                         name = client.nombre,
                         membershipNum = client.numeroMembresia,
                         fechaFin = client.fechaFin,
@@ -174,7 +181,10 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         isActive = client.estado == "ACTIVO" && client.activa,
                         tieneRostro = client.id in conRostro,
                         dentroDesde = dentro[client.id],
-                        onRostro = { registrandoRostro = client },
+                        // Con foto: se ve en grande (y desde ahí se puede actualizar el rostro)
+                        onRostro = { foto ->
+                            if (foto != null) viendoFoto = client to foto else registrandoRostro = client
+                        },
                         onEdit = {
                             editing = client
                             errorForm = null
@@ -202,6 +212,13 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             if (showForm) {
                 val c = editing
                 val partes = c?.nombre?.trim()?.split(" ", limit = 2)
+                // Al editar se carga el contacto de emergencia que ya tiene el cliente
+                var contacto by remember(c?.id) { mutableStateOf<ContactoEmergencia?>(null) }
+                LaunchedEffect(c?.id) {
+                    if (c != null) contacto = try {
+                        ClientesRepository.contactoEmergencia(SesionActual.correo ?: "", c.id)
+                    } catch (_: Exception) { null }
+                }
                 ClientFormDialog(
                     isEditing = c != null,
                     plans = planes.map { it.nombre },
@@ -210,19 +227,22 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     initialLastName = partes?.getOrNull(1) ?: "",
                     initialPhone = c?.telefono ?: "",
                     initialEmail = c?.gmail ?: "",
+                    initialContactName = contacto?.nombre ?: "",
+                    initialContactPhone = contacto?.telefono ?: "",
                     onDismiss = {
                         showForm = false
                         editing = null
                         errorForm = null
                     },
-                    onSave = { nombre, telefono, correo, plan ->
+                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo ->
                         if (c == null) {
                             confirmar = String.format(Locale.getDefault(), msgRegister, nombre) to {
                                 scope.launch {
                                     try {
                                         val nuevo = ClientesRepository.crear(
                                             nombre, telefono, correo, plan ?: "",
-                                            SesionActual.correo ?: ""
+                                            SesionActual.correo ?: "",
+                                            contactoNombre, contactoTelefono, metodo
                                         )
                                         showForm = false
                                         errorForm = null
@@ -241,7 +261,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             confirmar = String.format(Locale.getDefault(), msgSave, c.nombre) to {
                                 scope.launch {
                                     try {
-                                        ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado)
+                                        ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado, contactoNombre, contactoTelefono)
                                         showForm = false
                                         editing = null
                                         errorForm = null
@@ -280,12 +300,25 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
+            viendoFoto?.let { (cl, foto) ->
+                FotoClienteDialog(
+                    nombre = cl.nombre,
+                    foto = foto,
+                    onDismiss = { viendoFoto = null },
+                    accion = stringResource(R.string.foto_cliente_update_face) to {
+                        viendoFoto = null
+                        registrandoRostro = cl
+                    }
+                )
+            }
+
             registrandoRostro?.let { cl ->
                 RegistroRostroDialog(
                     cliente = cl,
                     yaTieneRostro = cl.id in conRostro,
                     onDismiss = { registrandoRostro = null },
                     onRegistrado = {
+                        FotosClientes.olvidar(cl.id)  // si era su primer registro, ya tiene foto
                         conRostro = conRostro + cl.id
                         registrandoRostro = null
                         info = "Rostro de ${cl.nombre} registrado para el acceso"
@@ -344,6 +377,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 
 @Composable
 private fun ClientCard(
+    clienteId: Long,
     name: String,
     membershipNum: String,
     fechaFin: String?,
@@ -351,7 +385,7 @@ private fun ClientCard(
     isActive: Boolean,
     tieneRostro: Boolean = false,
     dentroDesde: String? = null,
-    onRostro: () -> Unit = {},
+    onRostro: (ImageBitmap?) -> Unit = {},
     onEdit: () -> Unit,
     onRenovar: () -> Unit
 ) {
@@ -366,26 +400,15 @@ private fun ClientCard(
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .background(ClienteTema.Navy, CircleShape)
-                .border(
-                    if (tieneRostro) 2.dp else 1.dp,
-                    if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
-                    CircleShape
-                )
-                .clip(CircleShape)
-                .clickable(onClick = onRostro),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                tint = ClienteTema.TextoSec,
-                modifier = Modifier.size(34.dp)
-            )
-        }
+        // Borde verde = rostro registrado. Al tocarla: foto en grande o registrar el rostro
+        FotoClienteAvatar(
+            clienteId = clienteId,
+            size = 52.dp,
+            borderWidth = if (tieneRostro) 2.dp else 1.dp,
+            borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
+            recarga = tieneRostro,
+            onClick = onRostro
+        )
 
         Spacer(Modifier.width(12.dp))
 

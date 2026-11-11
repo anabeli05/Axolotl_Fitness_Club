@@ -69,6 +69,12 @@
     <string name="cliente_facial_camera_hint">Look at the reception camera to enter and exit</string>
     <string name="cliente_clients_now_title">Clients right now</string>
     <string name="cliente_gym_schedule">Gym hours: 06:00 - 00:00</string>
+    <string name="cliente_least_busy_title">Least busy hours</string>
+    <string name="cliente_least_busy_chart">Average entries</string>
+    <string name="cliente_least_busy_best">Best times to come:</string>
+    <string name="cliente_least_busy_item">• %1$s – %2$s · %3$s entries on average</string>
+    <string name="cliente_least_busy_note">Based on real entries from the last 4 weeks.</string>
+    <string name="cliente_least_busy_empty">There are not enough entry records yet.</string>
     <string name="cliente_greeting_morning">Good morning</string>
     <string name="cliente_greeting_afternoon">Good afternoon</string>
     <string name="cliente_greeting_evening">Good evening</string>
@@ -149,6 +155,13 @@
     <string name="perfil_camera_permission_required">Camera permission required to take photo</string>
     <string name="perfil_not_loaded_yet">Your data is not loaded yet</string>
     <string name="perfil_data_updated">Data updated</string>
+    <string name="foto_cliente_close">Close</string>
+    <string name="foto_cliente_update_face">Update face</string>
+    <string name="perfil_emergency_title">Emergency contact</string>
+    <string name="perfil_action_edit_contact">Edit emergency contact</string>
+    <string name="perfil_contact_not_set">Not set</string>
+    <string name="perfil_contact_updated">Emergency contact updated</string>
+    <string name="perfil_phone_length">Must be 10 digits (%1$d/10)</string>
     <string name="perfil_password_updated">Password updated</string>
 
     <!-- Instructor: Mis Clientes & Perfil -->
@@ -189,6 +202,12 @@
     <string name="encargado_client_form_email_label">Email</string>
     <string name="encargado_client_form_email_warning">Email cannot contain spaces</string>
     <string name="encargado_client_form_email_invalid">Invalid email</string>
+    <string name="client_form_emergency_title">Emergency contact (required)</string>
+    <string name="client_form_emergency_name">Contact name</string>
+    <string name="client_form_emergency_name_missing">Enter the contact name</string>
+    <string name="client_form_emergency_phone">Contact phone</string>
+    <string name="client_form_payment_method">Payment method</string>
+    <string name="client_form_transfer_note">The membership will be activated once the Manager confirms the transfer.</string>
     <string name="encargado_client_form_plan_placeholder">Select a plan</string>
     <string name="encargado_client_form_plan_label">Plan</string>
     <string name="encargado_client_form_create_button">Create Client</string>
@@ -362,7 +381,7 @@
     <string name="term_6_title">6. Payments, Memberships, and Cancellations</string>
     <string name="term_6_content">Tariffs, subscription validity, and renewal conditions are governed by the contracted plan. Facility access is subject to being current with the corresponding membership payment.\n\nDay, monthly, and quarterly memberships are available. A membership is active when its status is active and its expiration date is today or later. If expired, entry is not permitted until renewed. Renewals are handled by reception or the manager.\n\nOnly the manager can deactivate a client, leaving the account inactive. An account inactive for a specified time may be manually deleted by reception or the manager.\n\nCash, card, and transfer payments are accepted. Reception confirms cash and card payments; the manager confirms transfers and can also confirm the other two. A payment is pending, accepted, or rejected. Amounts are expressed in Mexican pesos. The application records payments and does not process online charges. Additional services, such as instructor use, are billed separately.</string>
     <string name="term_7_title">7. Gym Access</string>
-    <string name="term_7_content">The client is identified at reception through facial recognition. Reception accepts or rejects entry and reserves the right to deny it. The application records entry and exit. Attempting to enter by impersonating another person is strictly prohibited.</string>
+    <string name="term_7_content">The client is identified at reception through facial recognition. The first scan records the entry and the next one the exit, automatically; an active membership is required to enter. Reception reserves the right to deny entry. Attempting to enter by impersonating another person is strictly prohibited.</string>
     <string name="term_8_title">8. Capacity and Traffic Hours</string>
     <string name="term_8_content">The application shows an approximate number of people inside the gym, calculated from entry and exit records. It is informative and may not match real-time numbers exactly.</string>
     <string name="term_9_title">9. Instructor Advisories</string>
@@ -392,13 +411,13 @@
     <string name="privacy_1_title">1. Data Controller</string>
     <string name="privacy_1_content">Axolotl Fitness Club, gym with multiple branches. Data processing applies to all branches. Controller contact means are the phone and email indicated in section 12.</string>
     <string name="privacy_2_title">2. Information We Collect</string>
-    <string name="privacy_2_content">We collect information necessary to provide the service:\na) For all users: full name, email, phone number, password (stored with hashing and unreadable), role, account status, registration date, failed login attempts, and temporary lockout date.\nb) Profile photo, which can be set by the client and instructor.\nc) For clients: membership type, start and expiration dates, and membership status; attendance records (date, time, entry/exit type, and registration method); payments (amount, payment type, status, who confirmed it, and date); advisory requests and active advisories (instructor, attendance days, and goal); and an emergency contact. The client declares having authorization from the person provided as an emergency contact.\nd) Biometric data: numerical representation of the face, used to identify the client upon entry.\ne) For instructors: specialty, schedule, advisory cost, and maximum client capacity.\nf) Payment data: amount, type, and payment status.\ng) Date of birth and medical conditions are not collected.</string>
+    <string name="privacy_2_content">We collect information necessary to provide the service:\na) For all users: full name, email, phone number, password (stored with hashing and unreadable), role, account status, registration date, failed login attempts, and temporary lockout date.\nb) Profile photo. The client\'s photo is taken at reception when their face is registered and cannot be changed.\nc) For clients: membership type, start and expiration dates, and membership status; attendance records (date, time, entry/exit type, and registration method); payments (amount, payment type, status, who confirmed it, and date); advisory requests and active advisories (instructor, attendance days, and goal); and an emergency contact. The client declares having authorization from the person provided as an emergency contact.\nd) Biometric data: numerical representation of the face, used to identify the client upon entry.\ne) For instructors: specialty, schedule, advisory cost, and maximum client capacity.\nf) Payment data: amount, type, and payment status.\ng) Date of birth and medical conditions are not collected.</string>
     <string name="privacy_3_title">3. Purpose of Data Processing</string>
     <string name="privacy_3_content">Personal data is used exclusively for Axolotl purposes:\n(a) client authentication and identification for access control via facial recognition;\n(b) membership and payment management;\n(c) assignment and tracking of instructor advisories;\n(d) calculation of the number of people inside the gym and generation of income and expense reports;\n(e) sending important service notifications, such as membership expiration notices, outside the application; and\n(f) contacting the designated person in case of a client emergency.\n\nData is not used for any other purpose and there are no secondary purposes, such as promotions or advertising.</string>
     <string name="privacy_4_title">4. Biometric Data (Facial Recognition)</string>
     <string name="privacy_4_content">Facial data is used solely to identify the client upon entering the gym. Consent is requested explicitly and separately when registering the client\'s face.</string>
     <string name="privacy_5_title">5. Who Can View Data</string>
-    <string name="privacy_5_content">a) Clients view their own data.\nb) Instructors view their assigned clients: name, attendance days, and goal.\nc) Reception views client name, membership type, expiration date, and photo upon identification, and can create, edit, and renew clients.\nd) The owner or manager administers users, memberships, payments, services, and expenses and views reports.</string>
+    <string name="privacy_5_content">a) Clients view their own data.\nb) Instructors view their assigned clients: name, attendance days, and goal.\nc) Reception views client name, membership type, expiration date, and photo upon identification and in its client list, and can create, edit, and renew clients.\nd) The owner or manager administers users, memberships, payments, services, and expenses, views clients\' profile photos, and views reports.</string>
     <string name="privacy_6_title">6. We Do Not Share Your Data with Third Parties</string>
     <string name="privacy_6_content">Data is not sold, shared, or transferred to third parties for any purpose. The database is hosted on Supabase, a cloud service provider, solely for storage.</string>
     <string name="privacy_7_title">7. Security and Confidentiality</string>

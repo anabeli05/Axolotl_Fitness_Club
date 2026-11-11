@@ -42,6 +42,13 @@ import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
 import com.example.gymcontrol.ui.theme.GymColors
 import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
 
+private const val LEGAL_ACEPTADO = "legal_aceptado"
+
+private fun aceptarLegal(navController: NavHostController) {
+    navController.previousBackStackEntry?.savedStateHandle?.set(LEGAL_ACEPTADO, true)
+    navController.popBackStack()
+}
+
 @Composable
 fun GymNavGraph() {
     val navController = rememberNavController()
@@ -62,10 +69,16 @@ fun GymNavGraph() {
                 .background(GymColors.Background)
         ) {
             NavHost(navController = navController, startDestination = Routes.LOGIN) {
-                composable(Routes.LOGIN) {
+                composable(Routes.LOGIN) { entry ->
+                    // Lo escriben las pantallas legales al pulsar "Aceptar"
+                    val legalAceptado by entry.savedStateHandle
+                        .getStateFlow(LEGAL_ACEPTADO, false)
+                        .collectAsState()
                     LoginScreen(
                         onNavigateToTerms = { navController.navigate(Routes.TERMS) },
                         onNavigateToPrivacy = { navController.navigate(Routes.PRIVACY) },
+                        legalAceptado = legalAceptado,
+                        onLegalAceptadoConsumido = { entry.savedStateHandle[LEGAL_ACEPTADO] = false },
                         onLogin = { role ->
                             SesionActual.iniciar(role)
                             val target = when (role) {
@@ -81,11 +94,18 @@ fun GymNavGraph() {
                     )
                 }
 
+                // "Atrás" regresa sin marcar la casilla; "Aceptar" la marca y regresa
                 composable(Routes.TERMS) {
-                    TermsScreen(onBack = { navController.popBackStack() })
+                    TermsScreen(
+                        onBack = { navController.popBackStack() },
+                        onAccept = { aceptarLegal(navController) }
+                    )
                 }
                 composable(Routes.PRIVACY) {
-                    PrivacyPolicyScreen(onBack = { navController.popBackStack() })
+                    PrivacyPolicyScreen(
+                        onBack = { navController.popBackStack() },
+                        onAccept = { aceptarLegal(navController) }
+                    )
                 }
 
                 // Cliente: la barra inferior cambia entre Inicio, Asesorías y Perfil
