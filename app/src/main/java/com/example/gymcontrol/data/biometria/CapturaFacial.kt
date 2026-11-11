@@ -1,13 +1,15 @@
 package com.example.gymcontrol.data.biometria
 
 import android.graphics.Bitmap
+import androidx.annotation.StringRes
+import com.example.gymcontrol.R
 import com.google.mlkit.vision.face.Face
 import kotlin.math.abs
 
 /** Resultado de procesar un cuadro de la cámara. */
 sealed interface PasoFacial {
     /** Todavía no hay rostro listo: texto para orientar al cliente y avance (0..1). */
-    data class Indicacion(val texto: String, val progreso: Float = 0f) : PasoFacial
+    data class Indicacion(@StringRes val textRes: Int, val progreso: Float = 0f) : PasoFacial
     /** Rostro capturado: vector listo para enviar a la base de datos. */
     class Listo(val vector: FloatArray) : PasoFacial
 }
@@ -48,35 +50,35 @@ class CapturaFacial(
         if (cara == null) {
             rostroProcesado = null // ya se retiró
             reiniciar()
-            return PasoFacial.Indicacion("Colócate frente a la cámara")
+            return PasoFacial.Indicacion(R.string.facial_prompt_position_camera)
         }
 
         val id = cara.trackingId
         if (id != null && id == rostroProcesado) {
-            return PasoFacial.Indicacion("Listo. Puedes retirarte de la cámara", 1f)
+            return PasoFacial.Indicacion(R.string.facial_prompt_ready_retire, 1f)
         }
 
         // Dos personas casi a la misma distancia: no se adivina quién es
         val segunda = rostros.filter { it !== cara }.maxOfOrNull { area(it) } ?: 0
         if (segunda > area(cara) * 0.80f) {
             reiniciar()
-            return PasoFacial.Indicacion("Solo una persona frente a la cámara")
+            return PasoFacial.Indicacion(R.string.facial_prompt_single_person)
         }
 
         val caja = cara.boundingBox
         if (caja.width() < frame.width * TAMANO_MINIMO) {
             reiniciar()
-            return PasoFacial.Indicacion("Acércate a la cámara")
+            return PasoFacial.Indicacion(R.string.facial_prompt_come_closer)
         }
         if (caja.left < 0 || caja.top < 0 || caja.right > frame.width || caja.bottom > frame.height) {
             reiniciar()
-            return PasoFacial.Indicacion("Centra tu rostro en el recuadro")
+            return PasoFacial.Indicacion(R.string.facial_prompt_center_face)
         }
         if (abs(cara.headEulerAngleY) > GIRO_MAXIMO || abs(cara.headEulerAngleZ) > GIRO_MAXIMO ||
             abs(cara.headEulerAngleX) > GIRO_MAXIMO
         ) {
             muestras.clear()
-            return PasoFacial.Indicacion("Mira de frente a la cámara")
+            return PasoFacial.Indicacion(R.string.facial_prompt_look_camera)
         }
 
         // Cambió la persona: se empieza de nuevo
@@ -88,18 +90,18 @@ class CapturaFacial(
         muestras += try {
             reconocedor.vector(frame, caja)
         } catch (e: Exception) {
-            return PasoFacial.Indicacion("Centra tu rostro en el recuadro")
+            return PasoFacial.Indicacion(R.string.facial_prompt_center_face)
         }
 
         if (muestras.size < muestrasNecesarias) {
-            return PasoFacial.Indicacion("No te muevas…", muestras.size.toFloat() / muestrasNecesarias)
+            return PasoFacial.Indicacion(R.string.facial_prompt_hold_still, muestras.size.toFloat() / muestrasNecesarias)
         }
 
         val vector = ReconocedorFacial.promedio(muestras)
         // Si alguna muestra salió muy distinta (movimiento, otra persona) se repite
         val consistente = muestras.all { ReconocedorFacial.similitud(it, vector) >= CONSISTENCIA }
         muestras.clear()
-        if (!consistente) return PasoFacial.Indicacion("No te muevas…", 0f)
+        if (!consistente) return PasoFacial.Indicacion(R.string.facial_prompt_hold_still, 0f)
         return PasoFacial.Listo(vector)
     }
 
