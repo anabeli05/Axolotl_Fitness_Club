@@ -166,7 +166,9 @@ fun UsuariosScreen(
     }
 
     if (showNewForm) {
-        val confirmCreateMsg = stringResource(R.string.encargado_usuarios_confirm_create, "%s", "%s")
+        val confirmCreateMsg = stringResource(R.string.confirm_add_staff, "%s", "%s")
+        val successMsg = stringResource(R.string.staff_added_success)
+        val warningMsg = stringResource(R.string.staff_added_warning)
         NewStaffDialog(
             error = errorAlta,
             onDismiss = {
@@ -186,8 +188,7 @@ fun UsuariosScreen(
                             showNewForm = false
                             personal = PersonalRepository.listar()
                             val enviado = CorreoRepository.enviarBienvenida(correo.trim())
-                            info = if (enviado) "Alta realizada. Se envió la contraseña al correo."
-                            else "Alta realizada, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026"
+                            info = if (enviado) successMsg else warningMsg
                         } catch (e: Exception) {
                             errorAlta = mensajeError(e, "No se pudo crear")
                         }
@@ -198,7 +199,7 @@ fun UsuariosScreen(
     }
 
     editing?.let { target ->
-        val confirmSaveMsg = stringResource(R.string.encargado_usuarios_confirm_save, "%s")
+        val confirmSaveMsg = stringResource(R.string.confirm_edit_staff, "%s")
         EditStaffDialog(
             target = target,
             error = errorEditar,
@@ -844,7 +845,7 @@ private fun PhoneField(value: String, onValueChange: (String) -> Unit) {
         keyboardType = KeyboardType.Number,
         isError = warning || incomplete,
         errorText = if (warning) stringResource(R.string.perfil_error_phone_digits)
-        else "Deben ser 10 dígitos (${value.length}/10)"
+        else stringResource(R.string.error_phone_10_digits, value.length)
     )
 }
 

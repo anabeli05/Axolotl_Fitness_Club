@@ -161,7 +161,12 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             if (pico != null) {
                 item {
                     Text(
-                        text = "${stringResource(R.string.encargado_peak_hour_prefix, pico.first, pico.second)}. Entradas de hoy: ${datos.sumOf { it.second }}",
+                        text = stringResource(
+                            R.string.peak_hour_today,
+                            pico.first,
+                            pico.second,
+                            datos.sumOf { it.second }
+                        ),
                         color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )

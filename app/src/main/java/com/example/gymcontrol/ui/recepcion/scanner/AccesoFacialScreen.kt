@@ -74,7 +74,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     var dentro by remember { mutableStateOf(0) }
     var progreso by remember { mutableStateOf(0f) }
     var indicacion by remember { mutableStateOf("") }
-    val initialIndicacion = stringResource(R.string.recepcion_scanner_stand_in_front)
+    val initialIndicacion = stringResource(R.string.facial_prompt_camera)
     LaunchedEffect(Unit) { if (indicacion.isEmpty()) indicacion = initialIndicacion }
 
     val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
@@ -85,7 +85,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     val msgDbError = stringResource(R.string.recepcion_scanner_db_error)
     val msgDeniedInactive = stringResource(R.string.recepcion_scanner_denied_inactive)
     val msgUnregistered = stringResource(R.string.recepcion_scanner_denied_unregistered)
-    val msgVerifying = stringResource(R.string.recepcion_scanner_verifying)
+    val msgVerifying = stringResource(R.string.facial_prompt_verifying)
     val msgModelError = stringResource(R.string.recepcion_face_model_load_error)
 
     LaunchedEffect(Unit) {
@@ -116,13 +116,29 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
         )
         val nombre = r.nombre ?: "El cliente"
         aviso = when (r.resultado) {
-            "ENTRADA" -> Aviso("$nombre ha ingresado · ${formatHora(r.fechaHora)}", esError = false)
-            "SALIDA" -> Aviso(
-                "$nombre ha salido" + (duracion(r.entradaDesde, r.fechaHora)?.let { " · Estuvo $it" } ?: ""),
-                esError = false
-            )
+            "ENTRADA" -> Aviso(context.getString(R.string.access_entered_at, nombre, formatHora(r.fechaHora)), esError = false)
+            "SALIDA" -> {
+                val desde = r.entradaDesde
+                val hasta = r.fechaHora
+                val desdeInst = instante(desde)
+                val hastaInst = instante(hasta)
+                val text = if (desdeInst != null && hastaInst != null) {
+                    val minutos = java.time.Duration.between(desdeInst, hastaInst).toMinutes()
+                    when {
+                        minutos < 1 -> context.getString(R.string.access_exited_under_minute, nombre)
+                        minutos < 60 -> context.getString(R.string.access_exited_short_time, nombre, minutos.toInt())
+                        else -> {
+                            val durStr = "${minutos / 60} h ${minutos % 60} min"
+                            context.getString(R.string.access_exited_duration, nombre, durStr)
+                        }
+                    }
+                } else {
+                    context.getString(R.string.access_exited_under_minute, nombre)
+                }
+                Aviso(text, esError = false)
+            }
             "DENEGADO" -> Aviso(msgDeniedInactive, esError = true)
-            "REPETIDO" -> Aviso("$nombre ya fue registrado hace un momento", esError = false)
+            "REPETIDO" -> Aviso(context.getString(R.string.access_already_registered_just_now, nombre), esError = false)
             "YA_DENTRO" -> Aviso("$nombre ya tiene una entrada registrada", esError = true)
             "SIN_ENTRADA" -> Aviso("$nombre no tiene una entrada abierta", esError = true)
             else -> Aviso(msgUnregistered, esError = true)
@@ -150,7 +166,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
         if (pausa.get()) return@onFrame
         when (val paso = c.procesar(frame, rostros)) {
             is PasoFacial.Indicacion -> main.post {
-                indicacion = paso.texto
+                indicacion = context.getString(paso.textRes)
                 progreso = paso.progreso
             }
             is PasoFacial.Listo -> {
@@ -248,7 +264,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
 
             GymCard {
                 Text(
-                    stringResource(R.string.client_info),
+                    stringResource(R.string.client_info_title),
                     color = ClienteTema.Texto,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
@@ -260,7 +276,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 val actual = cliente
                 if (actual == null) {
                     Text(
-                        stringResource(R.string.scan_prompt),
+                        stringResource(R.string.scan_face_prompt),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -295,18 +311,18 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                             )
                             Spacer(Modifier.height(6.dp))
                             Text(stringResource(R.string.recepcion_scanner_membership_prefix, actual.membresia), color = ClienteTema.TextoSec, fontSize = 14.sp)
-                            Row {
-                                Text(stringResource(R.string.label_status), color = ClienteTema.TextoSec, fontSize = 14.sp)
-                                Text(
-                                    if (actual.activo) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
-                                    color = if (actual.activo) ClienteTema.Verde else ClienteTema.Rojo,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
+                            Text(
+                                stringResource(
+                                    R.string.status_label,
+                                    if (actual.activo) stringResource(R.string.status_active) else stringResource(R.string.status_inactive)
+                                ),
+                                color = if (actual.activo) ClienteTema.Verde else ClienteTema.Rojo,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                             actual.dentroDesde?.let { desde ->
                                 Text(
-                                    stringResource(R.string.recepcion_scanner_inside_since, formatHora(desde)),
+                                    stringResource(R.string.inside_since_format, formatHora(desde)),
                                     color = ClienteTema.AzulSel,
                                     fontSize = 14.sp
                                 )

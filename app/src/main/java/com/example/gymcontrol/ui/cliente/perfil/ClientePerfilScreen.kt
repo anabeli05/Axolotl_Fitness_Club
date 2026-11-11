@@ -421,7 +421,7 @@ private fun EditDataDialog(
             keyboardType = KeyboardType.Number,
             isError = phoneWarning || phoneIncomplete,
             errorText = if (phoneWarning) stringResource(R.string.perfil_error_phone_digits)
-            else "Deben ser 10 dígitos (${phone.length}/10)"
+            else stringResource(R.string.error_phone_10_digits, phone.length)
         )
 
         DialogButtons(
