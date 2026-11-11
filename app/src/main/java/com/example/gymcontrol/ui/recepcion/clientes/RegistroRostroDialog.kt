@@ -30,6 +30,7 @@ import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.recepcion.scanner.FaceCameraPreview
+import com.example.gymcontrol.ui.recepcion.scanner.CamaraFoto
 import com.example.gymcontrol.ui.recepcion.scanner.ScannerCorners
 import com.google.mlkit.vision.face.Face
 import kotlinx.coroutines.delay
@@ -40,8 +41,8 @@ private val DialogBorder = Brush.linearGradient(listOf(ClienteTema.Borde, Client
 
 /**
  * Registra (o actualiza) el rostro del cliente. Toma 5 muestras del rostro más cercano,
- * las promedia y guarda el vector. También manda una foto de la cara, que queda como
- * foto de perfil del cliente solo la primera vez (después ya no se cambia).
+ * las promedia y guarda el vector. También toma una foto nítida de la cara, que queda como
+ * foto de perfil del cliente (al actualizar el rostro se reemplaza).
  */
 @Composable
 fun RegistroRostroDialog(
@@ -57,6 +58,7 @@ fun RegistroRostroDialog(
     val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
     val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 5) } }
     val pausa = remember { AtomicBoolean(false) }
+    val camaraFoto = remember { CamaraFoto() }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 
     val promptAskClient = stringResource(R.string.facial_prompt_ask_client)
@@ -68,9 +70,11 @@ fun RegistroRostroDialog(
     var error by remember { mutableStateOf<String?>(null) }
     var listo by remember { mutableStateOf(false) }
 
-    fun guardar(vector: FloatArray, foto: String?) {
+    fun guardar(vector: FloatArray, fotoRespaldo: String?) {
         scope.launch {
             try {
+                // Foto nítida a resolución completa; si falla, la del cuadro del análisis
+                val foto = camaraFoto.tomar()?.let { FotoPerfil.desdeFotoAltaCalidad(it) } ?: fotoRespaldo
                 AccesoFacialRepository.registrarRostro(cliente.id, vector, foto)
                 listo = true
                 indicacion = registeredSuccess
@@ -98,7 +102,7 @@ fun RegistroRostroDialog(
             is PasoFacial.Listo -> {
                 pausa.set(true)
                 c.marcarProcesado()
-                // Foto de perfil: se recorta aquí, en el hilo de la cámara, mientras el cuadro sigue vivo
+                // Foto de respaldo: se recorta aquí, en el hilo de la cámara, mientras el cuadro sigue vivo
                 val foto = CapturaFacial.masCercano(rostros)?.let { cara ->
                     runCatching { FotoPerfil.desdeCuadro(frame, cara.boundingBox) }.getOrNull()
                 }
@@ -145,7 +149,7 @@ fun RegistroRostroDialog(
                 contentAlignment = Alignment.Center
             ) {
                 if (captura != null && !listo) {
-                    FaceCameraPreview(modifier = Modifier.fillMaxSize(), onFrame = onFrame)
+                    FaceCameraPreview(modifier = Modifier.fillMaxSize(), camaraFoto = camaraFoto, onFrame = onFrame)
                 }
                 ScannerCorners(Modifier.fillMaxSize())
             }

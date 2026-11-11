@@ -28,12 +28,13 @@ import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.FotoPerfil
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
+import com.example.gymcontrol.data.remote.PersonalRepository
 
 /**
- * Fotos de perfil ya descargadas en esta sesión (id del cliente → foto, o null si no tiene).
- * La comparten las listas de clientes y el acceso facial para no pedir dos veces la misma foto.
+ * Fotos de perfil ya descargadas en esta sesión (id → foto, o null si no tiene),
+ * para no pedir dos veces la misma foto.
  */
-object FotosClientes {
+open class CacheFotos(private val descargar: suspend (Long) -> String?) {
     private val cache = mutableMapOf<Long, ImageBitmap?>()
 
     fun enCache(clienteId: Long): Boolean = synchronized(cache) { cache.containsKey(clienteId) }
@@ -43,16 +44,22 @@ object FotosClientes {
     /** Descarga la foto si no está en caché. Si falla la red no se guarda, para reintentar después. */
     suspend fun obtener(clienteId: Long): ImageBitmap? {
         if (enCache(clienteId)) return guardada(clienteId)
-        val img = FotoPerfil.aImagen(AccesoFacialRepository.foto(clienteId))
+        val img = FotoPerfil.aImagen(descargar(clienteId))
         synchronized(cache) { cache[clienteId] = img }
         return img
     }
 
-    /** Se llama al registrar el rostro: el cliente pudo haber recibido su foto. */
+    /** Se llama al tomar una foto nueva, para que se vuelva a descargar. */
     fun olvidar(clienteId: Long) = synchronized(cache) { cache.remove(clienteId); Unit }
 }
 
-/** Círculo con la foto de perfil del cliente, o el ícono de persona si no tiene. */
+/** Clientes: listas de Recepción y Encargado y el acceso facial (clientes.foto_perfil). */
+object FotosClientes : CacheFotos({ AccesoFacialRepository.foto(it) })
+
+/** Personal (Recepción, Instructor, Encargado): lista de Usuarios (usuarios.foto_perfil). */
+object FotosPersonal : CacheFotos({ PersonalRepository.foto(it) })
+
+/** Círculo con la foto de perfil (cliente o personal, según [cache]), o el ícono de persona. */
 @Composable
 fun FotoClienteAvatar(
     clienteId: Long,
@@ -62,12 +69,13 @@ fun FotoClienteAvatar(
     borderWidth: Dp = 1.dp,
     // Cambia este valor para volver a buscar la foto (p. ej. al registrar el rostro)
     recarga: Any? = null,
+    cache: CacheFotos = FotosClientes,
     onClick: ((ImageBitmap?) -> Unit)? = null
 ) {
-    var foto by remember(clienteId, recarga) { mutableStateOf(FotosClientes.guardada(clienteId)) }
+    var foto by remember(clienteId, recarga) { mutableStateOf(cache.guardada(clienteId)) }
     LaunchedEffect(clienteId, recarga) {
-        if (!FotosClientes.enCache(clienteId)) {
-            foto = try { FotosClientes.obtener(clienteId) } catch (_: Exception) { null }
+        if (!cache.enCache(clienteId)) {
+            foto = try { cache.obtener(clienteId) } catch (_: Exception) { null }
         }
     }
 

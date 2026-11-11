@@ -68,6 +68,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var conRostro by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var registrandoRostro by remember { mutableStateOf<ClienteRow?>(null) }
     var viendoFoto by remember { mutableStateOf<Pair<ClienteRow, ImageBitmap>?>(null) }
+    // Sube cada vez que se registra o actualiza el rostro, para recargar su foto en la lista
+    var versionFoto by remember { mutableStateOf(mapOf<Long, Int>()) }
     var dentro by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
@@ -180,6 +182,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
                         tieneRostro = client.id in conRostro,
+                        recargaFoto = versionFoto[client.id] ?: 0,
                         dentroDesde = dentro[client.id],
                         // Con foto: se ve en grande (y desde ahí se puede actualizar el rostro)
                         onRostro = { foto ->
@@ -318,7 +321,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     yaTieneRostro = cl.id in conRostro,
                     onDismiss = { registrandoRostro = null },
                     onRegistrado = {
-                        FotosClientes.olvidar(cl.id)  // si era su primer registro, ya tiene foto
+                        FotosClientes.olvidar(cl.id)  // la foto es nueva: se vuelve a descargar
+                        versionFoto = versionFoto + (cl.id to ((versionFoto[cl.id] ?: 0) + 1))
                         conRostro = conRostro + cl.id
                         registrandoRostro = null
                         info = "Rostro de ${cl.nombre} registrado para el acceso"
@@ -384,6 +388,7 @@ private fun ClientCard(
     registrationDate: String,
     isActive: Boolean,
     tieneRostro: Boolean = false,
+    recargaFoto: Int = 0,
     dentroDesde: String? = null,
     onRostro: (ImageBitmap?) -> Unit = {},
     onEdit: () -> Unit,
@@ -406,7 +411,7 @@ private fun ClientCard(
             size = 52.dp,
             borderWidth = if (tieneRostro) 2.dp else 1.dp,
             borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
-            recarga = tieneRostro,
+            recarga = recargaFoto,
             onClick = onRostro
         )
 

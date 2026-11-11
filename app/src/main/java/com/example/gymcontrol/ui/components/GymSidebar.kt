@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DarkMode
@@ -44,7 +45,7 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
-    UserRole.RECEPCION -> listOf("Home", "Clientes", "Solicitudes")
+    UserRole.RECEPCION -> listOf("Home", "Clientes", "Solicitudes", "Perfil")
     UserRole.ENCARGADO -> listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
     UserRole.CLIENTE, UserRole.INSTRUCTOR -> emptyList()
 }
@@ -62,6 +63,7 @@ fun translatedSection(section: String): String = when (section) {
     "Pagos" -> "Pagos"
     "Gastos" -> stringResource(R.string.tab_expenses)
     "Reportes" -> stringResource(R.string.tab_reports)
+    "Perfil" -> stringResource(R.string.tab_profile)
     else -> section
 }
 
@@ -82,6 +84,7 @@ private fun iconoPara(seccion: String): ImageVector = when (seccion) {
     "Pagos" -> Icons.Filled.CreditCard
     "Gastos" -> Icons.Filled.ShoppingCart
     "Reportes" -> Icons.Filled.DateRange
+    "Perfil" -> Icons.Filled.AccountCircle
     else -> Icons.Filled.Home
 }
 
