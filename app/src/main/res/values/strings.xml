@@ -155,8 +155,17 @@
     <string name="perfil_camera_permission_required">Se necesita permiso de cámara para tomar la foto</string>
     <string name="perfil_not_loaded_yet">Aún no se cargan tus datos</string>
     <string name="perfil_data_updated">Datos actualizados</string>
+    <string name="perfil_action_edit_phone">Cambiar teléfono</string>
+    <string name="perfil_staff_photo_hint">Tu foto de perfil la toma el Encargado</string>
     <string name="foto_cliente_close">Cerrar</string>
     <string name="foto_cliente_update_face">Actualizar rostro</string>
+    <string name="foto_update">Actualizar foto</string>
+    <string name="foto_retake">Repetir</string>
+    <string name="foto_face_hint">Colócate frente a la cámara</string>
+    <string name="foto_ready_hint">Rostro detectado. Pulsa «Tomar foto».</string>
+    <string name="foto_preview_hint">¿Se ve bien? Guárdala o repítela.</string>
+    <string name="foto_no_face">No se detectó un rostro. Intenta de nuevo.</string>
+    <string name="foto_save_error">No se pudo guardar la foto</string>
     <string name="perfil_emergency_title">Contacto de emergencia</string>
     <string name="perfil_action_edit_contact">Editar contacto de emergencia</string>
     <string name="perfil_contact_not_set">Sin registrar</string>
@@ -429,7 +438,7 @@
     <string name="privacy_1_title">1. Responsable del Tratamiento de los Datos</string>
     <string name="privacy_1_content">Axolotl Fitness Club, gimnasio con sucursales. El tratamiento de los datos se realiza para todas sus sucursales. Los medios de contacto del responsable son el teléfono y el correo indicados en el punto 12.</string>
     <string name="privacy_2_title">2. Información que Recopilamos</string>
-    <string name="privacy_2_content">Recopilamos la información necesaria para la prestación del servicio:\na) De todos los usuarios: nombre completo, correo electrónico, número de teléfono, contraseña (se guarda con hash y no puede leerse), rol, estado de la cuenta, fecha de registro, intentos fallidos de acceso y fecha de bloqueo temporal.\nb) Fotografía de perfil. La del cliente se toma en recepción al registrar su rostro y no puede cambiarse.\nc) Del cliente: tipo de membresía, fechas de inicio y vencimiento y estado de la membresía; registro de asistencias (fecha, hora, tipo entrada o salida y método de registro); pagos (monto, tipo de pago, estado, quién lo confirmó y fecha); solicitudes de asesoría y asesorías activas (instructor, días de asistencia y objetivo); y un contacto de emergencia. El cliente declara contar con la autorización de la persona cuyo dato proporciona como contacto de emergencia.\nd) Datos biométricos: representación numérica del rostro, usada para identificar al cliente al entrar.\ne) Del instructor: especialidad, horario, costo de la asesoría y máximo de clientes que puede atender.\nf) Datos de pago: monto, tipo y estado del pago.\ng) No se recaban fecha de nacimiento ni condiciones médicas.</string>
+    <string name="privacy_2_content">Recopilamos la información necesaria para la prestación del servicio:\na) De todos los usuarios: nombre completo, correo electrónico, número de teléfono, contraseña (se guarda con hash y no puede leerse), rol, estado de la cuenta, fecha de registro, intentos fallidos de acceso y fecha de bloqueo temporal.\nb) Fotografía de perfil. La del cliente se toma en recepción al registrar su rostro y solo Recepción puede actualizarla; la del personal la toma el encargado al darlo de alta y puede actualizarla.\nc) Del cliente: tipo de membresía, fechas de inicio y vencimiento y estado de la membresía; registro de asistencias (fecha, hora, tipo entrada o salida y método de registro); pagos (monto, tipo de pago, estado, quién lo confirmó y fecha); solicitudes de asesoría y asesorías activas (instructor, días de asistencia y objetivo); y un contacto de emergencia. El cliente declara contar con la autorización de la persona cuyo dato proporciona como contacto de emergencia.\nd) Datos biométricos: representación numérica del rostro, usada para identificar al cliente al entrar.\ne) Del instructor: especialidad, horario, costo de la asesoría y máximo de clientes que puede atender.\nf) Datos de pago: monto, tipo y estado del pago.\ng) No se recaban fecha de nacimiento ni condiciones médicas.</string>
     <string name="privacy_3_title">3. Finalidad del Tratamiento de Datos</string>
     <string name="privacy_3_content">Los datos personales se utilizan exclusivamente para los fines de Axolotl:\n(a) autenticación e identificación del cliente para el control de acceso a las instalaciones mediante reconocimiento facial;\n(b) administración de membresías y pagos;\n(c) asignación y seguimiento de asesorías con instructores;\n(d) cálculo de la cantidad de personas dentro del gimnasio y generación de reportes de ingresos y gastos;\n(e) envío de notificaciones importantes sobre el servicio, como el aviso de vencimiento de la membresía, fuera de la aplicación; y\n(f) contactar a la persona indicada en caso de una emergencia del cliente.\n\nLos datos no se usan para ningún otro fin y no existen finalidades secundarias, como promociones o publicidad.</string>
     <string name="privacy_4_title">4. Datos Biométricos (Reconocimiento Facial)</string>

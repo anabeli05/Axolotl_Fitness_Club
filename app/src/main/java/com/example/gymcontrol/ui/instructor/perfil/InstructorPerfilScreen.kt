@@ -25,6 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.InstructorRepository
+import com.example.gymcontrol.data.remote.PersonalRepository
+import com.example.gymcontrol.data.biometria.FotoPerfil
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ScaffoldTab
@@ -68,6 +73,8 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
     var activo by remember { mutableStateOf(true) }
     var capacity by remember { mutableStateOf(0) }
     var activeClients by remember { mutableStateOf(0) }
+    // Foto que le toma el Encargado (el instructor no la cambia desde aquí)
+    var foto by remember { mutableStateOf<ImageBitmap?>(null) }
 
     // Datos reales del instructor que inició sesión
     LaunchedEffect(Unit) {
@@ -86,6 +93,8 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
             val msg = e.message?.substringBefore("\nCode:") ?: ""
             Toast.makeText(context, "No se pudo cargar el perfil: $msg", Toast.LENGTH_LONG).show()
         }
+        // Si falla, se quedan las iniciales
+        try { foto = FotoPerfil.aImagen(PersonalRepository.fotoPorCorreo(correo)) } catch (_: Exception) { }
     }
 
     var showEditDialog by remember { mutableStateOf(false) }
@@ -123,7 +132,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfileAvatar(name = name)
+                    ProfileAvatar(name = name, foto = foto)
 
                     Spacer(Modifier.height(14.dp))
 
@@ -258,9 +267,9 @@ private fun formatPhone(phone: String): String =
         "+52 ${phone.substring(0, 3)} ${phone.substring(3, 6)} ${phone.substring(6)}"
     } else phone
 
-// Avatar fijo con las iniciales del instructor (sin opción de cambiar foto)
+// Avatar: la foto que le tomó el Encargado, o las iniciales si aún no tiene
 @Composable
-private fun ProfileAvatar(name: String) {
+private fun ProfileAvatar(name: String, foto: ImageBitmap?) {
     Box(
         modifier = Modifier
             .size(116.dp)
@@ -269,12 +278,21 @@ private fun ProfileAvatar(name: String) {
             .border(3.dp, CardBorder, CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = initials(name),
-            color = ClienteTema.Texto,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold
-        )
+        if (foto != null) {
+            Image(
+                bitmap = foto,
+                contentDescription = stringResource(R.string.perfil_photo_desc),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Text(
+                text = initials(name),
+                color = ClienteTema.Texto,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
