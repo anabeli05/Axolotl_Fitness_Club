@@ -496,4 +496,11 @@
     <string name="access_exited_under_minute">%1$s checked out. Stayed for less than a minute</string>
     <string name="access_exited_short_time">%1$s checked out. Stayed for less than %2$d minutes</string>
     <string name="access_exited_duration">%1$s checked out. Stayed for %2$s</string>
+
+    <!-- Facial Access Validations -->
+    <string name="access_already_inside">%s already has an active check-in</string>
+    <string name="access_no_open_entry">%s does not have an open check-in</string>
+    <string name="access_denied_inactive">Access denied: inactive membership. Please renew</string>
+    <string name="access_denied_unregistered_face">Access denied: face not registered</string>
+    <string name="access_error_no_connection">No connection to database</string>
 </resources>

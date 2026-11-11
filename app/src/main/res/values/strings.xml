@@ -514,4 +514,11 @@
     <string name="access_exited_under_minute">%1$s ha salido. Estuvo menos de un minuto</string>
     <string name="access_exited_short_time">%1$s ha salido. Estuvo menos de %2$d minutos</string>
     <string name="access_exited_duration">%1$s ha salido. Estuvo %2$s</string>
+
+    <!-- Validaciones de Acceso Facial -->
+    <string name="access_already_inside">%s ya tiene una entrada registrada</string>
+    <string name="access_no_open_entry">%s no tiene una entrada abierta</string>
+    <string name="access_denied_inactive">Acceso denegado: membresía inactiva. Pasa a renovar</string>
+    <string name="access_denied_unregistered_face">Acceso denegado: rostro no registrado</string>
+    <string name="access_error_no_connection">Sin conexión con la base de datos</string>
 </resources>

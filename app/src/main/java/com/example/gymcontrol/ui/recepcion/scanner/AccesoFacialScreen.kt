@@ -82,9 +82,9 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     val pausa = remember { AtomicBoolean(false) }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 
-    val msgDbError = stringResource(R.string.recepcion_scanner_db_error)
-    val msgDeniedInactive = stringResource(R.string.recepcion_scanner_denied_inactive)
-    val msgUnregistered = stringResource(R.string.recepcion_scanner_denied_unregistered)
+    val msgDbError = stringResource(R.string.access_error_no_connection)
+    val msgDeniedInactive = stringResource(R.string.access_denied_inactive)
+    val msgUnregistered = stringResource(R.string.access_denied_unregistered_face)
     val msgVerifying = stringResource(R.string.facial_prompt_verifying)
     val msgModelError = stringResource(R.string.recepcion_face_model_load_error)
 
@@ -139,8 +139,8 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
             }
             "DENEGADO" -> Aviso(msgDeniedInactive, esError = true)
             "REPETIDO" -> Aviso(context.getString(R.string.access_already_registered_just_now, nombre), esError = false)
-            "YA_DENTRO" -> Aviso("$nombre ya tiene una entrada registrada", esError = true)
-            "SIN_ENTRADA" -> Aviso("$nombre no tiene una entrada abierta", esError = true)
+            "YA_DENTRO" -> Aviso(context.getString(R.string.access_already_inside, nombre), esError = true)
+            "SIN_ENTRADA" -> Aviso(context.getString(R.string.access_no_open_entry, nombre), esError = true)
             else -> Aviso(msgUnregistered, esError = true)
         }
     }
