@@ -39,6 +39,7 @@ import com.example.gymcontrol.ui.legal.TermsScreen
 import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
 import com.example.gymcontrol.ui.recepcion.scanner.AccesoFacialScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
+import com.example.gymcontrol.ui.recepcion.perfil.RecepcionPerfilScreen
 import com.example.gymcontrol.ui.theme.GymColors
 import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
 
@@ -132,6 +133,9 @@ fun GymNavGraph() {
                 composable(Routes.RECEPTION_REQUESTS) {
                     SolicitudesScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
+                composable(Routes.RECEPTION_PROFILE) {
+                    RecepcionPerfilScreen(onNavigate = { section -> navigateReception(navController, section) })
+                }
 
                 // Instructor: la barra inferior cambia entre Mis clientes y Perfil
                 composable(Routes.INSTRUCTOR_CLIENTS) {
@@ -205,6 +209,7 @@ private fun navigateReception(navController: NavHostController, section: String)
         "Home" -> Routes.RECEPTION_SCANNER
         "Clientes" -> Routes.RECEPTION_CLIENTS
         "Solicitudes" -> Routes.RECEPTION_REQUESTS
+        "Perfil" -> Routes.RECEPTION_PROFILE
         else -> null
     }
     if (route != null) {
@@ -320,6 +325,7 @@ private fun RoleDevMenu(navController: NavHostController) {
             Triple("Recepción · Acceso facial", Routes.RECEPTION_SCANNER, UserRole.RECEPCION),
             Triple("Recepción · Clientes", Routes.RECEPTION_CLIENTS, UserRole.RECEPCION),
             Triple("Recepción · Solicitudes", Routes.RECEPTION_REQUESTS, UserRole.RECEPCION),
+            Triple("Recepción · Perfil", Routes.RECEPTION_PROFILE, UserRole.RECEPCION),
             Triple("Instructor · Clientes", Routes.INSTRUCTOR_CLIENTS, UserRole.INSTRUCTOR),
             Triple("Instructor · Perfil", Routes.INSTRUCTOR_PROFILE, UserRole.INSTRUCTOR),
             Triple("Dueño · Dashboard", Routes.ADMIN_DASHBOARD, UserRole.ENCARGADO),

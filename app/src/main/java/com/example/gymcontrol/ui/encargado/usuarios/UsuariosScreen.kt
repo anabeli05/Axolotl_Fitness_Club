@@ -47,6 +47,11 @@ import com.example.gymcontrol.data.remote.PersonalRow
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.FotoClienteAvatar
+import com.example.gymcontrol.ui.components.FotoClienteDialog
+import com.example.gymcontrol.ui.components.FotosPersonal
+import com.example.gymcontrol.ui.components.TomarFotoDialog
+import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -104,6 +109,12 @@ fun UsuariosScreen(
     var pendiente by remember { mutableStateOf<Pendiente?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
 
+    // Foto de perfil: (id, nombre) a quien se le está tomando; la que se ve en grande;
+    // y un contador por usuario para volver a cargar su foto después de tomarla
+    var tomandoFoto by remember { mutableStateOf<Pair<Long, String>?>(null) }
+    var viendoFoto by remember { mutableStateOf<Triple<Long, String, ImageBitmap>?>(null) }
+    var versionFoto by remember { mutableStateOf(mapOf<Long, Int>()) }
+
     var personal by remember { mutableStateOf<List<PersonalRow>>(emptyList()) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
 
@@ -158,6 +169,12 @@ fun UsuariosScreen(
                 )
                 StaffCard(
                     item = item,
+                    recargaFoto = versionFoto[item.id] ?: 0,
+                    // Con foto: se ve en grande (y desde ahí se actualiza); sin foto: se toma
+                    onFoto = { foto ->
+                        if (foto != null) viendoFoto = Triple(item.id, item.name, foto)
+                        else tomandoFoto = item.id to item.name
+                    },
                     onEdit = { editing = item },
                     onDelete = { deleting = item }
                 )
@@ -180,7 +197,7 @@ fun UsuariosScreen(
                 pendiente = Pendiente(msg) {
                     scope.launch {
                         try {
-                            PersonalRepository.crear(
+                            val nuevoId = PersonalRepository.crear(
                                 nombre, tel, correo.trim(),
                                 rol.name, costo.toDoubleOrNull(), cap.toIntOrNull()
                             )
@@ -189,6 +206,8 @@ fun UsuariosScreen(
                             personal = PersonalRepository.listar()
                             val enviado = CorreoRepository.enviarBienvenida(correo.trim())
                             info = if (enviado) successMsg else warningMsg
+                            // Enseguida se le toma su foto de perfil
+                            tomandoFoto = nuevoId to nombre
                         } catch (e: Exception) {
                             errorAlta = mensajeError(e, "No se pudo crear")
                         }
@@ -225,6 +244,31 @@ fun UsuariosScreen(
                         }
                     }
                 }
+            }
+        )
+    }
+
+    viendoFoto?.let { (id, nombre, foto) ->
+        FotoClienteDialog(
+            nombre = nombre,
+            foto = foto,
+            onDismiss = { viendoFoto = null },
+            accion = stringResource(R.string.foto_update) to {
+                viendoFoto = null
+                tomandoFoto = id to nombre
+            }
+        )
+    }
+
+    tomandoFoto?.let { (id, nombre) ->
+        TomarFotoDialog(
+            nombre = nombre,
+            onDismiss = { tomandoFoto = null },
+            onGuardar = { foto ->
+                PersonalRepository.guardarFoto(SesionActual.correo ?: "", id, foto)
+                FotosPersonal.olvidar(id)
+                versionFoto = versionFoto + (id to ((versionFoto[id] ?: 0) + 1))
+                tomandoFoto = null
             }
         )
     }
@@ -360,7 +404,13 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
 }
 
 @Composable
-private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun StaffCard(
+    item: StaffItem,
+    recargaFoto: Int,
+    onFoto: (ImageBitmap?) -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     val statusColor = if (item.status == Status.ACTIVO) ClienteTema.Verde else ClienteTema.Rojo
     val statusText = item.status.etiqueta()
     val roleText = item.role.toTranslatedString()
@@ -373,21 +423,16 @@ private fun StaffCard(item: StaffItem, onEdit: () -> Unit, onDelete: () -> Unit)
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
-                .border(2.dp, CardBorder, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                tint = ClienteTema.TextoSec,
-                modifier = Modifier.size(32.dp)
-            )
-        }
+        // Foto de perfil: al tocarla se ve en grande, o se toma si aún no tiene
+        FotoClienteAvatar(
+            clienteId = item.id,
+            size = 52.dp,
+            borderWidth = 2.dp,
+            borderColor = ClienteTema.AzulSel,
+            recarga = recargaFoto,
+            cache = FotosPersonal,
+            onClick = onFoto
+        )
 
         Spacer(Modifier.width(14.dp))
 
