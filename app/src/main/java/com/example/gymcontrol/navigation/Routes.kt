@@ -25,6 +25,7 @@ object Routes {
     const val ADMIN_CLIENTS = "admin_clients"
     const val ADMIN_USERS = "admin_users"
     const val ADMIN_SERVICES = "admin_services"
+    const val ADMIN_PAYMENTS = "admin_payments"
     const val ADMIN_EXPENSES = "admin_expenses"
     const val ADMIN_REPORTS = "admin_reports"
 }
