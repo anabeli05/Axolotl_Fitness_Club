@@ -29,10 +29,10 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import kotlinx.coroutines.launch
 
-// Borde del cuadro "¿Seguro que quieres salir?": degradado solo en tonos dorados
-private val LogoutBorder = Brush.linearGradient(
-    listOf(ClienteTema.Borde, ClienteTema.AzulSel)
-)
+// Borde del cuadro "¿Seguro que quieres salir?": degradado solo en tonos dorados.
+// Es un getter para que cambie al alternar claro/oscuro.
+private val LogoutBorder
+    get() = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +71,8 @@ fun GymScaffold(
                     actions = {
                         if (rolConSidebar != null) {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, "Menú", tint = Color.White)
+                                // Color del tema: oscuro en modo claro, blanco en modo oscuro
+                                Icon(Icons.Default.Menu, "Menú", tint = ClienteTema.IconoBarra)
                             }
                         }
                     },

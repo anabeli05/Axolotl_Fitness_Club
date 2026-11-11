@@ -30,7 +30,9 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import kotlinx.coroutines.launch
 
-private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
+// Getter: se recalcula al cambiar entre modo claro y oscuro
+private val CardBorder
+    get() = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 private val ChipWidth = 96.dp
 private val ChipHeight = 36.dp
@@ -245,6 +247,12 @@ private fun StatusChip(status: String) {
         "RECHAZADA" -> ClienteTema.Rojo
         else -> ClienteTema.AzulSel
     }
+    // Pastel en aprobada/rechazada; la pendiente (dorada) conserva su tinte translúcido
+    val fondo = when (status) {
+        "APROBADA" -> ClienteTema.VerdePastel
+        "RECHAZADA" -> ClienteTema.RojoPastel
+        else -> color.copy(alpha = 0.15f)
+    }
     val label = when (status) {
         "APROBADA" -> stringResource(R.string.recepcion_solicitudes_status_approved)
         "RECHAZADA" -> stringResource(R.string.recepcion_solicitudes_status_rejected)
@@ -254,7 +262,7 @@ private fun StatusChip(status: String) {
     Box(
         modifier = Modifier
             .size(ChipWidth, ChipHeight)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+            .background(fondo, RoundedCornerShape(10.dp))
             .border(1.dp, color, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
     ) {
