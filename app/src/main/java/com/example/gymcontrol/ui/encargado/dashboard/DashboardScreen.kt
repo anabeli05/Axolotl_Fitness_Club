@@ -82,16 +82,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
         val hora = "%02d:00".format(h)
         hora to (conteo[hora] ?: 0)
     }
-    val maximo = datos.maxOfOrNull { it.second } ?: 0
     val pico = datos.maxByOrNull { it.second }?.takeIf { it.second > 0 }
-    val colores = datos.map { (_, n) ->
-        when {
-            maximo == 0 -> ClienteTema.AzulSel
-            n * 3 >= maximo * 2 -> ClienteTema.Rojo
-            n * 3 >= maximo -> ClienteTema.AzulSel
-            else -> ClienteTema.Verde
-        }
-    }
 
     GymScaffold(
         currentSection = "Dashboard",
@@ -153,7 +144,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                 SimpleBarChart(
                     title = stringResource(R.string.encargado_chart_hourly_occupancy),
                     entries = datos.map { BarEntry(it.first.take(2), it.second.toFloat()) },
-                    barColors = colores,
+                    barColor = ClienteTema.AzulSel,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -190,11 +181,20 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             item {
                 SimpleBarChart(
                     title = stringResource(R.string.encargado_chart_income_per_day),
-                    // El domingo solo aparece si ese día hubo cobros
+                    // El domingo solo aparece si ese día hubo cobros.
+                    // El total llega 100 veces más grande, por eso se divide entre 100.
                     entries = ingresosDia
                         .filter { it.diaSemana != 7 || it.total > 0.0 }
-                        .map { BarEntry(ResumenRepository.diaCorto(it.diaSemana), it.total.toFloat()) },
+                        .map {
+                            BarEntry(
+                                ResumenRepository.diaCorto(it.diaSemana),
+                                (it.total / 100.0).toFloat()
+                            )
+                        },
                     barColor = ClienteTema.AzulSel,
+                    // Eje fijo de 5 en 5: 0, 5, 10... hasta 30 (solo crece si un dato lo supera)
+                    yStep = 5f,
+                    yMax = 30f,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
