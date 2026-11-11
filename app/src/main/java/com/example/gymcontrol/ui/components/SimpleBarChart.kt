@@ -24,13 +24,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import java.util.Locale
+import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.pow
 
 data class BarEntry(val label: String, val value: Float)
 
-private val ColorDorado = Color(0xFFF2D675)
+// Barra/etiqueta seleccionada: dorado claro en oscuro, un dorado más profundo en claro
+private val ColorDorado
+    get() = if (ClienteTema.oscuro) Color(0xFFF2D675) else Color(0xFFD4A82A)
 
 private fun textoValorDefault(v: Float): String =
     if (v % 1f == 0f) v.toInt().toString() else "%.2f".format(Locale.US, v)
+
+/**
+ * Paso del eje Y a partir de un paso mínimo deseado (ej. 5).
+ * Si con ese paso saldrían demasiadas líneas, sube al siguiente paso "redondo"
+ * (5, 10, 20, 25, 50, 100, 200, 250, 500...) hasta que queden [maxLineas] o menos.
+ */
+private fun pasoEje(maxValue: Float, pasoMinimo: Float, maxLineas: Int = 5): Float {
+    val base = floatArrayOf(1f, 2f, 2.5f, 5f)
+    for (n in -2..8) {
+        val escala = 10f.pow(n)
+        for (b in base) {
+            val paso = b * escala
+            if (paso >= pasoMinimo && ceil(maxValue / paso) <= maxLineas) return paso
+        }
+    }
+    return pasoMinimo
+}
 
 @Composable
 fun SimpleBarChart(
@@ -40,12 +62,31 @@ fun SimpleBarChart(
     barColors: List<Color>? = null,
     modifier: Modifier = Modifier,
     chartHeight: Int = 180,
+    // Si se indica (ej. 5f), el eje Y sube de ese paso en ese paso (se ajusta solo si hay demasiadas líneas).
+    // Si es null, se usa la escala automática de siempre.
+    yStep: Float? = null,
+    // Si se indica junto con yStep (ej. 35f), el eje queda FIJO: 0, 5, 10... hasta ese valor,
+    // sin cambiar el paso. Solo crece si algún dato lo supera.
+    yMax: Float? = null,
     valueFormatter: (Float) -> String = ::textoValorDefault
 ) {
     val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
     val maxValue = entries.maxOfOrNull { it.value } ?: 1f
-    val niceMax = niceCeil(maxValue)
-    val labels = axisLabels(maxValue)
+
+    // Con yMax el paso no se mueve; sin yMax se ajusta solo si hay demasiadas líneas
+    val paso = yStep?.let { if (yMax != null) it else pasoEje(maxValue, it) }
+    val niceMax: Float
+    val labels: List<String>
+    if (paso != null) {
+        val tope = max(maxValue, yMax ?: 0f)
+        val lineas = ceil(tope / paso).toInt().coerceAtLeast(1)
+        niceMax = paso * lineas
+        // De arriba hacia abajo, igual que el eje automático
+        labels = (lineas downTo 0).map { textoValorDefault(it * paso) }
+    } else {
+        niceMax = niceCeil(maxValue)
+        labels = axisLabels(maxValue)
+    }
 
     // Índice de la barra seleccionada (null = ninguna)
     var seleccionado by remember { mutableStateOf<Int?>(null) }

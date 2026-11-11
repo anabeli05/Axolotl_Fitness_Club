@@ -44,8 +44,12 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
-private val InnerBackground = Color.Black.copy(alpha = 0.35f)
+// OJO: son getters (get() = ...) para que cambien al alternar claro/oscuro
+private val CardBorder
+    get() = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
+
+private val InnerBackground
+    get() = ClienteTema.Caja
 
 private val INSTRUCTOR_TABS = listOf(
     ScaffoldTab("Mis clientes", Icons.Filled.Group),
@@ -127,7 +131,9 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         text = name,
                         color = ClienteTema.Texto,
                         fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -138,9 +144,9 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         )
                         Spacer(Modifier.width(8.dp))
                         if (activo) {
-                            Chip(text = stringResource(R.string.status_active), color = ClienteTema.Verde, width = 84.dp, height = 30.dp)
+                            Chip(text = stringResource(R.string.status_active), color = ClienteTema.Verde, fondo = ClienteTema.VerdePastel, width = 84.dp, height = 30.dp)
                         } else {
-                            Chip(text = stringResource(R.string.status_inactive), color = ClienteTema.Rojo, width = 96.dp, height = 30.dp)
+                            Chip(text = stringResource(R.string.status_inactive), color = ClienteTema.Rojo, fondo = ClienteTema.RojoPastel, width = 96.dp, height = 30.dp)
                         }
                     }
 
@@ -163,7 +169,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Text(
                             text = stringResource(R.string.perfil_personal_data_title),
-                            color = ClienteTema.Texto,
+                            color = ClienteTema.CajaAcento,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -172,7 +178,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(ClienteTema.Borde)
+                                .background(ClienteTema.CajaAcento.copy(alpha = 0.6f))
                         )
                         Spacer(Modifier.height(12.dp))
 
@@ -188,27 +194,32 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             Icon(
                                 Icons.Filled.Group,
                                 contentDescription = null,
-                                tint = ClienteTema.TextoSec,
+                                tint = ClienteTema.CajaAcento,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(Modifier.width(12.dp))
                             Text(
                                 text = stringResource(R.string.instructor_max_capacity_label),
-                                color = ClienteTema.TextoSec,
-                                fontSize = 16.sp
+                                color = ClienteTema.CajaAcento,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = capacity.toString(),
-                                color = ClienteTema.Texto,
+                                color = ClienteTema.CajaValor,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(Modifier.width(10.dp))
+                        }
+
+                        // El chip va en su propia línea para que se lea completo en cualquier idioma
+                        Spacer(Modifier.height(8.dp))
+                        Box(modifier = Modifier.padding(start = 36.dp)) {
                             if (activeClients >= capacity) {
-                                Chip(text = stringResource(R.string.instructor_capacity_full), color = ClienteTema.Rojo, width = 64.dp, height = 28.dp)
+                                Chip(text = stringResource(R.string.instructor_capacity_full), color = ClienteTema.Rojo, fondo = ClienteTema.RojoPastel, height = 28.dp, fontSize = 13.sp, borderWidth = 2.dp)
                             } else {
-                                Chip(text = stringResource(R.string.instructor_capacity_available), color = ClienteTema.Verde, width = 90.dp, height = 28.dp)
+                                Chip(text = stringResource(R.string.instructor_capacity_available), color = ClienteTema.Verde, fondo = ClienteTema.VerdePastel, height = 28.dp, fontSize = 13.sp, borderWidth = 2.dp)
                             }
                         }
                     }
@@ -273,6 +284,7 @@ private fun initials(name: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
 
+// Caja de acción (café): icono y flecha dorados, texto blanco cálido
 @Composable
 private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
@@ -280,16 +292,16 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(InnerBackground)
+            .background(ClienteTema.Caja)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = ClienteTema.Texto, modifier = Modifier.size(22.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(14.dp))
         Text(
             text = label,
-            color = ClienteTema.Texto,
+            color = ClienteTema.CajaValor,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
@@ -297,26 +309,28 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
         Icon(
             Icons.Filled.ChevronRight,
             contentDescription = null,
-            tint = ClienteTema.TextoSec,
+            tint = ClienteTema.CajaAcento,
             modifier = Modifier.size(24.dp)
         )
     }
 }
 
+// Fila de información: icono y etiqueta en dorado, valor en blanco cálido
 @Composable
 private fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = ClienteTema.TextoSec, modifier = Modifier.size(24.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(24.dp))
         Spacer(Modifier.width(12.dp))
         Text(
             text = label,
-            color = ClienteTema.TextoSec,
+            color = ClienteTema.CajaAcento,
             fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.width(88.dp)
         )
         Text(
             text = value,
-            color = ClienteTema.Texto,
+            color = ClienteTema.CajaValor,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
@@ -326,26 +340,33 @@ private fun InfoRow(icon: ImageVector, label: String, value: String) {
     }
 }
 
-// Chip de estado con fondo tintado y borde del mismo color
+// Chip de estado: fondo pastel, borde del mismo color. Si no se da width, se ajusta al texto.
 @Composable
 private fun Chip(
     text: String,
     color: Color,
-    width: androidx.compose.ui.unit.Dp,
-    height: androidx.compose.ui.unit.Dp
+    height: androidx.compose.ui.unit.Dp,
+    fondo: Color = color.copy(alpha = 0.15f),
+    width: androidx.compose.ui.unit.Dp? = null,
+    fontSize: androidx.compose.ui.unit.TextUnit = 14.sp,
+    borderWidth: androidx.compose.ui.unit.Dp = 1.dp
 ) {
+    val ancho = if (width != null) Modifier.width(width) else Modifier
     Box(
         modifier = Modifier
-            .size(width, height)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
-            .border(1.dp, color, RoundedCornerShape(10.dp)),
+            .height(height)
+            .then(ancho)
+            .background(fondo, RoundedCornerShape(10.dp))
+            .border(borderWidth, color, RoundedCornerShape(10.dp))
+            .padding(horizontal = if (width == null) 10.dp else 0.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             color = color,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
         )
     }
 }
@@ -484,7 +505,7 @@ private fun EditDataDialog(
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ClienteTema.Azul,
-                    contentColor = ClienteTema.Texto
+                    contentColor = Color.White
                 )
             ) {
                 Text(stringResource(R.string.save), fontSize = 16.sp, fontWeight = FontWeight.Bold)

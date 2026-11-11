@@ -217,6 +217,7 @@ fun ClientFormDialog(
     }
 }
 
+// Colores explícitos (incluidos los no enfocados) para que no dependan del MaterialTheme
 @Composable
 private fun fieldColors() = OutlinedTextFieldDefaults.colors(
     focusedBorderColor = ClienteTema.AzulSel,
@@ -224,6 +225,9 @@ private fun fieldColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = ClienteTema.Texto,
     unfocusedTextColor = ClienteTema.Texto,
     focusedLabelColor = ClienteTema.AzulSel,
+    unfocusedLabelColor = ClienteTema.TextoSec,
+    focusedPlaceholderColor = ClienteTema.TextoSec,
+    unfocusedPlaceholderColor = ClienteTema.TextoSec,
     cursorColor = ClienteTema.AzulSel,
     errorBorderColor = ClienteTema.Rojo,
     errorTextColor = ClienteTema.Texto,
