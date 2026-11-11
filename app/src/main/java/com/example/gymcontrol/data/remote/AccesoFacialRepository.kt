@@ -48,12 +48,20 @@ data class ClienteDentroRow(
 private data class AccesoParams(val p_embedding: List<Float>)
 
 @Serializable
+private data class FotoParams(val p_cliente_id: Long)
+
+@Serializable
 private data class ManualParams(val p_cliente_id: Long, val p_es_entrada: Boolean)
 
 @Serializable
-private data class RegistrarRostroParams(val p_cliente_id: Long, val p_embedding: List<Float>)
+private data class RegistrarRostroParams(
+    val p_cliente_id: Long, val p_embedding: List<Float>, val p_foto: String? = null
+)
 
-/** Funciones de sql/reconocimiento_facial.sql. Solo viaja el vector del rostro, nunca la imagen. */
+/**
+ * Funciones de sql/reconocimiento_facial.sql. Para identificar solo viaja el vector del rostro;
+ * la foto de perfil se manda una vez, al registrar el rostro (sql/foto_y_contacto_cliente.sql).
+ */
 object AccesoFacialRepository {
 
     /** Identifica el rostro y registra ENTRADA (1) o SALIDA (0) automáticamente. */
@@ -70,10 +78,17 @@ object AccesoFacialRepository {
             .decodeList<MovimientoRow>()
             .first()
 
-    suspend fun registrarRostro(clienteId: Long, vector: FloatArray) {
+    /** [foto] en base64; la base de datos solo la guarda si el cliente todavía no tiene foto. */
+    suspend fun registrarRostro(clienteId: Long, vector: FloatArray, foto: String? = null) {
         SupabaseProvider.client.postgrest
-            .rpc("registrar_rostro_cliente", RegistrarRostroParams(clienteId, vector.toList()))
+            .rpc("registrar_rostro_cliente", RegistrarRostroParams(clienteId, vector.toList(), foto))
     }
+
+    /** Foto de perfil (JPEG en base64) para mostrarla al identificar al cliente; null si no tiene. */
+    suspend fun foto(clienteId: Long): String? =
+        SupabaseProvider.client.postgrest
+            .rpc("foto_cliente_por_id", FotoParams(clienteId))
+            .decodeAs<String?>()
 
     suspend fun clientesConRostro(): Set<Long> =
         SupabaseProvider.client.postgrest

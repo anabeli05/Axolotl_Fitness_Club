@@ -35,6 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.CapturaFacial
+import com.example.gymcontrol.ui.components.FotosClientes
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import com.example.gymcontrol.data.biometria.PasoFacial
 import com.example.gymcontrol.data.biometria.ReconocedorFacial
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
@@ -58,7 +62,7 @@ data class ClienteScan(
     val membresia: String,
     val activo: Boolean,
     val dentroDesde: String? = null,
-    val fotoUrl: String? = null
+    val foto: ImageBitmap? = null
 )
 
 private data class Aviso(val texto: String, val esError: Boolean, val id: Long = System.nanoTime())
@@ -98,8 +102,8 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     LaunchedEffect(aviso) {
         val actual = aviso
         if (actual != null) {
-            delay(3500)
-            if (!actual.esError) cliente = null
+            delay(5_000)  // los datos del cliente se muestran 5 segundos
+            cliente = null
             aviso = null
         }
     }
@@ -112,8 +116,20 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
             nombre = r.nombre ?: "Cliente",
             membresia = r.membresia ?: "—",
             activo = r.activa == true,
-            dentroDesde = if (r.esEntrada == true) r.entradaDesde ?: r.fechaHora else null
+            dentroDesde = if (r.esEntrada == true) r.entradaDesde ?: r.fechaHora else null,
+            foto = FotosClientes.guardada(id)
         )
+        // La foto llega aparte para no retrasar el registro de la entrada o salida.
+        // Se comparte la caché con las listas de clientes (FotosClientes).
+        if (id != null && !FotosClientes.enCache(id)) {
+            scope.launch {
+                val img = try { FotosClientes.obtener(id) } catch (_: Exception) { null }
+                if (img != null) {
+                    // Solo si siguen en pantalla los datos de ese mismo cliente
+                    cliente?.takeIf { it.id == id }?.let { cliente = it.copy(foto = img) }
+                }
+            }
+        }
         val nombre = r.nombre ?: "El cliente"
         aviso = when (r.resultado) {
             "ENTRADA" -> Aviso(context.getString(R.string.access_entered_at, nombre, formatHora(r.fechaHora)), esError = false)
@@ -177,17 +193,6 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                     progreso = 1f
                     identificar(paso.vector)
                 }
-            }
-        }
-    }
-
-    fun manual(esEntrada: Boolean) {
-        val c = cliente ?: return
-        scope.launch {
-            try {
-                mostrar(AccesoFacialRepository.manual(c.id, esEntrada))
-            } catch (e: Exception) {
-                aviso = Aviso(msgDbError, esError = true)
             }
         }
     }
@@ -294,12 +299,22 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                                 .background(ClienteTema.Navy),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Person,
-                                contentDescription = null,
-                                tint = ClienteTema.TextoSec,
-                                modifier = Modifier.size(40.dp)
-                            )
+                            val foto = actual.foto
+                            if (foto != null) {
+                                Image(
+                                    bitmap = foto,
+                                    contentDescription = stringResource(R.string.perfil_photo_desc),
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = null,
+                                    tint = ClienteTema.TextoSec,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
                         }
                         Spacer(Modifier.width(16.dp))
                         Column {
@@ -338,26 +353,6 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 aviso?.let {
                     AvisoBanner(it)
                     Spacer(Modifier.height(12.dp))
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    SolidButton(
-                        text = stringResource(R.string.recepcion_scanner_entry_btn),
-                        color = ClienteTema.Verde,
-                        enabled = cliente != null,
-                        onClick = { manual(esEntrada = true) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    SolidButton(
-                        text = stringResource(R.string.recepcion_scanner_exit_btn),
-                        color = ClienteTema.Rojo,
-                        enabled = cliente != null,
-                        onClick = { manual(esEntrada = false) },
-                        modifier = Modifier.weight(1f)
-                    )
                 }
             }
         }
@@ -451,31 +446,5 @@ internal fun ScannerCorners(modifier: Modifier = Modifier) {
         line(Offset(w, 0f), Offset(w - len, 0f)); line(Offset(w, 0f), Offset(w, len))
         line(Offset(0f, h), Offset(len, h)); line(Offset(0f, h), Offset(0f, h - len))
         line(Offset(w, h), Offset(w - len, h)); line(Offset(w, h), Offset(w, h - len))
-    }
-}
-
-@Composable
-private fun SolidButton(
-    text: String,
-    color: Color,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(10.dp)
-    Box(
-        modifier = modifier
-            .height(44.dp)
-            .clip(shape)
-            .background(if (enabled) color else color.copy(alpha = 0.3f), shape)
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text,
-            color = if (enabled) Color.White else Color.White.copy(alpha = 0.6f),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp
-        )
     }
 }

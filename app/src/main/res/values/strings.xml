@@ -69,6 +69,12 @@
     <string name="cliente_facial_camera_hint">Mira a la cámara de recepción para entrar y salir</string>
     <string name="cliente_clients_now_title">Clientes ahorita</string>
     <string name="cliente_gym_schedule">Horario del gimnasio: 06:00 - 00:00</string>
+    <string name="cliente_least_busy_title">Horarios de menor afluencia</string>
+    <string name="cliente_least_busy_chart">Promedio de entradas</string>
+    <string name="cliente_least_busy_best">Mejores horarios para venir:</string>
+    <string name="cliente_least_busy_item">• %1$s – %2$s · %3$s entradas en promedio</string>
+    <string name="cliente_least_busy_note">Calculado con las entradas reales de las últimas 4 semanas.</string>
+    <string name="cliente_least_busy_empty">Aún no hay suficientes registros de entrada.</string>
     <string name="cliente_greeting_morning">Buenos días</string>
     <string name="cliente_greeting_afternoon">Buenas tardes</string>
     <string name="cliente_greeting_evening">Buenas noches</string>
@@ -149,6 +155,13 @@
     <string name="perfil_camera_permission_required">Se necesita permiso de cámara para tomar la foto</string>
     <string name="perfil_not_loaded_yet">Aún no se cargan tus datos</string>
     <string name="perfil_data_updated">Datos actualizados</string>
+    <string name="foto_cliente_close">Cerrar</string>
+    <string name="foto_cliente_update_face">Actualizar rostro</string>
+    <string name="perfil_emergency_title">Contacto de emergencia</string>
+    <string name="perfil_action_edit_contact">Editar contacto de emergencia</string>
+    <string name="perfil_contact_not_set">Sin registrar</string>
+    <string name="perfil_contact_updated">Contacto de emergencia actualizado</string>
+    <string name="perfil_phone_length">Deben ser 10 dígitos (%1$d/10)</string>
     <string name="perfil_password_updated">Contraseña actualizada</string>
 
     <!-- Instructor: Mis Clientes & Perfil -->
@@ -189,6 +202,12 @@
     <string name="encargado_client_form_email_label">Correo</string>
     <string name="encargado_client_form_email_warning">El correo no lleva espacios</string>
     <string name="encargado_client_form_email_invalid">Correo no válido</string>
+    <string name="client_form_emergency_title">Contacto de emergencia (obligatorio)</string>
+    <string name="client_form_emergency_name">Nombre del contacto</string>
+    <string name="client_form_emergency_name_missing">Escribe el nombre del contacto</string>
+    <string name="client_form_emergency_phone">Teléfono del contacto</string>
+    <string name="client_form_payment_method">Método de pago</string>
+    <string name="client_form_transfer_note">La membresía se activará cuando el Encargado confirme la transferencia.</string>
     <string name="encargado_client_form_plan_placeholder">Selecciona un plan</string>
     <string name="encargado_client_form_plan_label">Plan</string>
     <string name="encargado_client_form_create_button">Crear Cliente</string>
@@ -380,7 +399,7 @@
     <string name="term_6_title">6. Pagos, Membresías y Cancelaciones</string>
     <string name="term_6_content">Las tarifas, vigencias de suscripciones y condiciones de renovación se rigen según el plan contratado. El acceso a las instalaciones está sujeto a encontrarse al corriente con el pago de la membresía correspondiente.\n\nExisten membresías de un día, mensual y trimestral. Una membresía está activa cuando su estado es activa y su fecha de vencimiento es la del día o posterior. Si está vencida, no se permite el ingreso hasta que se renueve. La renovación la hacen recepción o el encargado.\n\nSolo el encargado da de baja a un cliente, y la cuenta queda inactiva. Una cuenta inactiva por un tiempo determinado puede ser eliminada de forma manual por recepción o por el encargado.\n\nSe aceptan pagos en efectivo, con tarjeta y por transferencia. Recepción confirma los pagos en efectivo y con tarjeta; el encargado confirma las transferencias y también puede confirmar los otros dos. Un pago queda pendiente, aceptado o rechazado. Los montos se expresan en pesos mexicanos. La aplicación registra los pagos y no procesa cobros en línea. Los servicios adicionales, como el uso del instructor, se cobran aparte.</string>
     <string name="term_7_title">7. Acceso al Gimnasio</string>
-    <string name="term_7_content">El cliente es identificado en recepción mediante reconocimiento facial. Recepción acepta o rechaza el ingreso y se reserva el derecho de rechazarlo. La aplicación registra la entrada y la salida. Está prohibido intentar entrar suplantando a otra persona.</string>
+    <string name="term_7_content">El cliente es identificado en recepción mediante reconocimiento facial. El primer escaneo registra la entrada y el siguiente, la salida, de forma automática; para entrar se necesita una membresía activa. Recepción se reserva el derecho de negar el ingreso. Está prohibido intentar entrar suplantando a otra persona.</string>
     <string name="term_8_title">8. Aforo y Horarios de Afluencia</string>
     <string name="term_8_content">La aplicación muestra una cantidad aproximada de personas dentro del gimnasio, calculada con los registros de entrada y salida. Es informativa y puede no coincidir exactamente con la real.</string>
     <string name="term_9_title">9. Asesorías con Instructores</string>
@@ -410,13 +429,13 @@
     <string name="privacy_1_title">1. Responsable del Tratamiento de los Datos</string>
     <string name="privacy_1_content">Axolotl Fitness Club, gimnasio con sucursales. El tratamiento de los datos se realiza para todas sus sucursales. Los medios de contacto del responsable son el teléfono y el correo indicados en el punto 12.</string>
     <string name="privacy_2_title">2. Información que Recopilamos</string>
-    <string name="privacy_2_content">Recopilamos la información necesaria para la prestación del servicio:\na) De todos los usuarios: nombre completo, correo electrónico, número de teléfono, contraseña (se guarda con hash y no puede leerse), rol, estado de la cuenta, fecha de registro, intentos fallidos de acceso y fecha de bloqueo temporal.\nb) Fotografía de perfil, que pueden asignar el cliente y el instructor.\nc) Del cliente: tipo de membresía, fechas de inicio y vencimiento y estado de la membresía; registro de asistencias (fecha, hora, tipo entrada o salida y método de registro); pagos (monto, tipo de pago, estado, quién lo confirmó y fecha); solicitudes de asesoría y asesorías activas (instructor, días de asistencia y objetivo); y un contacto de emergencia. El cliente declara contar con la autorización de la persona cuyo dato proporciona como contacto de emergencia.\nd) Datos biométricos: representación numérica del rostro, usada para identificar al cliente al entrar.\ne) Del instructor: especialidad, horario, costo de la asesoría y máximo de clientes que puede atender.\nf) Datos de pago: monto, tipo y estado del pago.\ng) No se recaban fecha de nacimiento ni condiciones médicas.</string>
+    <string name="privacy_2_content">Recopilamos la información necesaria para la prestación del servicio:\na) De todos los usuarios: nombre completo, correo electrónico, número de teléfono, contraseña (se guarda con hash y no puede leerse), rol, estado de la cuenta, fecha de registro, intentos fallidos de acceso y fecha de bloqueo temporal.\nb) Fotografía de perfil. La del cliente se toma en recepción al registrar su rostro y no puede cambiarse.\nc) Del cliente: tipo de membresía, fechas de inicio y vencimiento y estado de la membresía; registro de asistencias (fecha, hora, tipo entrada o salida y método de registro); pagos (monto, tipo de pago, estado, quién lo confirmó y fecha); solicitudes de asesoría y asesorías activas (instructor, días de asistencia y objetivo); y un contacto de emergencia. El cliente declara contar con la autorización de la persona cuyo dato proporciona como contacto de emergencia.\nd) Datos biométricos: representación numérica del rostro, usada para identificar al cliente al entrar.\ne) Del instructor: especialidad, horario, costo de la asesoría y máximo de clientes que puede atender.\nf) Datos de pago: monto, tipo y estado del pago.\ng) No se recaban fecha de nacimiento ni condiciones médicas.</string>
     <string name="privacy_3_title">3. Finalidad del Tratamiento de Datos</string>
     <string name="privacy_3_content">Los datos personales se utilizan exclusivamente para los fines de Axolotl:\n(a) autenticación e identificación del cliente para el control de acceso a las instalaciones mediante reconocimiento facial;\n(b) administración de membresías y pagos;\n(c) asignación y seguimiento de asesorías con instructores;\n(d) cálculo de la cantidad de personas dentro del gimnasio y generación de reportes de ingresos y gastos;\n(e) envío de notificaciones importantes sobre el servicio, como el aviso de vencimiento de la membresía, fuera de la aplicación; y\n(f) contactar a la persona indicada en caso de una emergencia del cliente.\n\nLos datos no se usan para ningún otro fin y no existen finalidades secundarias, como promociones o publicidad.</string>
     <string name="privacy_4_title">4. Datos Biométricos (Reconocimiento Facial)</string>
     <string name="privacy_4_content">El dato facial se usa solo para identificar al cliente al ingresar al gimnasio. Su consentimiento se solicita de forma expresa y separada al registrar el rostro del cliente.</string>
     <string name="privacy_5_title">5. Quién Puede Ver los Datos</string>
-    <string name="privacy_5_content">a) El cliente ve sus propios datos.\nb) El instructor ve a los clientes que tiene asignados: nombre, días de asistencia y objetivo.\nc) Recepción ve nombre, tipo de membresía, fecha de vencimiento y foto del cliente al identificarlo, y puede crear, editar y renovar clientes.\nd) El dueño o encargado administra usuarios, membresías, pagos, servicios y gastos y consulta los reportes.</string>
+    <string name="privacy_5_content">a) El cliente ve sus propios datos.\nb) El instructor ve a los clientes que tiene asignados: nombre, días de asistencia y objetivo.\nc) Recepción ve nombre, tipo de membresía, fecha de vencimiento y foto del cliente al identificarlo y en su lista de clientes, y puede crear, editar y renovar clientes.\nd) El dueño o encargado administra usuarios, membresías, pagos, servicios y gastos, ve la foto de perfil de los clientes y consulta los reportes.</string>
     <string name="privacy_6_title">6. No Compartimos sus Datos con Terceros</string>
     <string name="privacy_6_content">Los datos no se venden, no se comparten y no se transfieren a terceros con ningún fin. La base de datos se aloja en Supabase, proveedor de servicio en la nube, únicamente para su almacenamiento.</string>
     <string name="privacy_7_title">7. Protección y Confidencialidad</string>

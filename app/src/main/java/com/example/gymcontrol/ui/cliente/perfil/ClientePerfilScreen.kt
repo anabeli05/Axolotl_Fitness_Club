@@ -2,6 +2,7 @@ package com.example.gymcontrol.ui.cliente.perfil
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,12 +18,15 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.ContactPhone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -36,9 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.biometria.FotoPerfil
 import com.example.gymcontrol.data.remote.AuthRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
@@ -56,6 +62,9 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf(SesionActual.correo ?: "") }
     val membership = cliente?.numeroMembresia ?: ""
+    // Foto tomada en recepción al registrar el rostro (no se puede cambiar)
+    var foto by remember { mutableStateOf<ImageBitmap?>(null) }
+    var contacto by remember { mutableStateOf<ContactoEmergencia?>(null) }
 
     LaunchedEffect(Unit) {
         val correo = SesionActual.correo ?: return@LaunchedEffect
@@ -69,9 +78,13 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
         } catch (e: Exception) {
             Toast.makeText(context, context.getString(R.string.perfil_load_error), Toast.LENGTH_SHORT).show()
         }
+        // Si fallan, se queda el avatar con iniciales y el contacto "Sin registrar"
+        try { contacto = ClientesRepository.miContacto(correo) } catch (_: Exception) { }
+        try { foto = FotoPerfil.aImagen(ClientesRepository.fotoPerfil(correo)) } catch (_: Exception) { }
     }
 
     var showEditDialog by remember { mutableStateOf(false) }
+    var showContactDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
 
     ClienteScaffoldClaro(
@@ -107,7 +120,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfileAvatar(name = name)
+                    ProfileAvatar(name = name, foto = foto)
 
                     Spacer(Modifier.height(12.dp))
                     Text(name, color = ClienteTema.Texto, fontSize = 22.sp, fontWeight = FontWeight.Bold)
@@ -134,6 +147,8 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(16.dp))
 
                     ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_data)) { showEditDialog = true }
+                    Spacer(Modifier.height(8.dp))
+                    ActionRow(Icons.Filled.ContactPhone, stringResource(R.string.perfil_action_edit_contact)) { showContactDialog = true }
                     Spacer(Modifier.height(8.dp))
                     ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
 
@@ -165,6 +180,41 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
                         Spacer(Modifier.height(14.dp))
                         InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), email)
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Contacto de emergencia (lo puede editar el propio cliente)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.perfil_emergency_title),
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(Color.White.copy(alpha = 0.5f))
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        val sinRegistrar = stringResource(R.string.perfil_contact_not_set)
+                        InfoRow(
+                            Icons.Filled.Person, stringResource(R.string.perfil_label_name),
+                            contacto?.nombre?.ifBlank { null } ?: sinRegistrar
+                        )
+                        Spacer(Modifier.height(14.dp))
+                        InfoRow(
+                            Icons.Filled.Phone, stringResource(R.string.perfil_label_phone),
+                            contacto?.telefono?.ifBlank { null } ?: sinRegistrar
+                        )
                     }
                 }
             }
@@ -200,6 +250,27 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
         )
     }
 
+    if (showContactDialog) {
+        EditContactDialog(
+            initialName = contacto?.nombre ?: "",
+            initialPhone = contacto?.telefono ?: "",
+            onDismiss = { showContactDialog = false },
+            onSave = { nuevoNombre, nuevoTelefono ->
+                scope.launch {
+                    try {
+                        ClientesRepository.editarMiContacto(email, nuevoNombre, nuevoTelefono)
+                        contacto = ContactoEmergencia(nuevoNombre.trim(), nuevoTelefono)
+                        showContactDialog = false
+                        Toast.makeText(context, context.getString(R.string.perfil_contact_updated), Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        )
+    }
+
     if (showPasswordDialog) {
         PasswordDialog(
             onDismiss = { showPasswordDialog = false },
@@ -219,9 +290,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     }
 }
 
-// Avatar fijo con las iniciales del cliente (sin opción de cambiar foto)
+// Avatar fijo: la foto tomada al registrar el rostro, o las iniciales si aún no tiene.
+// El cliente no puede cambiarla.
 @Composable
-private fun ProfileAvatar(name: String) {
+private fun ProfileAvatar(name: String, foto: ImageBitmap?) {
     Box(
         modifier = Modifier
             .size(116.dp)
@@ -230,12 +302,21 @@ private fun ProfileAvatar(name: String) {
             .border(3.dp, ClienteTema.Azul, CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            initials(name),
-            color = ClienteTema.Texto,
-            fontSize = 40.sp,
-            fontWeight = FontWeight.Bold
-        )
+        if (foto != null) {
+            Image(
+                bitmap = foto,
+                contentDescription = stringResource(R.string.perfil_photo_desc),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Text(
+                initials(name),
+                color = ClienteTema.Texto,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
@@ -431,6 +512,50 @@ private fun EditDataDialog(
             confirmText = stringResource(R.string.save),
             confirmEnabled = isValid,
             onConfirm = { onSave(phone) },
+            onDismiss = onDismiss
+        )
+    }
+}
+
+// Contacto de emergencia: nombre (mínimo 3 letras) y teléfono de 10 dígitos, los dos obligatorios
+@Composable
+private fun EditContactDialog(
+    initialName: String,
+    initialPhone: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit
+) {
+    var contactName by remember { mutableStateOf(initialName) }
+    var contactPhone by remember { mutableStateOf(initialPhone) }
+
+    val nameValid = contactName.count { it.isLetter() } >= 3
+    val phoneIncomplete = contactPhone.isNotEmpty() && contactPhone.length < 10
+    val isValid = nameValid && contactPhone.length == 10
+
+    GymDialog(title = stringResource(R.string.perfil_emergency_title), onDismiss = onDismiss) {
+        GymTextField(
+            value = contactName,
+            onValueChange = { new ->
+                if (new.length <= 60 && new.all { it.isLetter() || it == ' ' }) contactName = new
+            },
+            label = stringResource(R.string.client_form_emergency_name),
+            isError = contactName.isNotBlank() && !nameValid,
+            errorText = stringResource(R.string.encargado_client_form_min_letters)
+        )
+        GymTextField(
+            value = contactPhone,
+            onValueChange = { new ->
+                if (new.length <= 10 && new.all { it in '0'..'9' }) contactPhone = new
+            },
+            label = stringResource(R.string.client_form_emergency_phone),
+            keyboardType = KeyboardType.Number,
+            isError = phoneIncomplete,
+            errorText = stringResource(R.string.perfil_phone_length, contactPhone.length)
+        )
+        DialogButtons(
+            confirmText = stringResource(R.string.save),
+            confirmEnabled = isValid,
+            onConfirm = { onSave(contactName, contactPhone) },
             onDismiss = onDismiss
         )
     }

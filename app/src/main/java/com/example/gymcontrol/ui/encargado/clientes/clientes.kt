@@ -25,12 +25,16 @@ import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.data.remote.CorreoRepository
 import com.example.gymcontrol.data.remote.PlanRow
 import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.FotoClienteAvatar
+import com.example.gymcontrol.ui.components.FotoClienteDialog
+import androidx.compose.ui.graphics.ImageBitmap
 import java.util.Locale
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
@@ -49,6 +53,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var errorMsg by remember { mutableStateOf<String?>(null) }
     var errorForm by remember { mutableStateOf<String?>(null) }
     var renovando by remember { mutableStateOf<ClienteRow?>(null) }
+    var viendoFoto by remember { mutableStateOf<Pair<ClienteRow, ImageBitmap>?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
@@ -133,6 +138,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 
                 itemsIndexed(clients) { _, client ->
                     ClientCard(
+                        clienteId = client.id,
                         name = client.nombre,
                         membershipNum = client.numeroMembresia,
                         fechaFin = client.fechaFin,
@@ -143,7 +149,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             errorForm = null
                             showForm = true
                         },
-                        onRenovar = { renovando = client }
+                        onRenovar = { renovando = client },
+                        onFoto = { foto -> viendoFoto = client to foto }
                     )
                 }
 
@@ -165,6 +172,13 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             if (showForm) {
                 val c = editing
                 val partes = c?.nombre?.trim()?.split(" ", limit = 2)
+                // Al editar se carga el contacto de emergencia que ya tiene el cliente
+                var contacto by remember(c?.id) { mutableStateOf<ContactoEmergencia?>(null) }
+                LaunchedEffect(c?.id) {
+                    if (c != null) contacto = try {
+                        ClientesRepository.contactoEmergencia(SesionActual.correo ?: "", c.id)
+                    } catch (_: Exception) { null }
+                }
                 ClientFormDialog(
                     isEditing = c != null,
                     plans = planes.map { it.nombre },
@@ -173,19 +187,22 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     initialLastName = partes?.getOrNull(1) ?: "",
                     initialPhone = c?.telefono ?: "",
                     initialEmail = c?.gmail ?: "",
+                    initialContactName = contacto?.nombre ?: "",
+                    initialContactPhone = contacto?.telefono ?: "",
                     onDismiss = {
                         showForm = false
                         editing = null
                         errorForm = null
                     },
-                    onSave = { nombre, telefono, correo, plan ->
+                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo ->
                         if (c == null) {
                             confirmar = String.format(Locale.getDefault(), msgRegisterFormat, nombre) to {
                                 scope.launch {
                                     try {
                                         val nuevo = ClientesRepository.crear(
                                             nombre, telefono, correo, plan ?: "",
-                                            SesionActual.correo ?: ""
+                                            SesionActual.correo ?: "",
+                                            contactoNombre, contactoTelefono, metodo
                                         )
                                         showForm = false
                                         errorForm = null
@@ -203,7 +220,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             confirmar = String.format(Locale.getDefault(), msgSaveFormat, c.nombre) to {
                                 scope.launch {
                                     try {
-                                        ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado)
+                                        ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado, contactoNombre, contactoTelefono)
                                         showForm = false
                                         editing = null
                                         errorForm = null
@@ -217,6 +234,10 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         }
                     }
                 )
+            }
+
+            viendoFoto?.let { (cl, foto) ->
+                FotoClienteDialog(nombre = cl.nombre, foto = foto, onDismiss = { viendoFoto = null })
             }
 
             renovando?.let { cl ->
@@ -290,13 +311,15 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 
 @Composable
 private fun ClientCard(
+    clienteId: Long,
     name: String,
     membershipNum: String,
     fechaFin: String?,
     registrationDate: String,
     isActive: Boolean,
     onEdit: () -> Unit,
-    onRenovar: () -> Unit
+    onRenovar: () -> Unit,
+    onFoto: (ImageBitmap) -> Unit = {}
 ) {
     val labelMembership = stringResource(R.string.label_membership)
     val labelRegistration = stringResource(R.string.label_registration)
@@ -309,6 +332,15 @@ private fun ClientCard(
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Foto de perfil; al tocarla se ve en grande
+        FotoClienteAvatar(
+            clienteId = clienteId,
+            size = 52.dp,
+            onClick = { foto -> if (foto != null) onFoto(foto) }
+        )
+
+        Spacer(Modifier.width(12.dp))
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,

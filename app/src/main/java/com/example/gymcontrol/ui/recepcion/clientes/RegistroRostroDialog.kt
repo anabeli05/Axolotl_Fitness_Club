@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.CapturaFacial
+import com.example.gymcontrol.data.biometria.FotoPerfil
 import com.example.gymcontrol.data.biometria.PasoFacial
 import com.example.gymcontrol.data.biometria.ReconocedorFacial
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
@@ -39,7 +40,8 @@ private val DialogBorder = Brush.linearGradient(listOf(ClienteTema.Borde, Client
 
 /**
  * Registra (o actualiza) el rostro del cliente. Toma 5 muestras del rostro más cercano,
- * las promedia y guarda solo el vector en la base de datos (sin fotos).
+ * las promedia y guarda el vector. También manda una foto de la cara, que queda como
+ * foto de perfil del cliente solo la primera vez (después ya no se cambia).
  */
 @Composable
 fun RegistroRostroDialog(
@@ -66,10 +68,10 @@ fun RegistroRostroDialog(
     var error by remember { mutableStateOf<String?>(null) }
     var listo by remember { mutableStateOf(false) }
 
-    fun guardar(vector: FloatArray) {
+    fun guardar(vector: FloatArray, foto: String?) {
         scope.launch {
             try {
-                AccesoFacialRepository.registrarRostro(cliente.id, vector)
+                AccesoFacialRepository.registrarRostro(cliente.id, vector, foto)
                 listo = true
                 indicacion = registeredSuccess
                 delay(1_500)
@@ -96,11 +98,15 @@ fun RegistroRostroDialog(
             is PasoFacial.Listo -> {
                 pausa.set(true)
                 c.marcarProcesado()
+                // Foto de perfil: se recorta aquí, en el hilo de la cámara, mientras el cuadro sigue vivo
+                val foto = CapturaFacial.masCercano(rostros)?.let { cara ->
+                    runCatching { FotoPerfil.desdeCuadro(frame, cara.boundingBox) }.getOrNull()
+                }
                 main.post {
                     error = null
                     progreso = 1f
                     indicacion = promptSaving
-                    guardar(paso.vector)
+                    guardar(paso.vector, foto)
                 }
             }
         }
