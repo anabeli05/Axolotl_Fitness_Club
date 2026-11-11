@@ -139,15 +139,16 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Spacer(Modifier.height(12.dp))
 
+                    // Datos personales (caja café)
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
+                            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
                             .padding(16.dp)
                     ) {
                         Text(
                             stringResource(R.string.perfil_personal_data_title),
-                            color = Color.White,
+                            color = ClienteTema.CajaAcento,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -156,7 +157,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                             Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(Color.White.copy(alpha = 0.5f))
+                                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
                         )
                         Spacer(Modifier.height(12.dp))
                         InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
@@ -225,7 +226,7 @@ private fun ProfileAvatar(name: String) {
         modifier = Modifier
             .size(116.dp)
             .clip(CircleShape)
-            .background(Color(0xFFB9B5A6), CircleShape)
+            .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
             .border(3.dp, ClienteTema.Azul, CircleShape),
         contentAlignment = Alignment.Center
     ) {
@@ -244,6 +245,7 @@ private fun initials(name: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
 
+// Caja de acción (café): icono y flecha casi negros, texto blanco cálido
 @Composable
 private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
@@ -251,16 +253,16 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(48.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(ClienteTema.Navy)
+            .background(ClienteTema.Caja)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(12.dp))
         Text(
             label,
-            color = Color.White,
+            color = ClienteTema.CajaValor,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
@@ -268,21 +270,22 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
         Icon(
             Icons.Filled.ChevronRight,
             contentDescription = null,
-            tint = Color.White,
+            tint = ClienteTema.CajaAcento,
             modifier = Modifier.size(24.dp)
         )
     }
 }
 
+// Fila de información: icono y etiqueta casi negros, valor en blanco cálido
 @Composable
 private fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(22.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(12.dp))
-        Text(label, color = Color.White.copy(alpha = 0.85f), fontSize = 15.sp, modifier = Modifier.width(88.dp))
+        Text(label, color = ClienteTema.CajaAcento, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(88.dp))
         Text(
             value,
-            color = Color.White,
+            color = ClienteTema.CajaValor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,

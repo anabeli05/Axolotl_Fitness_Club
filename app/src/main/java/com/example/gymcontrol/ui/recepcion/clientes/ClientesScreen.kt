@@ -42,7 +42,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
+// Getter: se recalcula al cambiar entre modo claro y oscuro
+private val CardBorder
+    get() = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 private val ActionButtonWidth = 96.dp
 private val ActionButtonHeight = 36.dp
@@ -131,7 +133,9 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             unfocusedBorderColor = ClienteTema.Borde,
                             focusedTextColor = ClienteTema.Texto,
                             unfocusedTextColor = ClienteTema.Texto,
-                            cursorColor = ClienteTema.AzulSel
+                            cursorColor = ClienteTema.AzulSel,
+                            focusedContainerColor = ClienteTema.CampoFondo,
+                            unfocusedContainerColor = ClienteTema.CampoFondo
                         )
                     )
                 }
@@ -145,7 +149,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ClienteTema.AzulSel,
-                            contentColor = ClienteTema.Navy
+                            contentColor = ClienteTema.SobreDorado
                         ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -303,7 +307,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = ClienteTema.AzulSel,
-                                contentColor = ClienteTema.Navy
+                                contentColor = ClienteTema.SobreDorado
                             )
                         ) { Text(stringResource(R.string.common_yes_continue), fontWeight = FontWeight.Bold) }
                     },
@@ -466,15 +470,18 @@ private fun horaEntrada(iso: String): String =
     runCatching { OffsetDateTime.parse(iso).atZoneSameInstant(ZoneId.systemDefault()).format(HORA) }
         .getOrDefault("—")
 
+// Chip de estado: fondo pastel + borde del mismo color (se lee bien en claro y oscuro)
 @Composable
 private fun StatusBadge(isActive: Boolean) {
     val color = if (isActive) ClienteTema.Verde else ClienteTema.Rojo
+    val fondo = if (isActive) ClienteTema.VerdePastel else ClienteTema.RojoPastel
     val label = if (isActive) stringResource(R.string.status_active) else stringResource(R.string.status_inactive)
 
     Box(
         modifier = Modifier
             .size(ActionButtonWidth, ActionButtonHeight)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp)),
+            .background(fondo, RoundedCornerShape(10.dp))
+            .border(1.dp, color, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -539,7 +546,7 @@ private fun RenovarDialog(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ClienteTema.AzulSel,
-                        contentColor = ClienteTema.Navy
+                        contentColor = ClienteTema.SobreDorado
                     )
                 ) { Text(stringResource(R.string.encargado_clients_renew_button), fontWeight = FontWeight.Bold) }
             }
