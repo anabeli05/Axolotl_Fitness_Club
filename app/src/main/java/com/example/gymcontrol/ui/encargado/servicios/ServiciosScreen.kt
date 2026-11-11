@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 import com.example.gymcontrol.data.remote.ServicioRow
 import com.example.gymcontrol.data.remote.ServiciosRepository
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 private val DeleteBorder = Brush.linearGradient(
     listOf(Color(0xFFFF6B6B), ClienteTema.Rojo, Color(0xFF7A0A0A))

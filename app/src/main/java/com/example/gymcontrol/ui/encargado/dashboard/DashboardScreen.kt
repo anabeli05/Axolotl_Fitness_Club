@@ -27,7 +27,7 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import java.util.Locale
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 @Composable
 fun DashboardScreen(onNavigate: (String) -> Unit = {}) {

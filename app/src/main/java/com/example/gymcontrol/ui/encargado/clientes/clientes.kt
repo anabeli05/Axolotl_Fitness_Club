@@ -34,7 +34,7 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import java.util.Locale
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 private val ActionButtonWidth = 96.dp
 private val ActionButtonHeight = 36.dp
