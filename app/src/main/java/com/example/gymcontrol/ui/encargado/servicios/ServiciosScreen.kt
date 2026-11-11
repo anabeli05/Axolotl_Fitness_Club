@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -117,10 +118,10 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                 }
 
                 if (cargando) {
-                    item { Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec) }
+                    item { Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) }
                 }
                 errorMsg?.let { msg ->
-                    item { Text(msg, color = ClienteTema.Rojo) }
+                    item { Text(msg, color = ClienteTema.Rojo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) }
                 }
 
                 itemsIndexed(servicios) { index, service ->
@@ -150,11 +151,9 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                     onDurationChange = { duration = it },
                     onPriceChange = { price = it },
                     onDismiss = { closeForm() },
-                    onSave = {
+                    onSave = { dur ->
                         val nombre = name.trim()
-                        val dias = duration.toInt()
-                        val dur = if (dias == 1) "1 día" else "$dias días"
-                        val precio = price.toDouble()
+                        val precio = price.toDoubleOrNull() ?: 0.0
                         val idx = editingIndex
                         scope.launch {
                             try {
@@ -278,8 +277,10 @@ private fun ServiceCard(
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(10.dp))
+            val dias = duration.filter { it.isDigit() }.toIntOrNull() ?: 1
+            val durationText = pluralStringResource(R.plurals.days_count, count = dias, dias)
             Text(
-                text = stringResource(R.string.label_duration_format, duration),
+                text = stringResource(R.string.label_duration_format, durationText),
                 color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
@@ -339,10 +340,13 @@ private fun ServiceFormDialog(
     onDurationChange: (String) -> Unit,
     onPriceChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSave: () -> Unit
+    onSave: (String) -> Unit
 ) {
     val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
     val nameValid = nameHasMinLetters(name)
+    val dias = duration.toIntOrNull() ?: 1
+    val unit = stringResource(if (dias == 1) R.string.unit_day else R.string.unit_days)
+    val dur = stringResource(R.string.service_duration_format, dias, unit)
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -417,7 +421,7 @@ private fun ServiceFormDialog(
             Spacer(Modifier.height(18.dp))
 
             Button(
-                onClick = onSave,
+                onClick = { onSave(dur) },
                 enabled = nameValid &&
                         (duration.toIntOrNull() ?: 0) > 0 &&
                         (price.toDoubleOrNull() ?: 0.0) > 0.0,

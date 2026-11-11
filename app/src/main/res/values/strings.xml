@@ -454,4 +454,64 @@
     <string name="label_expenses">Gastos</string>
     <string name="label_total">Total</string>
     <string name="label_total_format">Total: $%s</string>
+
+    <!-- Encargado: Personal -->
+    <string name="confirm_add_staff">¿Estás seguro de dar de alta a %1$s como %2$s?</string>
+    <string name="staff_added_success">Alta realizada. Se envió la contraseña al correo.</string>
+    <string name="staff_added_warning">Alta realizada, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026</string>
+
+    <!-- Servicios -->
+    <string name="duration_days_format">%1$d %2$s</string>
+
+    <!-- Reconocimiento Facial -->
+    <string name="facial_prompt_camera">Colócate frente a la cámara</string>
+    <string name="facial_prompt_position_camera">Colócate frente a la cámara</string>
+    <string name="facial_prompt_center_face">Centra tu rostro en el recuadro</string>
+    <string name="facial_prompt_hold_still">No te muevas</string>
+    <string name="facial_prompt_look_camera">Mira a la cámara</string>
+    <string name="facial_prompt_ready_retire">Listo. Puedes retirarte de la cámara</string>
+    <string name="facial_prompt_single_person">Solo una persona frente a la cámara</string>
+    <string name="facial_prompt_come_closer">Acércate a la cámara</string>
+    <string name="facial_prompt_verifying">Verificando…</string>
+    <string name="facial_prompt_saving">Guardando rostro…</string>
+    <string name="facial_prompt_ask_client">Pide al cliente que mire a la cámara</string>
+    <string name="facial_registered_success">Rostro de %s registrado</string>
+
+    <!-- Plurales / Días de Servicios -->
+    <plurals name="days_count">
+        <item quantity="one">%d día</item>
+        <item quantity="other">%d días</item>
+    </plurals>
+
+    <!-- Recepción: Clientes y Diálogos -->
+    <string name="confirm_register_client">¿Estás seguro de registrar a %s?</string>
+    <string name="confirm_save_client_changes">¿Estás seguro de guardar los cambios de %s?</string>
+    <string name="client_registered_success_email">Cliente %s registrado. Se envió su membresía y contraseña al correo.</string>
+    <string name="client_registered_warning_email">Cliente %s registrado, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026</string>
+
+    <!-- Validación de Campos -->
+    <string name="error_phone_10_digits">Deben ser 10 dígitos (%1$d/10)</string>
+
+    <!-- Dashboard -->
+    <string name="peak_hour_today">Hora pico: %1$s (%2$d personas). Entradas de hoy: %3$d</string>
+
+    <!-- Personal -->
+    <string name="confirm_edit_staff">¿Estás seguro de guardar los cambios de %s?</string>
+
+    <!-- Servicios -->
+    <string name="service_duration_format">%1$d %2$s</string>
+
+    <!-- Recepción e Información de Cliente -->
+    <string name="client_info_title">Información del cliente</string>
+    <string name="scan_face_prompt">Escanea un rostro para ver la información del cliente</string>
+    <string name="status_label">Estado: %s</string>
+    <string name="inside_since_format">Dentro desde %s</string>
+
+    <!-- Mensajes de Entrada y Salida con Variables Dinámicas -->
+    <string name="access_entered_at">%1$s ha ingresado - %2$s</string>
+    <string name="access_already_registered_just_now">%s ya fue registrado hace un momento</string>
+    <string name="access_already_registered_ago">%1$s ya fue registrado %2$s</string>
+    <string name="access_exited_under_minute">%1$s ha salido. Estuvo menos de un minuto</string>
+    <string name="access_exited_short_time">%1$s ha salido. Estuvo menos de %2$d minutos</string>
+    <string name="access_exited_duration">%1$s ha salido. Estuvo %2$s</string>
 </resources>

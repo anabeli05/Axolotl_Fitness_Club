@@ -15,11 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.CapturaFacial
 import com.example.gymcontrol.data.biometria.PasoFacial
 import com.example.gymcontrol.data.biometria.ReconocedorFacial
@@ -55,7 +57,11 @@ fun RegistroRostroDialog(
     val pausa = remember { AtomicBoolean(false) }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 
-    var indicacion by remember { mutableStateOf("Pide al cliente que mire a la cámara") }
+    val promptAskClient = stringResource(R.string.facial_prompt_ask_client)
+    val promptSaving = stringResource(R.string.facial_prompt_saving)
+    val registeredSuccess = stringResource(R.string.facial_registered_success, cliente.nombre)
+
+    var indicacion by remember { mutableStateOf(promptAskClient) }
     var progreso by remember { mutableStateOf(0f) }
     var error by remember { mutableStateOf<String?>(null) }
     var listo by remember { mutableStateOf(false) }
@@ -65,7 +71,7 @@ fun RegistroRostroDialog(
             try {
                 AccesoFacialRepository.registrarRostro(cliente.id, vector)
                 listo = true
-                indicacion = "Rostro de ${cliente.nombre} registrado"
+                indicacion = registeredSuccess
                 delay(1_500)
                 onRegistrado()
             } catch (e: Exception) {
@@ -84,7 +90,7 @@ fun RegistroRostroDialog(
         if (pausa.get()) return@onFrame
         when (val paso = c.procesar(frame, rostros)) {
             is PasoFacial.Indicacion -> main.post {
-                indicacion = paso.texto
+                indicacion = context.getString(paso.textRes)
                 progreso = paso.progreso
             }
             is PasoFacial.Listo -> {
@@ -93,7 +99,7 @@ fun RegistroRostroDialog(
                 main.post {
                     error = null
                     progreso = 1f
-                    indicacion = "Guardando rostro…"
+                    indicacion = promptSaving
                     guardar(paso.vector)
                 }
             }

@@ -128,8 +128,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     }
                 }
 
-                errorMsg?.let { msg -> item { Text(msg, color = ClienteTema.Rojo) } }
-                info?.let { msg -> item { Text(msg, color = ClienteTema.Verde, fontSize = 13.sp) } }
+                errorMsg?.let { msg -> item { Text(msg, color = ClienteTema.Rojo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) } }
+                info?.let { msg -> item { Text(msg, color = ClienteTema.Verde, fontSize = 13.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) } }
 
                 itemsIndexed(clients) { _, client ->
                     ClientCard(
@@ -247,8 +247,23 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     onDismissRequest = { confirmar = null },
                     containerColor = ClienteTema.Beige,
                     shape = RoundedCornerShape(16.dp),
-                    title = { Text(stringResource(R.string.common_confirm), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
-                    text = { Text(texto, color = ClienteTema.TextoSec) },
+                    title = {
+                        Text(
+                            stringResource(R.string.common_confirm),
+                            color = ClienteTema.Texto,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    text = {
+                        Text(
+                            texto,
+                            color = ClienteTema.TextoSec,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
                     confirmButton = {
                         Button(
                             onClick = {

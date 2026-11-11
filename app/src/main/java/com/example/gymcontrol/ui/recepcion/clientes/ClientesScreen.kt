@@ -64,8 +64,10 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
 
-    val msgRegister = stringResource(R.string.encargado_confirm_register_client, "%s")
-    val msgSave = stringResource(R.string.encargado_confirm_save_client, "%s")
+    val msgRegister = stringResource(R.string.confirm_register_client, "%s")
+    val msgSave = stringResource(R.string.confirm_save_client_changes, "%s")
+    val successEmailFormat = stringResource(R.string.client_registered_success_email, "%s")
+    val warningEmailFormat = stringResource(R.string.client_registered_warning_email, "%s")
     val msgRenew = stringResource(R.string.encargado_confirm_renew_client, "%s", "%s")
 
     suspend fun recargar() {
@@ -156,8 +158,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     }
                 }
 
-                errorMsg?.let { msg -> item { Text(msg, color = ClienteTema.Rojo) } }
-                info?.let { msg -> item { Text(msg, color = ClienteTema.Verde, fontSize = 13.sp) } }
+                errorMsg?.let { msg -> item { Text(msg, color = ClienteTema.Rojo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) } }
+                info?.let { msg -> item { Text(msg, color = ClienteTema.Verde, fontSize = 13.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) } }
 
                 itemsIndexed(clients) { _, client ->
                     ClientCard(
@@ -222,8 +224,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                         errorForm = null
                                         recargar()
                                         val enviado = CorreoRepository.enviarBienvenida(correo)
-                                        info = if (enviado) "Cliente ${nuevo.numero} registrado. Se envió su membresía y contraseña al correo."
-                                        else "Cliente ${nuevo.numero} registrado, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026"
+                                        info = if (enviado) String.format(Locale.getDefault(), successEmailFormat, nuevo.numero)
+                                        else String.format(Locale.getDefault(), warningEmailFormat, nuevo.numero)
                                         registrandoRostro = todos.firstOrNull { it.id == nuevo.id }
                                     } catch (e: Exception) {
                                         errorForm = mensaje(e, "No se pudo registrar")
@@ -292,8 +294,23 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     onDismissRequest = { confirmar = null },
                     containerColor = ClienteTema.Beige,
                     shape = RoundedCornerShape(16.dp),
-                    title = { Text(stringResource(R.string.common_confirm), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
-                    text = { Text(texto, color = ClienteTema.TextoSec) },
+                    title = {
+                        Text(
+                            stringResource(R.string.common_confirm),
+                            color = ClienteTema.Texto,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    text = {
+                        Text(
+                            texto,
+                            color = ClienteTema.TextoSec,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
                     confirmButton = {
                         Button(
                             onClick = {

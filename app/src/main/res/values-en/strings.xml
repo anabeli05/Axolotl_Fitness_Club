@@ -436,4 +436,64 @@
     <string name="label_expenses">Expenses</string>
     <string name="label_total">Total</string>
     <string name="label_total_format">Total: $%s</string>
+
+    <!-- Encargado: Personal -->
+    <string name="confirm_add_staff">Are you sure you want to register %1$s as %2$s?</string>
+    <string name="staff_added_success">Staff registered successfully. Password sent to email.</string>
+    <string name="staff_added_warning">Staff registered, but email could not be sent. Initial password: Axolotl2026</string>
+
+    <!-- Servicios -->
+    <string name="duration_days_format">%1$d %2$s</string>
+
+    <!-- Reconocimiento Facial -->
+    <string name="facial_prompt_camera">Position yourself in front of the camera</string>
+    <string name="facial_prompt_position_camera">Position yourself in front of the camera</string>
+    <string name="facial_prompt_center_face">Center your face in the frame</string>
+    <string name="facial_prompt_hold_still">Hold still</string>
+    <string name="facial_prompt_look_camera">Look at the camera</string>
+    <string name="facial_prompt_ready_retire">Ready. You can step away from the camera</string>
+    <string name="facial_prompt_single_person">Only one person in front of the camera</string>
+    <string name="facial_prompt_come_closer">Move closer to the camera</string>
+    <string name="facial_prompt_verifying">Verifying…</string>
+    <string name="facial_prompt_saving">Saving face…</string>
+    <string name="facial_prompt_ask_client">Ask the client to look at the camera</string>
+    <string name="facial_registered_success">Face registered for %s</string>
+
+    <!-- Plurals / Service Days -->
+    <plurals name="days_count">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+    <!-- Recepción: Clientes y Diálogos -->
+    <string name="confirm_register_client">Are you sure you want to register %s?</string>
+    <string name="confirm_save_client_changes">Are you sure you want to save changes for %s?</string>
+    <string name="client_registered_success_email">Client %s registered. Membership and password sent to email.</string>
+    <string name="client_registered_warning_email">Client %s registered, but email could not be sent. Initial password: Axolotl2026</string>
+
+    <!-- Validación de Campos -->
+    <string name="error_phone_10_digits">Must be 10 digits (%1$d/10)</string>
+
+    <!-- Dashboard -->
+    <string name="peak_hour_today">Peak hour today: %1$s (%2$d people). Today\'s entries: %3$d</string>
+
+    <!-- Personal -->
+    <string name="confirm_edit_staff">Are you sure you want to save changes for %s?</string>
+
+    <!-- Servicios -->
+    <string name="service_duration_format">%1$d %2$s</string>
+
+    <!-- Recepción e Información de Cliente -->
+    <string name="client_info_title">Client information</string>
+    <string name="scan_face_prompt">Scan a face to display client information</string>
+    <string name="status_label">Status: %s</string>
+    <string name="inside_since_format">Inside since %s</string>
+
+    <!-- Entry and Exit Dynamic Messages -->
+    <string name="access_entered_at">%1$s checked in - %2$s</string>
+    <string name="access_already_registered_just_now">%s was already registered a moment ago</string>
+    <string name="access_already_registered_ago">%1$s was registered %2$s</string>
+    <string name="access_exited_under_minute">%1$s checked out. Stayed for less than a minute</string>
+    <string name="access_exited_short_time">%1$s checked out. Stayed for less than %2$d minutes</string>
+    <string name="access_exited_duration">%1$s checked out. Stayed for %2$s</string>
 </resources>
