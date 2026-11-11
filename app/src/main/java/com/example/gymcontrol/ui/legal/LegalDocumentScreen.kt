@@ -23,6 +23,7 @@ fun LegalDocumentScreen(
     title: String,
     sections: List<LegalSection>,
     onBack: () -> Unit,
+    onAccept: () -> Unit = onBack,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -48,7 +49,7 @@ fun LegalDocumentScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onBack) {
+                    TextButton(onClick = onAccept) {
                         Text(
                             text = stringResource(R.string.btn_accept),
                             color = GymColors.Gold,

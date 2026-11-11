@@ -37,7 +37,10 @@ private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter()
 fun ClientFormDialog(
     isEditing: Boolean,
     onDismiss: () -> Unit,
-    onSave: (nombre: String, telefono: String, correo: String, plan: String?) -> Unit,
+    onSave: (
+        nombre: String, telefono: String, correo: String, plan: String?,
+        contactoNombre: String, contactoTelefono: String, metodo: String
+    ) -> Unit,
     plans: List<String> = emptyList(),
     error: String? = null,
     // Datos con los que arranca el formulario (vacíos al crear, con los del cliente al editar)
@@ -45,7 +48,10 @@ fun ClientFormDialog(
     initialLastName: String = "",
     initialPhone: String = "",
     initialEmail: String = "",
-    initialPlan: String? = null
+    initialPlan: String? = null,
+    // Contacto de emergencia: solo nombre y teléfono (obligatorio)
+    initialContactName: String = "",
+    initialContactPhone: String = ""
 ) {
     var name by remember { mutableStateOf(initialName) }
     var lastName by remember { mutableStateOf(initialLastName) }
@@ -53,6 +59,9 @@ fun ClientFormDialog(
     var email by remember { mutableStateOf(initialEmail) }
     var selectedPlan by remember { mutableStateOf(initialPlan) }
     var planMenuExpanded by remember { mutableStateOf(false) }
+    var contactName by remember(initialContactName) { mutableStateOf(initialContactName) }
+    var contactPhone by remember(initialContactPhone) { mutableStateOf(initialContactPhone) }
+    var metodo by remember { mutableStateOf(com.example.gymcontrol.data.remote.METODOS_PAGO.first()) }
 
     val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
@@ -60,7 +69,10 @@ fun ClientFormDialog(
     val nameValid = nameHasMinLetters(name)
     val lastNameValid = nameHasMinLetters(lastName)
     val emailValid = Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+    // El contacto de emergencia es obligatorio: nombre (mínimo 3 letras) y teléfono de 10 dígitos
+    val contactValid = nameHasMinLetters(contactName) && contactPhone.length == 10
     val canSave = nameValid &&
+            contactValid &&
             lastNameValid &&
             phone.length == 10 &&
             emailValid &&
@@ -147,6 +159,38 @@ fun ClientFormDialog(
                 keyboardType = KeyboardType.Email,
                 errorText = if (email.isNotEmpty() && !emailValid) stringResource(R.string.encargado_client_form_email_invalid) else null
             )
+            Spacer(Modifier.height(14.dp))
+            Text(
+                stringResource(R.string.client_form_emergency_title),
+                color = ClienteTema.Texto,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(6.dp))
+            RestrictedField(
+                value = contactName,
+                onValueChange = { contactName = it },
+                label = stringResource(R.string.client_form_emergency_name),
+                accept = { s -> s.all { it.isLetter() || it == ' ' } },
+                maxLength = 60,
+                warningText = stringResource(R.string.encargado_client_form_name_warning),
+                errorText = if (contactName.isNotBlank() && !nameHasMinLetters(contactName)) stringResource(R.string.encargado_client_form_min_letters)
+                else if (contactName.isBlank() && contactPhone.isNotEmpty()) stringResource(R.string.client_form_emergency_name_missing)
+                else null
+            )
+            Spacer(Modifier.height(10.dp))
+            RestrictedField(
+                value = contactPhone,
+                onValueChange = { contactPhone = it },
+                label = stringResource(R.string.client_form_emergency_phone),
+                accept = { s -> s.all { it in '0'..'9' } },
+                maxLength = 10,
+                warningText = stringResource(R.string.encargado_client_form_phone_warning),
+                keyboardType = KeyboardType.Number,
+                errorText = if (contactPhone.isNotEmpty() && contactPhone.length < 10) {
+                    "Deben ser 10 dígitos (${contactPhone.length}/10)"
+                } else null
+            )
             Spacer(Modifier.height(10.dp))
 
             if (!isEditing) ExposedDropdownMenuBox(
@@ -185,6 +229,24 @@ fun ClientFormDialog(
                 }
             }
 
+            if (!isEditing) {
+                Spacer(Modifier.height(10.dp))
+                Text(stringResource(R.string.client_form_payment_method), color = ClienteTema.TextoSec, fontSize = 13.sp)
+                com.example.gymcontrol.data.remote.METODOS_PAGO.forEach { m ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = metodo == m,
+                            onClick = { metodo = m },
+                            colors = RadioButtonDefaults.colors(selectedColor = ClienteTema.AzulSel)
+                        )
+                        Text(m, color = ClienteTema.Texto, fontSize = 13.sp)
+                    }
+                }
+                if (metodo == "Transferencia") {
+                    Text(stringResource(R.string.client_form_transfer_note), color = ClienteTema.TextoSec, fontSize = 12.sp)
+                }
+            }
+
             error?.let {
                 Spacer(Modifier.height(8.dp))
                 Text(it, color = ClienteTema.Rojo, fontSize = 13.sp)
@@ -198,7 +260,10 @@ fun ClientFormDialog(
                         "${name.trim()} ${lastName.trim()}".trim(),
                         phone,
                         email.trim(),
-                        selectedPlan
+                        selectedPlan,
+                        contactName.trim(),
+                        contactPhone,
+                        metodo
                     )
                 },
                 enabled = canSave,
