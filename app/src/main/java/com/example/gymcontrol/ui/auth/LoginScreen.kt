@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,12 +59,22 @@ private val RojoError = Color(0xFFFF6B6B)
 fun LoginScreen(
     onNavigateToTerms: () -> Unit = {},
     onNavigateToPrivacy: () -> Unit = {},
+    // true cuando el usuario regresó de Términos o Privacidad con el botón "Aceptar"
+    legalAceptado: Boolean = false,
+    onLegalAceptadoConsumido: () -> Unit = {},
     onLogin: (UserRole) -> Unit
 ) {
-    var identifier by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    // rememberSaveable: los datos se conservan al abrir y cerrar las pantallas legales
+    var identifier by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var terminosAceptados by remember { mutableStateOf(false) }
+    var terminosAceptados by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(legalAceptado) {
+        if (legalAceptado) {
+            terminosAceptados = true
+            onLegalAceptadoConsumido()
+        }
+    }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var mostrarCambio by remember { mutableStateOf(false) }

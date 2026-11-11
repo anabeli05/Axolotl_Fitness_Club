@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
+import com.example.gymcontrol.data.remote.AfluenciaRepository
+import com.example.gymcontrol.data.remote.AfluenciaRow
+import com.example.gymcontrol.data.remote.ResumenRepository
 import com.example.gymcontrol.data.remote.OcupacionRepository
 import com.example.gymcontrol.data.remote.OcupacionRow
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
@@ -67,6 +70,15 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
         while (true) {
             try { ocupacion = OcupacionRepository.hoy() } catch (_: Exception) { }
             delay(30_000)
+        }
+    }
+
+    // Promedio real de entradas por día y hora (últimos 28 días); se actualiza cada 10 min
+    var afluencia by remember { mutableStateOf<List<AfluenciaRow>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { afluencia = AfluenciaRepository.semanal() } catch (_: Exception) { }
+            delay(600_000)
         }
     }
 
@@ -125,6 +137,8 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
+            item { MenorAfluencia(afluencia) }
+
             item {
                 Text(
                     text = stringResource(R.string.cliente_gym_schedule),
@@ -133,6 +147,106 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
         }
+    }
+}
+
+private fun etiquetaHora(h: Int): String = when {
+    h == 0 || h == 24 -> "12am"
+    h < 12 -> "${h}am"
+    h == 12 -> "12pm"
+    else -> "${h - 12}pm"
+}
+
+/**
+ * Horarios de menor afluencia: promedio de entradas del día elegido en bloques de 2 h
+ * y los 3 bloques más tranquilos. Cambia con los registros reales de entrada.
+ */
+@Composable
+private fun MenorAfluencia(datos: List<AfluenciaRow>) {
+    val hoy = java.time.LocalDate.now().dayOfWeek.value
+    var dia by remember { mutableStateOf(hoy) }
+
+    val porHora = datos.filter { it.diaSemana == dia }.associate { it.hora to it.promedio }
+    val bloques = (6..22 step 2).map { h ->
+        h to ((porHora[h] ?: 0.0) + (porHora[h + 1] ?: 0.0)).toFloat()
+    }
+    val menores = bloques.sortedWith(compareBy({ it.second }, { it.first })).take(3)
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.cliente_least_busy_title),
+            color = ClienteTema.Texto,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            (1..7).forEach { d ->
+                val sel = d == dia
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (sel) ClienteTema.AzulSel else ClienteTema.Beige)
+                        .clickable { dia = d }
+                        .padding(vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        ResumenRepository.diaCorto(d),
+                        color = if (sel) Color.White else ClienteTema.Texto,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+
+        if (datos.isEmpty()) {
+            Text(
+                stringResource(R.string.cliente_least_busy_empty),
+                color = ClienteTema.TextoSec,
+                fontSize = 13.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            return@Column
+        }
+
+        BarrasClaro(
+            titulo = stringResource(R.string.cliente_least_busy_chart),
+            datos = bloques.map { (h, v) -> etiquetaHora(h) to v }
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.cliente_least_busy_best),
+            color = ClienteTema.Texto,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        menores.forEach { (h, v) ->
+            Text(
+                stringResource(
+                    R.string.cliente_least_busy_item,
+                    etiquetaHora(h), etiquetaHora(h + 2), "%.1f".format(v)
+                ),
+                color = ClienteTema.TextoSec,
+                fontSize = 14.sp
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.cliente_least_busy_note),
+            color = ClienteTema.TextoSec,
+            fontSize = 11.sp
+        )
     }
 }
 
