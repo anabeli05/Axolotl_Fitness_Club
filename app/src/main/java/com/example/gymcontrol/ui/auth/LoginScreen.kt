@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -40,21 +42,28 @@ import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.AuthRepository
+import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.ColoresDialogo
 import com.example.gymcontrol.ui.components.LocaleHelper
 import com.example.gymcontrol.ui.components.RestablecerContrasenaDialog
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.components.alternarTema
 import kotlinx.coroutines.launch
 
-// Paleta tomada del diseño
-private val FondoNegro = Color(0xFF000000)
-private val TarjetaOscura = Color(0xFF1B1B1B)
-private val MoradoCampo = Color(0xFF2F2E2E)
-private val MoradoBorde = Color(0xFF6B5326)
-private val DoradoBorde = Color(0xFFC9A24B)
-private val Dorado = Color(0xFFC9A24B)
-private val BlancoTexto = Color(0xFFFFFFFF)
-private val RojoError = Color(0xFFFF6B6B)
+// Paleta del login: en oscuro conserva el diseño original (negro/dorado);
+// en claro toma los tokens de ClienteTema. Al cambiar ClienteTema.oscuro todo se recompone solo.
+private val FondoNegro get() = if (ClienteTema.oscuro) Color(0xFF000000) else ClienteTema.Fondo
+private val TarjetaOscura get() = if (ClienteTema.oscuro) Color(0xFF1B1B1B) else ClienteTema.Beige
+private val MoradoCampo get() = if (ClienteTema.oscuro) Color(0xFF2F2E2E) else ClienteTema.Interior
+private val MoradoBorde get() = if (ClienteTema.oscuro) Color(0xFF6B5326) else ClienteTema.Azul
+private val DoradoBorde get() = if (ClienteTema.oscuro) Color(0xFFC9A24B) else ClienteTema.Borde
+private val Dorado get() = if (ClienteTema.oscuro) Color(0xFFC9A24B) else ClienteTema.AzulSel
+private val BlancoTexto get() = if (ClienteTema.oscuro) Color(0xFFFFFFFF) else ClienteTema.Texto
+private val RojoError get() = if (ClienteTema.oscuro) Color(0xFFFF6B6B) else ClienteTema.Rojo
+
+// Botones rellenos: gris oscuro en oscuro, café en claro (texto siempre blanco)
+private val BotonFondo get() = if (ClienteTema.oscuro) Color(0xFF2F2E2E) else ClienteTema.Azul
+private val BotonTexto = Color.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +99,7 @@ fun LoginScreen(
     val strPassUpdated = stringResource(R.string.password_updated_success)
 
     val campoShape = RoundedCornerShape(50)
+    // Se calcula en cada recomposición para que siga al tema
     val campoColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = MoradoCampo,
         unfocusedContainerColor = MoradoCampo,
@@ -155,156 +165,185 @@ fun LoginScreen(
                 )
                 Spacer(Modifier.height(24.dp))
 
-                Spacer(Modifier.height(20.dp))
-                OutlinedTextField(
-                    value = identifier,
-                    onValueChange = { identifier = it },
-                    label = { Text(stringResource(R.string.login_email)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    shape = campoShape,
-                    colors = campoColors,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(stringResource(R.string.login_password)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
-                    ),
-                    visualTransformation = if (passwordVisible) VisualTransformation.None
-                    else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                imageVector = if (passwordVisible) Icons.Filled.VisibilityOff
-                                else Icons.Filled.Visibility,
-                                contentDescription = if (passwordVisible) stringResource(R.string.hide_password)
-                                else stringResource(R.string.show_password)
-                            )
-                        }
-                    },
-                    shape = campoShape,
-                    colors = campoColors,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = terminosAceptados,
-                        onCheckedChange = { terminosAceptados = it },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = Dorado,
-                            uncheckedColor = DoradoBorde,
-                            checkmarkColor = TarjetaOscura
+            Spacer(Modifier.height(20.dp))
+            OutlinedTextField(
+                value = identifier,
+                onValueChange = { identifier = it },
+                label = { Text(stringResource(R.string.login_email)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                shape = campoShape,
+                colors = campoColors,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text(stringResource(R.string.login_password)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.VisibilityOff
+                            else Icons.Filled.Visibility,
+                            contentDescription = if (passwordVisible) stringResource(R.string.hide_password)
+                            else stringResource(R.string.show_password)
                         )
-                    )
-                    val textoTerminos = buildAnnotatedString {
-                        append(stringResource(R.string.accept_terms_prefix))
-                        withLink(
-                            LinkAnnotation.Clickable(
-                                tag = "terminos",
-                                styles = TextLinkStyles(
-                                    style = SpanStyle(
-                                        color = Dorado,
-                                        textDecoration = TextDecoration.Underline,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                ),
-                                linkInteractionListener = {
-                                    onNavigateToTerms()
-                                }
-                            )
-                        ) {
-                            append(stringResource(R.string.terms_and_conditions))
-                        }
-                        append(stringResource(R.string.accept_terms_and))
-                        withLink(
-                            LinkAnnotation.Clickable(
-                                tag = "politica",
-                                styles = TextLinkStyles(
-                                    style = SpanStyle(
-                                        color = Dorado,
-                                        textDecoration = TextDecoration.Underline,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                ),
-                                linkInteractionListener = {
-                                    onNavigateToPrivacy()
-                                }
-                            )
-                        ) {
-                            append(stringResource(R.string.privacy_policy))
-                        }
                     }
-                    Text(
-                        text = textoTerminos,
-                        style = MaterialTheme.typography.bodySmall.copy(color = BlancoTexto),
-                        modifier = Modifier.padding(start = 4.dp)
+                },
+                shape = campoShape,
+                colors = campoColors,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = terminosAceptados,
+                    onCheckedChange = { terminosAceptados = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Dorado,
+                        uncheckedColor = DoradoBorde,
+                        checkmarkColor = TarjetaOscura
                     )
-                }
-                Spacer(Modifier.height(20.dp))
-                Button(
-                    onClick = {
-                        scope.launch {
-                            loading = true
-                            error = null
-                            try {
-                                val id = identifier.trim()
-                                val fila = AuthRepository.loginAuto(id, password)
-                                val rolEncontrado = fila?.let {
-                                    runCatching { UserRole.valueOf(it.rol) }.getOrNull()
-                                }
-                                if (rolEncontrado != null && fila != null) {
-                                    // Se guarda el correo real aunque haya entrado con su número de membresía
-                                    SesionActual.fijarCorreo(fila.gmail.ifBlank { id })
-                                    SesionActual.fijarDatos(fila.id, fila.nombre, fila.codigoQr)
-                                    onLogin(rolEncontrado)
-                                } else {
-                                    error = strInvalidCreds
-                                }
-                            } catch (e: Exception) {
-                                val msg = e.message?.substringBefore("\nCode:") ?: ""
-                                error = if ("bloqueada" in msg) msg else "$strConnErrorPrefix$msg"
+                )
+                val textoTerminos = buildAnnotatedString {
+                    append(stringResource(R.string.accept_terms_prefix))
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "terminos",
+                            styles = TextLinkStyles(
+                                style = SpanStyle(
+                                    color = Dorado,
+                                    textDecoration = TextDecoration.Underline,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            ),
+                            linkInteractionListener = {
+                                onNavigateToTerms()
                             }
-                            loading = false
-                        }
-                    },
-                    enabled = !loading && terminosAceptados,
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MoradoCampo,
-                        contentColor = BlancoTexto,
-                        disabledContainerColor = MoradoCampo.copy(alpha = 0.5f),
-                        disabledContentColor = BlancoTexto.copy(alpha = 0.7f)
-                    ),
-                    border = BorderStroke(1.dp, DoradoBorde),
-                    modifier = Modifier.fillMaxWidth(0.6f)
-                ) {
-                    Text(if (loading) stringResource(R.string.logging_in) else stringResource(R.string.login_button))
+                        )
+                    ) {
+                        append(stringResource(R.string.terms_and_conditions))
+                    }
+                    append(stringResource(R.string.accept_terms_and))
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "politica",
+                            styles = TextLinkStyles(
+                                style = SpanStyle(
+                                    color = Dorado,
+                                    textDecoration = TextDecoration.Underline,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            ),
+                            linkInteractionListener = {
+                                onNavigateToPrivacy()
+                            }
+                        )
+                    ) {
+                        append(stringResource(R.string.privacy_policy))
+                    }
                 }
-                error?.let {
-                    Spacer(Modifier.height(12.dp))
-                    Text(it, color = RojoError, style = MaterialTheme.typography.bodySmall)
-                }
-                aviso?.let {
-                    Spacer(Modifier.height(12.dp))
-                    Text(it, color = Dorado, style = MaterialTheme.typography.bodySmall)
-                }
-                Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { mostrarCambio = true; aviso = null }) {
-                    Text(stringResource(R.string.change_password), color = Dorado)
-                }
+                Text(
+                    text = textoTerminos,
+                    style = MaterialTheme.typography.bodySmall.copy(color = BlancoTexto),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
             }
+            Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = {
+                    scope.launch {
+                        loading = true
+                        error = null
+                        try {
+                            val id = identifier.trim()
+                            val fila = AuthRepository.loginAuto(id, password)
+                            val rolEncontrado = fila?.let {
+                                runCatching { UserRole.valueOf(it.rol) }.getOrNull()
+                            }
+                            if (rolEncontrado != null && fila != null) {
+                                // Se guarda el correo real aunque haya entrado con su número de membresía
+                                SesionActual.fijarCorreo(fila.gmail.ifBlank { id })
+                                SesionActual.fijarDatos(fila.id, fila.nombre, fila.codigoQr)
+                                onLogin(rolEncontrado)
+                            } else {
+                                error = strInvalidCreds
+                            }
+                        } catch (e: Exception) {
+                            val msg = e.message?.substringBefore("\nCode:") ?: ""
+                            error = if ("bloqueada" in msg) msg else "$strConnErrorPrefix$msg"
+                        }
+                        loading = false
+                    }
+                },
+                enabled = !loading && terminosAceptados,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BotonFondo,
+                    contentColor = BotonTexto,
+                    disabledContainerColor = BotonFondo.copy(alpha = 0.5f),
+                    disabledContentColor = BotonTexto.copy(alpha = 0.7f)
+                ),
+                border = BorderStroke(1.dp, DoradoBorde),
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) {
+                Text(if (loading) stringResource(R.string.logging_in) else stringResource(R.string.login_button))
+            }
+            error?.let {
+                Spacer(Modifier.height(12.dp))
+                Text(it, color = RojoError, style = MaterialTheme.typography.bodySmall)
+            }
+            aviso?.let {
+                Spacer(Modifier.height(12.dp))
+                Text(it, color = Dorado, style = MaterialTheme.typography.bodySmall)
+            }
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = { mostrarCambio = true; aviso = null }) {
+                Text(stringResource(R.string.change_password), color = Dorado)
+            }
+        }
+
+        // Tema claro/oscuro (arriba a la izquierda)
+        IconButton(
+            onClick = { alternarTema(context) },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = if (ClienteTema.oscuro) Icons.Filled.LightMode else Icons.Filled.DarkMode,
+                contentDescription = if (ClienteTema.oscuro) "Tema claro" else "Tema oscuro",
+                tint = Dorado
+            )
+        }
+
+        // Idioma (arriba a la derecha)
+        IconButton(
+            onClick = { LocaleHelper.toggleLanguage(context) },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Language,
+                contentDescription = stringResource(R.string.change_language),
+                tint = Dorado
+            )
         }
     }
 
@@ -332,7 +371,7 @@ fun LoginScreen(
             colores = ColoresDialogo(
                 fondo = TarjetaOscura, texto = BlancoTexto, textoSec = BlancoTexto.copy(alpha = 0.7f),
                 acento = Dorado, borde = DoradoBorde, error = RojoError,
-                boton = MoradoCampo, textoBoton = BlancoTexto
+                boton = BotonFondo, textoBoton = BotonTexto
             ),
             onDismiss = { mostrarRestablecer = false },
             onListo = {
@@ -467,7 +506,7 @@ private fun CambiarContrasenaDialog(
                             cargando = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MoradoCampo, contentColor = BlancoTexto)
+                    colors = ButtonDefaults.buttonColors(containerColor = BotonFondo, contentColor = BotonTexto)
                 ) { Text(if (cargando) stringResource(R.string.saving) else stringResource(R.string.save)) }
             }
         }

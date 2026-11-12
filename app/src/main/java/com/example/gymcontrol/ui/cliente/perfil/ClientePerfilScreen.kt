@@ -157,27 +157,8 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Spacer(Modifier.height(12.dp))
 
-                    // Datos personales (caja café)
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.perfil_personal_data_title),
-                            color = ClienteTema.CajaAcento,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
-                        )
-                        Spacer(Modifier.height(12.dp))
+                    // Datos personales
+                    InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
                         InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
                         Spacer(Modifier.height(14.dp))
                         InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
@@ -188,26 +169,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(12.dp))
 
                     // Contacto de emergencia (lo puede editar el propio cliente)
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
-                            .padding(16.dp)
+                    InfoCard(
+                        title = stringResource(R.string.perfil_emergency_title),
+                        titleIcon = Icons.Filled.ContactPhone
                     ) {
-                        Text(
-                            stringResource(R.string.perfil_emergency_title),
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(Color.White.copy(alpha = 0.5f))
-                        )
-                        Spacer(Modifier.height(12.dp))
                         val sinRegistrar = stringResource(R.string.perfil_contact_not_set)
                         InfoRow(
                             Icons.Filled.Person, stringResource(R.string.perfil_label_name),
@@ -379,6 +344,49 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             tint = ClienteTema.CajaAcento,
             modifier = Modifier.size(24.dp)
         )
+    }
+}
+
+// Caja de información con título y divisor. Usa los tokens del tema (claro/oscuro),
+// así "Datos personales" y "Contacto de emergencia" siempre se ven iguales.
+@Composable
+private fun InfoCard(
+    title: String,
+    titleIcon: ImageVector? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (titleIcon != null) {
+                Icon(
+                    titleIcon,
+                    contentDescription = null,
+                    tint = ClienteTema.CajaAcento,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                title,
+                color = ClienteTema.CajaAcento,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
+        )
+        Spacer(Modifier.height(12.dp))
+        content()
     }
 }
 
