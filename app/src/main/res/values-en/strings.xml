@@ -463,7 +463,7 @@
     <string name="label_advisories">Advisories</string>
     <string name="label_expenses">Expenses</string>
     <string name="label_total">Total</string>
-    <string name="label_total_format">Total: $%s</string>
+    <string name="label_total_format">Total: %s</string>
 
     <!-- Encargado: Personal -->
     <string name="confirm_add_staff">Are you sure you want to register %1$s as %2$s?</string>

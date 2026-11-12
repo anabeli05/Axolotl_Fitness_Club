@@ -11,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,12 +21,14 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -39,34 +42,80 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ComprobantesRepository
+import com.example.gymcontrol.data.remote.MiComprobanteRow
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.components.dinero
 import android.graphics.BitmapFactory
-
-/** Planes disponibles (precios temporales, cámbialos aquí cuando tengas los correctos). */
-enum class PlanPago(val nombre: String, val corto: String, val descripcion: String, val monto: Int) {
-    MES("Mensualidad", "Mes", "Acceso por 1 mes", 500),
-    TRIMESTRE("Trimestre", "Trimestre", "Acceso por 3 meses", 1200);
-
-    /** Ej: "$500 MXN (Mes)" */
-    val montoTexto: String get() = "$$monto MXN ($corto)"
-}
+import kotlinx.coroutines.launch
 
 /**
- * @param nombreUsuario   Nombre del cliente (de tu sesión / ViewModel).
- * @param numeroMembresia Número de membresía del cliente.
- * @param onSubirComprobante Se llama cuando el usuario confirma el envío del comprobante.
- *        Aquí sube la imagen a tu backend / Firebase Storage.
+ * Un plan que el cliente puede pagar. Sale de la pestaña "Servicios" del Encargado
+ * (vista planes_pago), así que nombre, duración y precio siempre son los actuales.
+ */
+data class PlanPago(val nombre: String, val duracionDias: Int, val precio: Double) {
+    val descripcion: String
+        get() = when {
+            duracionDias == 1 -> "Acceso por 1 día"
+            duracionDias >= 30 && duracionDias % 30 == 0 ->
+                (duracionDias / 30).let { if (it == 1) "Acceso por 1 mes" else "Acceso por $it meses" }
+            else -> "Acceso por $duracionDias días"
+        }
+
+    val icono: ImageVector
+        get() = when {
+            duracionDias < 30 -> Icons.Filled.FitnessCenter
+            duracionDias < 90 -> Icons.Filled.CalendarMonth
+            else -> Icons.Filled.DateRange
+        }
+}
+
+/** Ej: "$500.00 MXN (Mensualidad)" */
+private fun montoTexto(plan: PlanPago) = "${dinero(plan.precio)} MXN (${plan.nombre})"
+
+/**
+ * El cliente elige plan y método, sube su comprobante y este queda en revisión
+ * hasta que el Encargado lo acepta en su pestaña "Pagos".
  */
 @Composable
-fun PagHomeScreen(
-    onNavigate: (String) -> Unit = {},
-    nombreUsuario: String = "",
-    numeroMembresia: String = "",
-    onSubirComprobante: (plan: PlanPago, concepto: String, comprobante: Uri) -> Unit = { _, _, _ -> }
-) {
+fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val correo = SesionActual.correo.orEmpty()
+    val nombreUsuario = SesionActual.nombre.orEmpty()
+
     var selectedPlan by remember { mutableStateOf<PlanPago?>(null) }
     var selectedMethod by remember { mutableStateOf<PaymentMethodInfo?>(null) }
+    var numeroMembresia by remember { mutableStateOf("") }
+    var planes by remember { mutableStateOf<List<PlanPago>>(emptyList()) }
+    var cargandoPlanes by remember { mutableStateOf(true) }
+    var ultimo by remember { mutableStateOf<MiComprobanteRow?>(null) }
+    var enviando by remember { mutableStateOf(false) }
+    var mensaje by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    val enRevision = ultimo?.estado == "PENDIENTE"
+
+    suspend fun cargarUltimo() {
+        if (correo.isBlank()) return
+        try { ultimo = ComprobantesRepository.miUltimo(correo) } catch (_: Exception) {}
+    }
+
+    LaunchedEffect(correo) {
+        try {
+            planes = ComprobantesRepository.planesPago().map { PlanPago(it.nombre, it.duracionDias, it.precio) }
+        } catch (e: Exception) {
+            error = "No se pudieron cargar los planes: ${e.message?.substringBefore("\nCode:")}"
+        }
+        cargandoPlanes = false
+        if (correo.isNotBlank()) {
+            try { numeroMembresia = ClientesRepository.porCorreo(correo)?.numeroMembresia.orEmpty() } catch (_: Exception) {}
+        }
+        cargarUltimo()
+    }
 
     // Con un plan elegido, "atrás" regresa a la selección de plan
     BackHandler(enabled = selectedPlan != null) { selectedPlan = null }
@@ -125,18 +174,30 @@ fun PagHomeScreen(
                     )
                 }
                 item {
+                    EstadoComprobante(ultimo = ultimo, mensaje = mensaje)
+                }
+                items(planes, key = { it.nombre }) { p ->
                     PlanCard(
-                        icon = Icons.Filled.CalendarMonth,
-                        plan = PlanPago.MES,
-                        onClick = { selectedPlan = PlanPago.MES }
+                        plan = p,
+                        habilitado = !enRevision,
+                        onClick = { mensaje = null; error = null; selectedPlan = p }
                     )
                 }
-                item {
-                    PlanCard(
-                        icon = Icons.Filled.DateRange,
-                        plan = PlanPago.TRIMESTRE,
-                        onClick = { selectedPlan = PlanPago.TRIMESTRE }
-                    )
+                if (planes.isEmpty()) {
+                    item {
+                        val err = error
+                        Text(
+                            text = when {
+                                cargandoPlanes -> "Cargando planes…"
+                                err != null -> err
+                                else -> "Por ahora no hay planes disponibles."
+                            },
+                            color = if (err != null) ClienteTema.Rojo else ClienteTema.TextoSec,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                        )
+                    }
                 }
             }
         } else {
@@ -180,7 +241,7 @@ fun PagHomeScreen(
                                 color = ClienteTema.Texto
                             )
                             Text(
-                                text = "Total a pagar: ${plan.montoTexto}",
+                                text = "Total a pagar: ${montoTexto(plan)}",
                                 fontSize = 13.sp,
                                 color = ClienteTema.TextoSec
                             )
@@ -200,7 +261,7 @@ fun PagHomeScreen(
                         subtitle = stringResource(R.string.cliente_pago_transferencia_sub),
                         onClick = {
                             selectedMethod = PaymentMethodInfo(
-                                type = PaymentType.TRANSFERENCIA,
+                                metodo = "Transferencia",
                                 title = transTitle,
                                 details = listOf(
                                     labelBanco to bankTitle,
@@ -223,7 +284,7 @@ fun PagHomeScreen(
                         subtitle = stringResource(R.string.cliente_pago_deposito_sub),
                         onClick = {
                             selectedMethod = PaymentMethodInfo(
-                                type = PaymentType.DEPOSITO,
+                                metodo = "Depósito",
                                 title = depTitle,
                                 details = listOf(
                                     labelNoTarjeta to "4152 3138 9012 3456",
@@ -246,7 +307,7 @@ fun PagHomeScreen(
                         subtitle = stringResource(R.string.cliente_pago_efectivo_sub),
                         onClick = {
                             selectedMethod = PaymentMethodInfo(
-                                type = PaymentType.EFECTIVO,
+                                metodo = "Efectivo",
                                 title = efecTitle,
                                 details = listOf(
                                     labelUbicacion to valRecepcion,
@@ -263,12 +324,28 @@ fun PagHomeScreen(
             selectedMethod?.let { info ->
                 PaymentDetailDialog(
                     info = info,
-                    plan = plan,
+                    montoTexto = montoTexto(plan),
                     concepto = concepto,
-                    onDismiss = { selectedMethod = null },
+                    enviando = enviando,
+                    error = error,
+                    onDismiss = { if (!enviando) { selectedMethod = null; error = null } },
                     onSubirComprobante = { uri ->
-                        onSubirComprobante(plan, concepto, uri)
-                        selectedMethod = null
+                        scope.launch {
+                            enviando = true
+                            error = null
+                            try {
+                                val imagen = ComprobantesRepository.imagenABase64(context, uri)
+                                ComprobantesRepository.enviar(correo, plan.nombre, info.metodo, imagen)
+                                selectedMethod = null
+                                selectedPlan = null
+                                mensaje = "Comprobante enviado. El Encargado lo revisará y, al validarlo, se activará tu membresía."
+                                cargarUltimo()
+                            } catch (e: Exception) {
+                                error = "No se pudo enviar: ${e.message?.substringBefore("\nCode:")?.substringAfterLast("ERROR: ")}"
+                            } finally {
+                                enviando = false
+                            }
+                        }
                     }
                 )
             }
@@ -277,7 +354,7 @@ fun PagHomeScreen(
 }
 
 private fun buildConcepto(plan: PlanPago, nombre: String, membresia: String): String {
-    val partes = mutableListOf("Pago plan ${plan.corto} ($${plan.monto})")
+    val partes = mutableListOf("Pago plan ${plan.nombre} (${dinero(plan.precio)})")
     if (nombre.isNotBlank()) partes += nombre
     if (membresia.isNotBlank()) partes += "Membresía $membresia"
     return partes.joinToString(" - ")
@@ -285,14 +362,15 @@ private fun buildConcepto(plan: PlanPago, nombre: String, membresia: String): St
 
 @Composable
 private fun PlanCard(
-    icon: ImageVector,
     plan: PlanPago,
+    habilitado: Boolean,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .alpha(if (habilitado) 1f else 0.45f)
+            .clickable(enabled = habilitado) { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = ClienteTema.Beige),
         border = BorderStroke(1.5.dp, ClienteTema.Borde)
@@ -304,7 +382,7 @@ private fun PlanCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = icon,
+                imageVector = plan.icono,
                 contentDescription = null,
                 tint = ClienteTema.AzulSel,
                 modifier = Modifier.size(54.dp)
@@ -325,7 +403,7 @@ private fun PlanCard(
                 )
             }
             Text(
-                text = "$${plan.monto}",
+                text = dinero(plan.precio),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = ClienteTema.AzulSel
@@ -406,10 +484,66 @@ private fun MetodoPagoCard(
     }
 }
 
-private enum class PaymentType { TRANSFERENCIA, DEPOSITO, EFECTIVO }
+/** Aviso arriba de los planes: comprobante en revisión, validado o rechazado. */
+@Composable
+private fun EstadoComprobante(ultimo: MiComprobanteRow?, mensaje: String?) {
+    if (ultimo?.estado == "RECHAZADO" && mensaje == null) {
+        // Rechazado: recuadro rojo con el motivo que escribió el Encargado
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(ClienteTema.RojoPastel, RoundedCornerShape(12.dp))
+                .border(1.5.dp, ClienteTema.Rojo, RoundedCornerShape(12.dp))
+                .padding(14.dp)
+        ) {
+            Text(
+                text = "Pago rechazado · plan ${ultimo.plan ?: ""}",
+                color = ClienteTema.Rojo,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "Motivo: ${ultimo.motivo?.takeIf { it.isNotBlank() } ?: "sin especificar"}",
+                color = ClienteTema.Rojo,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "Corrige lo indicado y vuelve a enviar tu comprobante.",
+                color = ClienteTema.Rojo,
+                fontSize = 13.sp
+            )
+        }
+        return
+    }
+
+    val (texto, color) = when {
+        ultimo?.estado == "PENDIENTE" ->
+            "Tu comprobante del plan ${ultimo.plan ?: ""} está en revisión. Cuando el Encargado lo valide se activará tu membresía." to ClienteTema.AzulSel
+        mensaje != null -> mensaje to ClienteTema.Verde
+        ultimo?.estado == "ACEPTADO" ->
+            "Tu pago del plan ${ultimo.plan ?: ""} fue validado el ${ClientesRepository.fechaApp(ultimo.resuelto)}." to ClienteTema.Verde
+        else -> return
+    }
+    Text(
+        text = texto,
+        color = color,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ClienteTema.Beige, RoundedCornerShape(12.dp))
+            .border(1.dp, color, RoundedCornerShape(12.dp))
+            .padding(12.dp)
+    )
+}
 
 private data class PaymentMethodInfo(
-    val type: PaymentType,
+    /** Como se guarda en pagos.metodo_pago */
+    val metodo: String,
     val title: String,
     val details: List<Pair<String, String>>,
     val instructions: String
@@ -418,8 +552,10 @@ private data class PaymentMethodInfo(
 @Composable
 private fun PaymentDetailDialog(
     info: PaymentMethodInfo,
-    plan: PlanPago,
+    montoTexto: String,
     concepto: String,
+    enviando: Boolean,
+    error: String?,
     onDismiss: () -> Unit,
     onSubirComprobante: (Uri) -> Unit
 ) {
@@ -503,7 +639,7 @@ private fun PaymentDetailDialog(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = plan.montoTexto,
+                    text = montoTexto,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = ClienteTema.Azul
@@ -564,8 +700,13 @@ private fun PaymentDetailDialog(
             }
 
             // Botón dorado: Subir comprobante
+            if (error != null) {
+                Text(error, color = ClienteTema.Rojo, fontSize = 13.sp, modifier = Modifier.padding(bottom = 8.dp))
+            }
+
             Button(
                 onClick = { picker.launch("image/*") },
+                enabled = !enviando,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
@@ -589,18 +730,27 @@ private fun PaymentDetailDialog(
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedButton(
                     onClick = { comprobanteUri?.let(onSubirComprobante) },
+                    enabled = !enviando,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
                     shape = RoundedCornerShape(12.dp),
                     border = BorderStroke(1.5.dp, ClienteTema.Azul)
                 ) {
-                    Text(
-                        "Enviar comprobante",
-                        fontSize = 16.sp,
-                        color = ClienteTema.Azul,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (enviando) {
+                        CircularProgressIndicator(
+                            color = ClienteTema.Azul,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Text(
+                            "Enviar comprobante",
+                            fontSize = 16.sp,
+                            color = ClienteTema.Azul,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

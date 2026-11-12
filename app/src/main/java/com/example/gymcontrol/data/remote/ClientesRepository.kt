@@ -51,7 +51,8 @@ data class PagoPendienteRow(
     @SerialName("cliente_id") val clienteId: Long,
     val cliente: String,
     @SerialName("numero_membresia") val numeroMembresia: String = "",
-    val plan: String? = null
+    val plan: String? = null,
+    @SerialName("tiene_comprobante") val tieneComprobante: Boolean = false
 )
 
 @Serializable

@@ -18,10 +18,17 @@ sealed interface PasoFacial {
  * Elige SIEMPRE el rostro más cercano a la cámara (el de mayor tamaño) e ignora a quienes
  * están detrás. Junta varias muestras seguidas del mismo rostro antes de dar el vector.
  * Se usa solo desde el hilo de la cámara.
+ *
+ * @param soloElMasCercano true en el escáner de entrada: nunca se detiene por haber más
+ *        personas; escanea al más cercano y, si ya empezó con alguien, lo termina aunque
+ *        otro se acerque casi igual (solo cambia si el otro está claramente más cerca).
+ *        false en el registro de rostros: si hay dos personas a la misma distancia se
+ *        pide que quede una sola, para no registrar la cara equivocada.
  */
 class CapturaFacial(
     private val reconocedor: ReconocedorFacial,
-    private val muestrasNecesarias: Int
+    private val muestrasNecesarias: Int,
+    private val soloElMasCercano: Boolean = false
 ) {
     private var rostroActual: Int? = null
     private val muestras = mutableListOf<FloatArray>()
@@ -46,7 +53,7 @@ class CapturaFacial(
     }
 
     fun procesar(frame: Bitmap, rostros: List<Face>): PasoFacial {
-        val cara = masCercano(rostros)
+        val cara = if (soloElMasCercano) elegirMasCercano(rostros) else masCercano(rostros)
         if (cara == null) {
             rostroProcesado = null // ya se retiró
             reiniciar()
@@ -58,11 +65,14 @@ class CapturaFacial(
             return PasoFacial.Indicacion(R.string.facial_prompt_ready_retire, 1f)
         }
 
-        // Dos personas casi a la misma distancia: no se adivina quién es
-        val segunda = rostros.filter { it !== cara }.maxOfOrNull { area(it) } ?: 0
-        if (segunda > area(cara) * 0.80f) {
-            reiniciar()
-            return PasoFacial.Indicacion(R.string.facial_prompt_single_person)
+        // Registro: dos personas casi a la misma distancia, no se adivina quién es.
+        // En la entrada no se detiene: los de atrás simplemente se ignoran.
+        if (!soloElMasCercano) {
+            val segunda = rostros.filter { it !== cara }.maxOfOrNull { area(it) } ?: 0
+            if (segunda > area(cara) * 0.80f) {
+                reiniciar()
+                return PasoFacial.Indicacion(R.string.facial_prompt_single_person)
+            }
         }
 
         val caja = cara.boundingBox
@@ -105,11 +115,26 @@ class CapturaFacial(
         return PasoFacial.Listo(vector)
     }
 
+    /**
+     * El más cercano, pero si ya se estaba escaneando a alguien y sigue casi igual de cerca
+     * se continúa con él; así no se reinicia cuando dos personas están a distancias parecidas.
+     */
+    private fun elegirMasCercano(rostros: List<Face>): Face? {
+        val mayor = masCercano(rostros) ?: return null
+        val actual = rostroActual?.let { id -> rostros.firstOrNull { it.trackingId == id } }
+        return if (actual != null && actual !== mayor && area(actual) >= area(mayor) * CONSERVAR_ACTUAL) actual
+        else mayor
+    }
+
     companion object {
+        /** El que ya se está escaneando se conserva mientras tenga al menos este tamaño del más grande. */
+        private const val CONSERVAR_ACTUAL = 0.85f
+
         /** El rostro debe ocupar al menos este ancho del cuadro (lo de atrás se ve más chico). */
         private const val TAMANO_MINIMO = 0.25f
         private const val GIRO_MAXIMO = 18f
-        private const val CONSISTENCIA = 0.80f
+        // FaceNet-512 varía un poco más entre cuadros que MobileFaceNet
+        private const val CONSISTENCIA = 0.75f
 
         private fun area(f: Face) = f.boundingBox.width() * f.boundingBox.height()
 
