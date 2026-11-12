@@ -25,14 +25,25 @@ import com.example.gymcontrol.ui.components.GymScaffold
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
+/** Forma en que el cliente realizó el pago. */
+enum class MetodoPago(val etiqueta: String) {
+    EFECTIVO("Efectivo"),
+    TRANSFERENCIA("Transferencia"),
+    DEPOSITO("Depósito")
+}
+
 /**
  * Un pago de cliente.
+ * [membresia] es el número de membresía del cliente.
+ * [plan] es lo que está pagando (Semana, Mes o Trimestre).
  * [imagen] es el comprobante que subió; si es null se muestra un recuadro vacío.
  */
 data class PagoItem(
     val id: String,
     val cliente: String,
     val membresia: String,
+    val plan: String,
+    val metodoPago: MetodoPago,
     val imagen: ImageBitmap? = null
 )
 
@@ -41,9 +52,9 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
     // TODO: reemplazar por los comprobantes reales cuando se conecte la base de datos
     val pagos = remember {
         listOf(
-            PagoItem("1", "Ana López", "Mes"),
-            PagoItem("2", "Carlos Gómez", "Semana"),
-            PagoItem("3", "María Rodríguez", "Trimestre")
+            PagoItem("1", "Ana López", "M-1001", "Mes", MetodoPago.TRANSFERENCIA),
+            PagoItem("2", "Carlos Gómez", "M-1002", "Semana", MetodoPago.EFECTIVO),
+            PagoItem("3", "María Rodríguez", "M-1003", "Trimestre", MetodoPago.DEPOSITO)
         )
     }
     var imagenAmpliada by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -91,7 +102,7 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
     }
 }
 
-/** Recuadro con: nombre del cliente, su membresía y la imagen que subió. */
+/** Recuadro con: nombre, número de membresía, plan, tipo de pago y la imagen que subió. */
 @Composable
 private fun PagoCard(pago: PagoItem, onAmpliar: (ImageBitmap) -> Unit) {
     Card(
@@ -113,6 +124,18 @@ private fun PagoCard(pago: PagoItem, onAmpliar: (ImageBitmap) -> Unit) {
                 color = ClienteTema.AzulSel,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "Plan: ${pago.plan}",
+                color = ClienteTema.Texto,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "Tipo de pago: ${pago.metodoPago.etiqueta}",
+                color = ClienteTema.TextoSec,
+                fontSize = 14.sp
             )
 
             Spacer(Modifier.height(12.dp))
