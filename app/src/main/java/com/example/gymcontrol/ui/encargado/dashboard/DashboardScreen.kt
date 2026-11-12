@@ -26,6 +26,7 @@ import com.example.gymcontrol.ui.components.StatIconType
 import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import java.util.Locale
+import kotlin.math.roundToInt
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
@@ -195,6 +196,10 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     // Eje fijo de 5 en 5: 0, 5, 10... hasta 30 (solo crece si un dato lo supera)
                     yStep = 5f,
                     yMax = 30f,
+                    // Más alto para que las etiquetas del eje no queden apretadas
+                    chartHeight = 240,
+                    // Burbuja al tocar una barra: sin decimales (redondea al entero más cercano)
+                    valueFormatter = { it.roundToInt().toString() },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
