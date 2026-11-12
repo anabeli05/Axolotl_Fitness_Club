@@ -13,7 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,6 +26,7 @@ import com.example.gymcontrol.data.remote.ReporteRow
 import com.example.gymcontrol.data.remote.ReportesRepository
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.dinero
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
@@ -40,7 +44,20 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
     var cargando by remember { mutableStateOf(true) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
+    // Se recarga cada vez que la pantalla vuelve a mostrarse (p. ej. después de
+    // aceptar un pago en "Pagos" o registrar un gasto), no solo la primera vez.
+    var recargas by remember { mutableIntStateOf(0) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) recargas++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(recargas) {
+        if (recargas == 0) return@LaunchedEffect
         try {
             reportes = ReportesRepository.listar()
             errorMsg = null
@@ -129,7 +146,7 @@ fun MonthlyReportCard(item: ReporteMensualItem) {
                 )
                 val totalColor = if (item.total >= 0) ClienteTema.Verde else ClienteTema.Rojo
                 Text(
-                    text = stringResource(R.string.label_total_format, item.total),
+                    text = stringResource(R.string.label_total_format, dinero(item.total)),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
                     color = totalColor
@@ -158,6 +175,6 @@ fun ReportDetailItem(label: String, value: Double) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = label, fontSize = 12.sp, color = ClienteTema.TextoSec)
         Spacer(Modifier.height(2.dp))
-        Text(text = "$${value}", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ClienteTema.Texto)
+        Text(text = dinero(value), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = ClienteTema.Texto)
     }
 }
