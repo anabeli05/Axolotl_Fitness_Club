@@ -28,6 +28,12 @@ private data class LoginAutoParams(val p_gmail: String, val p_password: String)
 @Serializable
 private data class CambiarParams(val p_gmail: String, val p_actual: String, val p_nueva: String)
 
+@Serializable
+private data class RevisarParams(val p_nueva: String)
+
+@Serializable
+private data class RestablecerParams(val p_gmail: String, val p_codigo: String, val p_nueva: String)
+
 object AuthRepository {
     suspend fun login(identifier: String, password: String, role: UserRole): LoginRow? {
         return SupabaseProvider.client.postgrest
@@ -48,6 +54,26 @@ object AuthRepository {
         val r = SupabaseProvider.client.postgrest.rpc(
             "cambiar_contrasena",
             CambiarParams(gmail.trim(), actual, nueva)
+        ).decodeAs<String>()
+        if (r != "OK") throw IllegalStateException(r)
+    }
+
+    /** Revisa que la contraseña nueva cumpla los requisitos antes de pedir el código. null = válida. */
+    suspend fun revisarContrasenaNueva(nueva: String): String? {
+        val r = SupabaseProvider.client.postgrest
+            .rpc("revisar_contrasena_nueva", RevisarParams(nueva))
+            .decodeAs<String>()
+        return if (r == "OK") null else r
+    }
+
+    /**
+     * Cambia la contraseña sin la actual, con el código que llegó al correo
+     * (ver [CorreoRepository.enviarCodigoContrasena]). Lanza el motivo si no se pudo.
+     */
+    suspend fun restablecerContrasena(gmail: String, codigo: String, nueva: String) {
+        val r = SupabaseProvider.client.postgrest.rpc(
+            "restablecer_contrasena",
+            RestablecerParams(gmail.trim(), codigo.trim(), nueva)
         ).decodeAs<String>()
         if (r != "OK") throw IllegalStateException(r)
     }

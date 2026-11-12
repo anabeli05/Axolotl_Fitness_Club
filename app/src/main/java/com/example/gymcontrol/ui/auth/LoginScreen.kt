@@ -40,7 +40,9 @@ import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.AuthRepository
+import com.example.gymcontrol.ui.components.ColoresDialogo
 import com.example.gymcontrol.ui.components.LocaleHelper
+import com.example.gymcontrol.ui.components.RestablecerContrasenaDialog
 import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.launch
 
@@ -78,6 +80,7 @@ fun LoginScreen(
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var mostrarCambio by remember { mutableStateOf(false) }
+    var mostrarRestablecer by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -300,8 +303,31 @@ fun LoginScreen(
         CambiarContrasenaDialog(
             correoInicial = identifier.trim(),
             onDismiss = { mostrarCambio = false },
+            onOlvide = {
+                mostrarCambio = false
+                mostrarRestablecer = true
+            },
             onListo = {
                 mostrarCambio = false
+                password = ""
+                aviso = strPassUpdated
+            }
+        )
+    }
+
+    // No recuerda la actual: contraseña nueva + código por correo
+    if (mostrarRestablecer) {
+        RestablecerContrasenaDialog(
+            correoInicial = identifier.trim(),
+            correoEditable = true,
+            colores = ColoresDialogo(
+                fondo = TarjetaOscura, texto = BlancoTexto, textoSec = BlancoTexto.copy(alpha = 0.7f),
+                acento = Dorado, borde = DoradoBorde, error = RojoError,
+                boton = MoradoCampo, textoBoton = BlancoTexto
+            ),
+            onDismiss = { mostrarRestablecer = false },
+            onListo = {
+                mostrarRestablecer = false
                 password = ""
                 aviso = strPassUpdated
             }
@@ -314,6 +340,7 @@ fun LoginScreen(
 private fun CambiarContrasenaDialog(
     correoInicial: String,
     onDismiss: () -> Unit,
+    onOlvide: () -> Unit,
     onListo: () -> Unit
 ) {
     var correo by remember { mutableStateOf(correoInicial) }
@@ -386,6 +413,11 @@ private fun CambiarContrasenaDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 campo(correo, { correo = it }, stringResource(R.string.login_email), false)
                 campo(actual, { actual = it }, stringResource(R.string.current_password), true)
+                TextButton(
+                    onClick = onOlvide,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.align(Alignment.End)
+                ) { Text("¿No recuerdas tu contraseña actual?", color = Dorado) }
                 campo(nueva, { nueva = it }, stringResource(R.string.new_password), true)
                 campo(repetir, { repetir = it }, stringResource(R.string.repeat_new_password), true)
                 Text(

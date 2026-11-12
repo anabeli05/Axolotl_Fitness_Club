@@ -48,6 +48,8 @@ import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.ColoresDialogo
+import com.example.gymcontrol.ui.components.RestablecerContrasenaDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -86,6 +88,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showRestablecer by remember { mutableStateOf(false) }
 
     ClienteScaffoldClaro(
         currentSection = "Perfil",
@@ -274,6 +277,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     if (showPasswordDialog) {
         PasswordDialog(
             onDismiss = { showPasswordDialog = false },
+            onOlvide = {
+                showPasswordDialog = false
+                showRestablecer = true
+            },
             onSave = { actual, nueva ->
                 scope.launch {
                     try {
@@ -285,6 +292,24 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
                     }
                 }
+            }
+        )
+    }
+
+    // No recuerda la actual: la nueva se confirma con un código enviado a su correo registrado
+    if (showRestablecer) {
+        RestablecerContrasenaDialog(
+            correoInicial = email,
+            correoEditable = false,
+            colores = ColoresDialogo(
+                fondo = ClienteTema.Beige, texto = ClienteTema.Texto, textoSec = ClienteTema.TextoSec,
+                acento = ClienteTema.Azul, borde = ClienteTema.Borde, error = ClienteTema.Rojo,
+                boton = ClienteTema.Azul, textoBoton = ClienteTema.SobreDorado
+            ),
+            onDismiss = { showRestablecer = false },
+            onListo = {
+                showRestablecer = false
+                Toast.makeText(context, context.getString(R.string.perfil_password_updated), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -562,7 +587,7 @@ private fun EditContactDialog(
 }
 
 @Composable
-private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+private fun PasswordDialog(onDismiss: () -> Unit, onOlvide: () -> Unit, onSave: (String, String) -> Unit) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -579,6 +604,11 @@ private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Un
             label = stringResource(R.string.current_password),
             isPassword = true
         )
+        TextButton(
+            onClick = onOlvide,
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.align(Alignment.End)
+        ) { Text("¿No recuerdas tu contraseña actual?", color = ClienteTema.Azul) }
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
@@ -654,7 +684,7 @@ private fun GymTextField(
 private fun translatedPlanName(plan: String?): String {
     return when (plan?.lowercase()?.trim()) {
         "trimestral", "quarterly" -> stringResource(R.string.plan_quarterly)
-        "mensual", "monthly" -> stringResource(R.string.plan_monthly)
+        "mensual", "mensualidad", "monthly" -> stringResource(R.string.plan_monthly)
         "visita", "día", "day", "day pass" -> stringResource(R.string.plan_day)
         else -> plan ?: "—"
     }
