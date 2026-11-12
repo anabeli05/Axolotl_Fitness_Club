@@ -19,8 +19,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.components.LocaleHelper
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -198,7 +200,7 @@ private fun MenorAfluencia(datos: List<AfluenciaRow>) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        ResumenRepository.diaCorto(d),
+                        ResumenRepository.diaCorto(d, LocaleHelper.getActiveLocale(LocalContext.current)),
                         color = if (sel) Color.White else ClienteTema.Texto,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,

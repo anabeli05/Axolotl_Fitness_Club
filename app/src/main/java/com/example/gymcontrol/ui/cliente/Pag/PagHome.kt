@@ -57,14 +57,6 @@ import kotlinx.coroutines.launch
  * (vista planes_pago), así que nombre, duración y precio siempre son los actuales.
  */
 data class PlanPago(val nombre: String, val duracionDias: Int, val precio: Double) {
-    val descripcion: String
-        get() = when {
-            duracionDias == 1 -> "Acceso por 1 día"
-            duracionDias >= 30 && duracionDias % 30 == 0 ->
-                (duracionDias / 30).let { if (it == 1) "Acceso por 1 mes" else "Acceso por $it meses" }
-            else -> "Acceso por $duracionDias días"
-        }
-
     val icono: ImageVector
         get() = when {
             duracionDias < 30 -> Icons.Filled.FitnessCenter
@@ -108,7 +100,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
         try {
             planes = ComprobantesRepository.planesPago().map { PlanPago(it.nombre, it.duracionDias, it.precio) }
         } catch (e: Exception) {
-            error = "No se pudieron cargar los planes: ${e.message?.substringBefore("\nCode:")}"
+            error = context.resources.getString(R.string.error_loading_plans, e.message?.substringBefore("\nCode:") ?: "")
         }
         cargandoPlanes = false
         if (correo.isNotBlank()) {
@@ -163,7 +155,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
             ) {
                 item {
                     Text(
-                        text = "Selecciona tu plan",
+                        text = stringResource(R.string.client_select_plan),
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
                         color = ClienteTema.Texto,
@@ -188,9 +180,9 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                         val err = error
                         Text(
                             text = when {
-                                cargandoPlanes -> "Cargando planes…"
+                                cargandoPlanes -> stringResource(R.string.loading_plans)
                                 err != null -> err
-                                else -> "Por ahora no hay planes disponibles."
+                                else -> stringResource(R.string.no_plans_available)
                             },
                             color = if (err != null) ClienteTema.Rojo else ClienteTema.TextoSec,
                             fontSize = 14.sp,
@@ -235,19 +227,19 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Plan: ${plan.nombre}",
+                                text = stringResource(R.string.plan_selected_format, plan.nombre),
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = ClienteTema.Texto
                             )
                             Text(
-                                text = "Total a pagar: ${montoTexto(plan)}",
+                                text = stringResource(R.string.total_to_pay_format, montoTexto(plan)),
                                 fontSize = 13.sp,
                                 color = ClienteTema.TextoSec
                             )
                         }
                         TextButton(onClick = { selectedPlan = null }) {
-                            Text("Cambiar", color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.btn_change), color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -338,7 +330,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                                 ComprobantesRepository.enviar(correo, plan.nombre, info.metodo, imagen)
                                 selectedMethod = null
                                 selectedPlan = null
-                                mensaje = "Comprobante enviado. El Encargado lo revisará y, al validarlo, se activará tu membresía."
+                                mensaje = context.resources.getString(R.string.receipt_sent_message)
                                 cargarUltimo()
                             } catch (e: Exception) {
                                 error = "No se pudo enviar: ${e.message?.substringBefore("\nCode:")?.substringAfterLast("ERROR: ")}"
@@ -396,8 +388,14 @@ private fun PlanCard(
                     color = ClienteTema.Texto
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                val descripcion = when {
+                    plan.duracionDias == 1 -> stringResource(R.string.plan_access_1_day)
+                    plan.duracionDias >= 30 && plan.duracionDias % 30 == 0 ->
+                        (plan.duracionDias / 30).let { if (it == 1) stringResource(R.string.plan_access_1_month) else stringResource(R.string.plan_access_months, it) }
+                    else -> stringResource(R.string.plan_access_days, plan.duracionDias)
+                }
                 Text(
-                    text = plan.descripcion,
+                    text = descripcion,
                     fontSize = 13.sp,
                     color = ClienteTema.TextoSec
                 )
@@ -497,21 +495,21 @@ private fun EstadoComprobante(ultimo: MiComprobanteRow?, mensaje: String?) {
                 .padding(14.dp)
         ) {
             Text(
-                text = "Pago rechazado · plan ${ultimo.plan ?: ""}",
+                text = stringResource(R.string.payment_rejected_title, ultimo.plan.orEmpty()),
                 color = ClienteTema.Rojo,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Motivo: ${ultimo.motivo?.takeIf { it.isNotBlank() } ?: "sin especificar"}",
+                text = stringResource(R.string.payment_rejected_reason, ultimo.motivo?.takeIf { it.isNotBlank() } ?: "sin especificar"),
                 color = ClienteTema.Rojo,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Corrige lo indicado y vuelve a enviar tu comprobante.",
+                text = stringResource(R.string.payment_rejected_instruction),
                 color = ClienteTema.Rojo,
                 fontSize = 13.sp
             )
@@ -521,10 +519,10 @@ private fun EstadoComprobante(ultimo: MiComprobanteRow?, mensaje: String?) {
 
     val (texto, color) = when {
         ultimo?.estado == "PENDIENTE" ->
-            "Tu comprobante del plan ${ultimo.plan ?: ""} está en revisión. Cuando el Encargado lo valide se activará tu membresía." to ClienteTema.AzulSel
+            stringResource(R.string.receipt_under_review, ultimo.plan.orEmpty()) to ClienteTema.AzulSel
         mensaje != null -> mensaje to ClienteTema.Verde
         ultimo?.estado == "ACEPTADO" ->
-            "Tu pago del plan ${ultimo.plan ?: ""} fue validado el ${ClientesRepository.fechaApp(ultimo.resuelto)}." to ClienteTema.Verde
+            stringResource(R.string.payment_validated_on, ultimo.plan.orEmpty(), ClientesRepository.fechaApp(ultimo.resuelto).orEmpty()) to ClienteTema.Verde
         else -> return
     }
     Text(
@@ -633,7 +631,7 @@ private fun PaymentDetailDialog(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Monto a pagar",
+                    text = stringResource(R.string.label_amount_to_pay),
                     fontSize = 14.sp,
                     color = ClienteTema.Texto
                 )
@@ -646,7 +644,7 @@ private fun PaymentDetailDialog(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Concepto",
+                    text = stringResource(R.string.label_concept),
                     fontSize = 14.sp,
                     color = ClienteTema.Texto
                 )
@@ -688,7 +686,7 @@ private fun PaymentDetailDialog(
             if (preview != null) {
                 Image(
                     bitmap = preview,
-                    contentDescription = "Comprobante seleccionado",
+                    contentDescription = stringResource(R.string.receipt_selected),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -719,7 +717,7 @@ private fun PaymentDetailDialog(
                 Icon(Icons.Filled.UploadFile, contentDescription = null, modifier = Modifier.size(22.dp))
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    if (comprobanteUri == null) "Subir comprobante" else "Cambiar comprobante",
+                    if (comprobanteUri == null) stringResource(R.string.btn_upload_receipt) else stringResource(R.string.btn_change_receipt),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -745,7 +743,7 @@ private fun PaymentDetailDialog(
                         )
                     } else {
                         Text(
-                            "Enviar comprobante",
+                            stringResource(R.string.btn_send_receipt),
                             fontSize = 16.sp,
                             color = ClienteTema.Azul,
                             fontWeight = FontWeight.Bold

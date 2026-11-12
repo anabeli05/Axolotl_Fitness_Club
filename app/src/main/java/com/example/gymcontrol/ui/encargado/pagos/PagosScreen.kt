@@ -31,6 +31,9 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.dinero
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
+import com.example.gymcontrol.R
 import kotlinx.coroutines.launch
 
 private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
@@ -91,13 +94,13 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Pagos de Clientes",
+                    text = stringResource(R.string.tab_payments),
                     color = ClienteTema.Texto,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Pendientes de validar: ${pagos.size}",
+                    text = stringResource(R.string.manager_pending_payments, pagos.size),
                     color = ClienteTema.TextoSec,
                     fontSize = 15.sp
                 )
@@ -121,7 +124,7 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
             if (pagos.isEmpty() && !cargando && error == null) {
                 item {
                     Text(
-                        text = "No hay pagos pendientes por validar.",
+                        text = stringResource(R.string.manager_no_pending_payments),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -135,13 +138,16 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
     }
 
     confirmar?.let { r ->
+        val ctx = LocalContext.current
+        val strMsgRejected = stringResource(R.string.manager_payment_rejected_msg, r.pago.cliente)
+
         AlertDialog(
             onDismissRequest = { if (!procesando) confirmar = null },
             containerColor = ClienteTema.Beige,
             shape = RoundedCornerShape(16.dp),
             title = {
                 Text(
-                    if (r.aceptar) "Aceptar pago" else "Rechazar pago",
+                    if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.manager_reject_payment),
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -152,9 +158,9 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
                 Column {
                     Text(
                         if (r.aceptar)
-                            "¿Validar el pago de ${montoTexto(r.pago.monto)} de ${r.pago.cliente}? Se sumará a los ingresos de hoy y se activará su membresía."
+                            stringResource(R.string.manager_accept_confirmation, montoTexto(r.pago.monto), r.pago.cliente)
                         else
-                            "¿Rechazar el pago de ${r.pago.cliente}? No se sumará a los ingresos y el cliente verá el motivo en su pestaña Pagos.",
+                            stringResource(R.string.manager_reject_confirmation, r.pago.cliente),
                         color = ClienteTema.TextoSec,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -164,8 +170,8 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
                         OutlinedTextField(
                             value = motivo,
                             onValueChange = { if (it.length <= 200) motivo = it },
-                            label = { Text("Motivo del rechazo") },
-                            placeholder = { Text("Ej. El monto no coincide con el plan") },
+                            label = { Text(stringResource(R.string.manager_rejection_reason_label)) },
+                            placeholder = { Text(stringResource(R.string.manager_rejection_reason_placeholder)) },
                             enabled = !procesando,
                             minLines = 2,
                             colors = OutlinedTextFieldDefaults.colors(
@@ -194,10 +200,10 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
                             try {
                                 mensaje = if (r.aceptar) {
                                     val vence = ClientesRepository.confirmarPago(correo, r.pago.id, true)
-                                    "Pago de ${r.pago.cliente} validado. Ya aparece en Reportes y su membresía vence el ${ClientesRepository.fechaApp(vence)}."
+                                    ctx.resources.getString(R.string.manager_payment_validated_msg, r.pago.cliente, ClientesRepository.fechaApp(vence).orEmpty())
                                 } else {
                                     ComprobantesRepository.rechazar(correo, r.pago.id, motivo)
-                                    "Pago de ${r.pago.cliente} rechazado."
+                                    strMsgRejected
                                 }
                                 error = null
                                 imagenes.remove(r.pago.id)
@@ -210,11 +216,11 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
                             }
                         }
                     }
-                ) { Text(if (r.aceptar) "Aceptar" else "Rechazar") }
+                ) { Text(if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.manager_reject_payment)) }
             },
             dismissButton = {
                 TextButton(enabled = !procesando, onClick = { confirmar = null }) {
-                    Text("Cancelar", color = ClienteTema.TextoSec)
+                    Text(stringResource(R.string.cancel), color = ClienteTema.TextoSec)
                 }
             }
         )

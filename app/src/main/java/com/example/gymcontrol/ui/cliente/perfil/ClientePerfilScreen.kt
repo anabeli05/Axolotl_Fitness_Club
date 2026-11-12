@@ -608,7 +608,7 @@ private fun PasswordDialog(onDismiss: () -> Unit, onOlvide: () -> Unit, onSave: 
             onClick = onOlvide,
             contentPadding = PaddingValues(0.dp),
             modifier = Modifier.align(Alignment.End)
-        ) { Text("¿No recuerdas tu contraseña actual?", color = ClienteTema.Azul) }
+        ) { Text(stringResource(R.string.forgot_current_password), color = ClienteTema.Azul) }
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },

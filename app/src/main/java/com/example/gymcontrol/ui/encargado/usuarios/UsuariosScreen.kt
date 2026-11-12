@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -92,13 +93,20 @@ private class StaffItem(
 
 private class Pendiente(val mensaje: String, val accion: () -> Unit)
 
-private fun mensajeError(e: Exception, porDefecto: String): String =
-    e.message?.substringBefore("\nCode:") ?: porDefecto
+private fun mensajeError(context: android.content.Context, e: Exception, porDefecto: String): String {
+    val raw = e.message?.substringBefore("\nCode:") ?: ""
+    return if ("Ese correo ya está registrado" in raw) {
+        context.getString(R.string.error_email_already_registered)
+    } else {
+        raw.ifBlank { porDefecto }
+    }
+}
 
 @Composable
 fun UsuariosScreen(
     onNavigate: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showNewForm by remember { mutableStateOf(false) }
     var errorAlta by remember { mutableStateOf<String?>(null) }
@@ -209,7 +217,7 @@ fun UsuariosScreen(
                             // Enseguida se le toma su foto de perfil
                             tomandoFoto = nuevoId to nombre
                         } catch (e: Exception) {
-                            errorAlta = mensajeError(e, "No se pudo crear")
+                            errorAlta = mensajeError(context, e, "No se pudo crear")
                         }
                     }
                 }
@@ -240,7 +248,7 @@ fun UsuariosScreen(
                             editing = null
                             personal = PersonalRepository.listar()
                         } catch (e: Exception) {
-                            errorEditar = mensajeError(e, "No se pudo guardar")
+                            errorEditar = mensajeError(context, e, "No se pudo guardar")
                         }
                     }
                 }
@@ -342,7 +350,7 @@ fun UsuariosScreen(
                                     errorBaja = null
                                     personal = PersonalRepository.listar()
                                 } catch (e: Exception) {
-                                    errorBaja = mensajeError(e, "No se pudo eliminar")
+                                    errorBaja = mensajeError(context, e, "No se pudo eliminar")
                                 }
                             }
                         },
@@ -677,6 +685,7 @@ private fun EditStaffDialog(
     onDismiss: () -> Unit,
     onSave: (String, String, UserRole, Status, String?, Double?, Int?) -> Unit
 ) {
+    val context = LocalContext.current
     var name by remember { mutableStateOf(target.name) }
     var email by remember { mutableStateOf(target.email) }
     var role by remember { mutableStateOf(target.role) }
@@ -699,7 +708,7 @@ private fun EditStaffDialog(
             }
             detalleCargado = true
         } catch (e: Exception) {
-            errorDetalle = mensajeError(e, "No se pudieron cargar teléfono, costo y capacidad")
+            errorDetalle = mensajeError(context, e, "No se pudieron cargar teléfono, costo y capacidad")
         }
     }
 

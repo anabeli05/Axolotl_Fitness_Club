@@ -38,6 +38,7 @@ import com.example.gymcontrol.ui.components.FotoClienteAvatar
 import com.example.gymcontrol.ui.components.FotoClienteDialog
 import com.example.gymcontrol.ui.components.FotosClientes
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.delay
@@ -73,6 +74,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var dentro by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val msgRegister = stringResource(R.string.confirm_register_client, "%s")
     val msgSave = stringResource(R.string.confirm_save_client_changes, "%s")
@@ -179,7 +181,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         name = client.nombre,
                         membershipNum = client.numeroMembresia,
                         fechaFin = client.fechaFin,
-                        registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
+                        registrationDate = ClientesRepository.fechaApp(context, client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
                         tieneRostro = client.id in conRostro,
                         recargaFoto = versionFoto[client.id] ?: 0,
@@ -404,6 +406,7 @@ private fun ClientCard(
     onEdit: () -> Unit,
     onRenovar: () -> Unit
 ) {
+    val context = LocalContext.current
     val labelMembership = stringResource(R.string.label_membership)
     val labelRegistration = stringResource(R.string.label_registration)
 
@@ -443,7 +446,7 @@ private fun ClientCard(
             if (fechaFin != null) {
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(fechaFin)),
+                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(context, fechaFin)),
                     color = ClienteTema.TextoSec,
                     fontSize = 17.sp
                 )

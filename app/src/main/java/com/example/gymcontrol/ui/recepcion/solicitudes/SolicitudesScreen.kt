@@ -209,7 +209,7 @@ private fun SolicitudCard(
             Spacer(Modifier.height(2.dp))
             Text(stringResource(R.string.recepcion_solicitudes_instructor_prefix, instructor), color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text(stringResource(R.string.recepcion_solicitudes_date_prefix, date), color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text(stringResource(R.string.label_date_format, date), color = ClienteTema.TextoSec, fontSize = 17.sp)
         }
 
         Spacer(Modifier.width(12.dp))

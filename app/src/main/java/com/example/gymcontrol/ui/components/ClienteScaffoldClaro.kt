@@ -133,7 +133,7 @@ fun BotonTema(modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = if (ClienteTema.oscuro) Icons.Filled.LightMode else Icons.Filled.DarkMode,
-            contentDescription = if (ClienteTema.oscuro) "Tema claro" else "Tema oscuro",
+            contentDescription = if (ClienteTema.oscuro) stringResource(R.string.light_theme) else stringResource(R.string.dark_theme),
             tint = ClienteTema.IconoBarra,
             modifier = Modifier.size(26.dp)
         )

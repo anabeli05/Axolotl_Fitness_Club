@@ -27,21 +27,21 @@ data class IngresoDiaRow(
 )
 
 object ResumenRepository {
-    // "2026-09" -> "Sep" (localized according to device Locale.getDefault())
-    fun mesCorto(periodo: String): String {
+    // "2026-09" -> "Sep" (localized according to locale)
+    fun mesCorto(periodo: String, locale: Locale = Locale.getDefault()): String {
         val parts = periodo.split("-")
         val year = parts.getOrNull(0)?.toIntOrNull() ?: 2026
         val month = parts.getOrNull(1)?.toIntOrNull() ?: 1
         val date = LocalDate.of(year, month, 1)
-        return date.format(DateTimeFormatter.ofPattern("MMM", Locale.getDefault()))
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        return date.format(DateTimeFormatter.ofPattern("MMM", locale))
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
     }
 
-    // 1 -> "Lun" / "Mon" … 7 -> "Dom" / "Sun" (localized according to device Locale.getDefault())
-    fun diaCorto(diaSemana: Int): String {
+    // 1 -> "Lun" / "Mon" … 7 -> "Dom" / "Sun" (localized according to locale)
+    fun diaCorto(diaSemana: Int, locale: Locale = Locale.getDefault()): String {
         val dayOfWeek = java.time.DayOfWeek.of(diaSemana.coerceIn(1, 7))
-        return dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+        return dayOfWeek.getDisplayName(TextStyle.SHORT, locale)
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
     }
 
     suspend fun obtener(): ResumenRow =

@@ -4,6 +4,8 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.rpc
+import android.content.Context
+import com.example.gymcontrol.R
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -97,6 +99,31 @@ object ClientesRepository {
         if (f.isNullOrBlank()) return "—"
         val p = f.take(10).split("-")
         return if (p.size == 3) "${p[2]}/${p[1]}/${p[0]}" else f
+    }
+
+    fun fechaApp(context: Context, f: String?): String {
+        if (f.isNullOrBlank()) return "—"
+        val p = f.take(10).split("-")
+        if (p.size != 3) return f
+        val day = p[2]
+        val monthNum = p[1].toIntOrNull() ?: 1
+        val year = p[0]
+        val monthStr = when (monthNum) {
+            1 -> context.getString(R.string.month_jan)
+            2 -> context.getString(R.string.month_feb)
+            3 -> context.getString(R.string.month_mar)
+            4 -> context.getString(R.string.month_apr)
+            5 -> context.getString(R.string.month_may)
+            6 -> context.getString(R.string.month_jun)
+            7 -> context.getString(R.string.month_jul)
+            8 -> context.getString(R.string.month_aug)
+            9 -> context.getString(R.string.month_sep)
+            10 -> context.getString(R.string.month_oct)
+            11 -> context.getString(R.string.month_nov)
+            12 -> context.getString(R.string.month_dec)
+            else -> p[1]
+        }
+        return "$day $monthStr $year"
     }
 
     suspend fun listar(): List<ClienteRow> =
