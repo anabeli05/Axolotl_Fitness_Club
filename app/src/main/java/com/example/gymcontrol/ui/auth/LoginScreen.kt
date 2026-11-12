@@ -9,6 +9,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -40,19 +42,28 @@ import androidx.compose.ui.unit.dp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.AuthRepository
+import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.ColoresDialogo
 import com.example.gymcontrol.ui.components.LocaleHelper
+import com.example.gymcontrol.ui.components.RestablecerContrasenaDialog
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.components.alternarTema
 import kotlinx.coroutines.launch
 
-// Paleta tomada del diseño
-private val FondoNegro = Color(0xFF000000)
-private val TarjetaOscura = Color(0xFF1B1B1B)
-private val MoradoCampo = Color(0xFF2F2E2E)
-private val MoradoBorde = Color(0xFF6B5326)
-private val DoradoBorde = Color(0xFFC9A24B)
-private val Dorado = Color(0xFFC9A24B)
-private val BlancoTexto = Color(0xFFFFFFFF)
-private val RojoError = Color(0xFFFF6B6B)
+// Paleta del login: en oscuro conserva el diseño original (negro/dorado);
+// en claro toma los tokens de ClienteTema. Al cambiar ClienteTema.oscuro todo se recompone solo.
+private val FondoNegro get() = if (ClienteTema.oscuro) Color(0xFF000000) else ClienteTema.Fondo
+private val TarjetaOscura get() = if (ClienteTema.oscuro) Color(0xFF1B1B1B) else ClienteTema.Beige
+private val MoradoCampo get() = if (ClienteTema.oscuro) Color(0xFF2F2E2E) else ClienteTema.Interior
+private val MoradoBorde get() = if (ClienteTema.oscuro) Color(0xFF6B5326) else ClienteTema.Azul
+private val DoradoBorde get() = if (ClienteTema.oscuro) Color(0xFFC9A24B) else ClienteTema.Borde
+private val Dorado get() = if (ClienteTema.oscuro) Color(0xFFC9A24B) else ClienteTema.AzulSel
+private val BlancoTexto get() = if (ClienteTema.oscuro) Color(0xFFFFFFFF) else ClienteTema.Texto
+private val RojoError get() = if (ClienteTema.oscuro) Color(0xFFFF6B6B) else ClienteTema.Rojo
+
+// Botones rellenos: gris oscuro en oscuro, café en claro (texto siempre blanco)
+private val BotonFondo get() = if (ClienteTema.oscuro) Color(0xFF2F2E2E) else ClienteTema.Azul
+private val BotonTexto = Color.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +89,7 @@ fun LoginScreen(
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var mostrarCambio by remember { mutableStateOf(false) }
+    var mostrarRestablecer by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -87,6 +99,7 @@ fun LoginScreen(
     val strPassUpdated = stringResource(R.string.password_updated_success)
 
     val campoShape = RoundedCornerShape(50)
+    // Se calcula en cada recomposición para que siga al tema
     val campoColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = MoradoCampo,
         unfocusedContainerColor = MoradoCampo,
@@ -257,10 +270,10 @@ fun LoginScreen(
                 enabled = !loading && terminosAceptados,
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MoradoCampo,
-                    contentColor = BlancoTexto,
-                    disabledContainerColor = MoradoCampo.copy(alpha = 0.5f),
-                    disabledContentColor = BlancoTexto.copy(alpha = 0.7f)
+                    containerColor = BotonFondo,
+                    contentColor = BotonTexto,
+                    disabledContainerColor = BotonFondo.copy(alpha = 0.5f),
+                    disabledContentColor = BotonTexto.copy(alpha = 0.7f)
                 ),
                 border = BorderStroke(1.dp, DoradoBorde),
                 modifier = Modifier.fillMaxWidth(0.6f)
@@ -281,6 +294,22 @@ fun LoginScreen(
             }
         }
 
+        // Tema claro/oscuro (arriba a la izquierda)
+        IconButton(
+            onClick = { alternarTema(context) },
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = if (ClienteTema.oscuro) Icons.Filled.LightMode else Icons.Filled.DarkMode,
+                contentDescription = if (ClienteTema.oscuro) "Tema claro" else "Tema oscuro",
+                tint = Dorado
+            )
+        }
+
+        // Idioma (arriba a la derecha)
         IconButton(
             onClick = { LocaleHelper.toggleLanguage(context) },
             modifier = Modifier
@@ -300,8 +329,31 @@ fun LoginScreen(
         CambiarContrasenaDialog(
             correoInicial = identifier.trim(),
             onDismiss = { mostrarCambio = false },
+            onOlvide = {
+                mostrarCambio = false
+                mostrarRestablecer = true
+            },
             onListo = {
                 mostrarCambio = false
+                password = ""
+                aviso = strPassUpdated
+            }
+        )
+    }
+
+    // No recuerda la actual: contraseña nueva + código por correo
+    if (mostrarRestablecer) {
+        RestablecerContrasenaDialog(
+            correoInicial = identifier.trim(),
+            correoEditable = true,
+            colores = ColoresDialogo(
+                fondo = TarjetaOscura, texto = BlancoTexto, textoSec = BlancoTexto.copy(alpha = 0.7f),
+                acento = Dorado, borde = DoradoBorde, error = RojoError,
+                boton = BotonFondo, textoBoton = BotonTexto
+            ),
+            onDismiss = { mostrarRestablecer = false },
+            onListo = {
+                mostrarRestablecer = false
                 password = ""
                 aviso = strPassUpdated
             }
@@ -314,6 +366,7 @@ fun LoginScreen(
 private fun CambiarContrasenaDialog(
     correoInicial: String,
     onDismiss: () -> Unit,
+    onOlvide: () -> Unit,
     onListo: () -> Unit
 ) {
     var correo by remember { mutableStateOf(correoInicial) }
@@ -386,6 +439,11 @@ private fun CambiarContrasenaDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 campo(correo, { correo = it }, stringResource(R.string.login_email), false)
                 campo(actual, { actual = it }, stringResource(R.string.current_password), true)
+                TextButton(
+                    onClick = onOlvide,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.align(Alignment.End)
+                ) { Text("¿No recuerdas tu contraseña actual?", color = Dorado) }
                 campo(nueva, { nueva = it }, stringResource(R.string.new_password), true)
                 campo(repetir, { repetir = it }, stringResource(R.string.repeat_new_password), true)
                 Text(
@@ -426,7 +484,7 @@ private fun CambiarContrasenaDialog(
                             cargando = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MoradoCampo, contentColor = BlancoTexto)
+                    colors = ButtonDefaults.buttonColors(containerColor = BotonFondo, contentColor = BotonTexto)
                 ) { Text(if (cargando) stringResource(R.string.saving) else stringResource(R.string.save)) }
             }
         }

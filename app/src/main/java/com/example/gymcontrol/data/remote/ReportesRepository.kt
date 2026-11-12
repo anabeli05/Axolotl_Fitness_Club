@@ -24,8 +24,9 @@ object ReportesRepository {
         return "${meses[partes[1].toInt() - 1]} ${partes[0]}"
     }
 
+    /** Últimos 6 meses, el mes actual primero. */
     suspend fun listar(): List<ReporteRow> =
         SupabaseProvider.client.from("reporte_mensual")
-            .select { order("periodo", Order.ASCENDING) }
+            .select { order("periodo", Order.DESCENDING) }
             .decodeList<ReporteRow>()
 }

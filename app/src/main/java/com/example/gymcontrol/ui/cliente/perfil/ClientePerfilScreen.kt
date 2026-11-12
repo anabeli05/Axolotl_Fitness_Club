@@ -48,6 +48,8 @@ import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.ColoresDialogo
+import com.example.gymcontrol.ui.components.RestablecerContrasenaDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -86,6 +88,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showRestablecer by remember { mutableStateOf(false) }
 
     ClienteScaffoldClaro(
         currentSection = "Perfil",
@@ -154,27 +157,8 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Spacer(Modifier.height(12.dp))
 
-                    // Datos personales (caja café)
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.perfil_personal_data_title),
-                            color = ClienteTema.CajaAcento,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
-                        )
-                        Spacer(Modifier.height(12.dp))
+                    // Datos personales
+                    InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
                         InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
                         Spacer(Modifier.height(14.dp))
                         InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
@@ -185,26 +169,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(12.dp))
 
                     // Contacto de emergencia (lo puede editar el propio cliente)
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
-                            .padding(16.dp)
+                    InfoCard(
+                        title = stringResource(R.string.perfil_emergency_title),
+                        titleIcon = Icons.Filled.ContactPhone
                     ) {
-                        Text(
-                            stringResource(R.string.perfil_emergency_title),
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(1.dp)
-                                .background(Color.White.copy(alpha = 0.5f))
-                        )
-                        Spacer(Modifier.height(12.dp))
                         val sinRegistrar = stringResource(R.string.perfil_contact_not_set)
                         InfoRow(
                             Icons.Filled.Person, stringResource(R.string.perfil_label_name),
@@ -274,6 +242,10 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     if (showPasswordDialog) {
         PasswordDialog(
             onDismiss = { showPasswordDialog = false },
+            onOlvide = {
+                showPasswordDialog = false
+                showRestablecer = true
+            },
             onSave = { actual, nueva ->
                 scope.launch {
                     try {
@@ -285,6 +257,24 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
                     }
                 }
+            }
+        )
+    }
+
+    // No recuerda la actual: la nueva se confirma con un código enviado a su correo registrado
+    if (showRestablecer) {
+        RestablecerContrasenaDialog(
+            correoInicial = email,
+            correoEditable = false,
+            colores = ColoresDialogo(
+                fondo = ClienteTema.Beige, texto = ClienteTema.Texto, textoSec = ClienteTema.TextoSec,
+                acento = ClienteTema.Azul, borde = ClienteTema.Borde, error = ClienteTema.Rojo,
+                boton = ClienteTema.Azul, textoBoton = ClienteTema.SobreDorado
+            ),
+            onDismiss = { showRestablecer = false },
+            onListo = {
+                showRestablecer = false
+                Toast.makeText(context, context.getString(R.string.perfil_password_updated), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -354,6 +344,49 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             tint = ClienteTema.CajaAcento,
             modifier = Modifier.size(24.dp)
         )
+    }
+}
+
+// Caja de información con título y divisor. Usa los tokens del tema (claro/oscuro),
+// así "Datos personales" y "Contacto de emergencia" siempre se ven iguales.
+@Composable
+private fun InfoCard(
+    title: String,
+    titleIcon: ImageVector? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (titleIcon != null) {
+                Icon(
+                    titleIcon,
+                    contentDescription = null,
+                    tint = ClienteTema.CajaAcento,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                title,
+                color = ClienteTema.CajaAcento,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
+        )
+        Spacer(Modifier.height(12.dp))
+        content()
     }
 }
 
@@ -562,7 +595,7 @@ private fun EditContactDialog(
 }
 
 @Composable
-private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+private fun PasswordDialog(onDismiss: () -> Unit, onOlvide: () -> Unit, onSave: (String, String) -> Unit) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -579,6 +612,11 @@ private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Un
             label = stringResource(R.string.current_password),
             isPassword = true
         )
+        TextButton(
+            onClick = onOlvide,
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.align(Alignment.End)
+        ) { Text("¿No recuerdas tu contraseña actual?", color = ClienteTema.Azul) }
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
@@ -654,7 +692,7 @@ private fun GymTextField(
 private fun translatedPlanName(plan: String?): String {
     return when (plan?.lowercase()?.trim()) {
         "trimestral", "quarterly" -> stringResource(R.string.plan_quarterly)
-        "mensual", "monthly" -> stringResource(R.string.plan_monthly)
+        "mensual", "mensualidad", "monthly" -> stringResource(R.string.plan_monthly)
         "visita", "día", "day", "day pass" -> stringResource(R.string.plan_day)
         else -> plan ?: "—"
     }

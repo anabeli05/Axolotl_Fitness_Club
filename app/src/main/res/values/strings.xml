@@ -68,7 +68,7 @@
     <string name="cliente_facial_access_title">Acceso con reconocimiento facial</string>
     <string name="cliente_facial_camera_hint">Mira a la cámara de recepción para entrar y salir</string>
     <string name="cliente_clients_now_title">Clientes ahorita</string>
-    <string name="cliente_gym_schedule">Horario del gimnasio: 06:00 - 00:00</string>
+    <string name="cliente_gym_schedule">Horario del gimnasio: 06:00 - 22:00</string>
     <string name="cliente_least_busy_title">Horarios de menor afluencia</string>
     <string name="cliente_least_busy_chart">Promedio de entradas</string>
     <string name="cliente_least_busy_best">Mejores horarios para venir:</string>
@@ -481,7 +481,7 @@
     <string name="label_advisories">Asesorías</string>
     <string name="label_expenses">Gastos</string>
     <string name="label_total">Total</string>
-    <string name="label_total_format">Total: $%s</string>
+    <string name="label_total_format">Total: %s</string>
 
     <!-- Encargado: Personal -->
     <string name="confirm_add_staff">¿Estás seguro de dar de alta a %1$s como %2$s?</string>

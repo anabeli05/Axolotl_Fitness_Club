@@ -107,15 +107,35 @@ fun SimpleBarChart(
         Spacer(Modifier.height(28.dp))
 
         Row {
-            Column(
+            // Cada etiqueta se coloca a la altura exacta de su valor (centrada en su línea),
+            // así coincide con las barras aunque cambie el tamaño de la fuente.
+            Box(
                 modifier = Modifier
                     .width(30.dp)
-                    .height(chartHeight.dp),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.SpaceBetween
+                    .height(chartHeight.dp)
             ) {
-                labels.forEach { label ->
-                    Text(text = label, color = ClienteTema.TextoSec, fontSize = 10.sp)
+                val tramos = (labels.size - 1).coerceAtLeast(1)
+                labels.forEachIndexed { i, label ->
+                    // i = 0 es la etiqueta de arriba (valor máximo); la última es el 0
+                    val y = chartHeight.dp * (i.toFloat() / tramos)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(y = y)
+                            .height(0.dp)
+                    ) {
+                        Text(
+                            text = label,
+                            color = ClienteTema.TextoSec,
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier.wrapContentHeight(
+                                align = Alignment.CenterVertically,
+                                unbounded = true
+                            )
+                        )
+                    }
                 }
             }
 

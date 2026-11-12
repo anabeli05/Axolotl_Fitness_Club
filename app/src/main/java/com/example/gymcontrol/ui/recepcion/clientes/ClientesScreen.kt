@@ -292,7 +292,17 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 try {
                                     val vence = ClientesRepository.renovar(cl.id, plan, SesionActual.correo ?: "")
                                     recargar()
-                                    info = "Membresía de ${cl.nombre} renovada hasta ${ClientesRepository.fechaApp(vence)}. Pago registrado."
+                                    val renovada = "Membresía de ${cl.nombre} renovada hasta ${ClientesRepository.fechaApp(vence)}. Pago registrado."
+                                    info = renovada
+                                    // Pago en efectivo ya aceptado: el comprobante va al correo registrado del cliente
+                                    if (vence != null) {
+                                        val falla = CorreoRepository.enviarRecibo(cl.id)
+                                        if (falla == null) info = "$renovada Comprobante enviado a ${cl.gmail}."
+                                        else {
+                                            info = null
+                                            errorMsg = "$renovada No se pudo enviar el comprobante por correo: $falla"
+                                        }
+                                    }
                                 } catch (e: Exception) {
                                     errorMsg = mensaje(e, "No se pudo renovar")
                                 }
@@ -450,14 +460,15 @@ private fun ClientCard(
             StatusBadge(isActive = isActive)
             Spacer(Modifier.height(10.dp))
 
-            if (isActive) {
-                IconSquareButton(
-                    icon = Icons.Filled.Edit,
-                    color = ClienteTema.AzulSel,
-                    onClick = onEdit,
-                    modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
-                )
-            } else {
+            // Editar siempre está disponible, aunque el plan no esté vigente
+            IconSquareButton(
+                icon = Icons.Filled.Edit,
+                color = ClienteTema.AzulSel,
+                onClick = onEdit,
+                modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
+            )
+            if (!isActive) {
+                Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = onRenovar,
                     shape = RoundedCornerShape(10.dp),

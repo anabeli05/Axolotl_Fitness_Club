@@ -123,21 +123,9 @@ fun RecepcionPerfilScreen(onNavigate: (String) -> Unit = {}) {
                     ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
 
                     Spacer(Modifier.height(12.dp))
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            stringResource(R.string.perfil_personal_data_title),
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.5f)))
-                        Spacer(Modifier.height(12.dp))
+
+                    // Datos personales (mismos tonos que el perfil del cliente)
+                    InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
                         InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
                         Spacer(Modifier.height(14.dp))
                         InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), perfil?.telefono?.ifBlank { "—" } ?: "—")
@@ -223,6 +211,7 @@ private fun Avatar(name: String, foto: ImageBitmap?) {
     }
 }
 
+// Caja de acción: usa los tokens Caja/CajaAcento/CajaValor (claro y oscuro)
 @Composable
 private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
@@ -230,27 +219,54 @@ private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(48.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(ClienteTema.Navy)
+            .background(ClienteTema.Caja)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(12.dp))
-        Text(label, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+        Text(label, color = ClienteTema.CajaValor, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(24.dp))
+    }
+}
+
+// Caja de información con título y divisor (igual que en el perfil del cliente)
+@Composable
+private fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            title,
+            color = ClienteTema.CajaAcento,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
+        )
+        Spacer(Modifier.height(12.dp))
+        content()
     }
 }
 
 @Composable
 private fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(22.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(12.dp))
-        Text(label, color = Color.White.copy(alpha = 0.85f), fontSize = 15.sp, modifier = Modifier.width(88.dp))
+        Text(label, color = ClienteTema.CajaAcento, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(88.dp))
         Text(
             value,
-            color = Color.White,
+            color = ClienteTema.CajaValor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,

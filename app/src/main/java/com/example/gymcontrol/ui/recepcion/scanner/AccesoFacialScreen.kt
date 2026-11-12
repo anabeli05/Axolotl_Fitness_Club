@@ -82,7 +82,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     LaunchedEffect(Unit) { if (indicacion.isEmpty()) indicacion = initialIndicacion }
 
     val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
-    val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 3) } }
+    val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 3, soloElMasCercano = true) } }
     val pausa = remember { AtomicBoolean(false) }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 

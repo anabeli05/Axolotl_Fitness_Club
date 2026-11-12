@@ -10,7 +10,7 @@ import java.nio.ByteOrder
 import kotlin.math.sqrt
 
 /**
- * Convierte un rostro en un vector de 192 números con MobileFaceNet (assets/mobilefacenet.tflite).
+ * Convierte un rostro en un vector de 512 números con FaceNet (assets/facenet_512.tflite).
  * Dos vectores de la misma persona dan una similitud alta (producto punto cercano a 1).
  * No se guarda ninguna foto: solo viaja el vector.
  */
@@ -27,7 +27,7 @@ class ReconocedorFacial(context: Context) : Closeable {
         val modelo = ByteBuffer.allocateDirect(bytes.size).order(ByteOrder.nativeOrder())
         modelo.put(bytes)
         modelo.rewind()
-        interpreter = Interpreter(modelo, Interpreter.Options().setNumThreads(2))
+        interpreter = Interpreter(modelo, Interpreter.Options().setNumThreads(4))
     }
 
     /** Vector normalizado (largo 1) del rostro que está en [caja] dentro de [frame]. */
@@ -42,11 +42,27 @@ class ReconocedorFacial(context: Context) : Closeable {
         val escalado = Bitmap.createScaledBitmap(recorte, TAM, TAM, true)
         escalado.getPixels(pixeles, 0, TAM, 0, 0, TAM, TAM)
 
+        // FaceNet espera la imagen estandarizada: (valor - media) / desviación de esa misma imagen
+        var suma = 0.0
+        var sumaCuadrados = 0.0
+        for (p in pixeles) {
+            val r = (p shr 16) and 0xFF
+            val g = (p shr 8) and 0xFF
+            val b = p and 0xFF
+            suma += r + g + b
+            sumaCuadrados += (r * r + g * g + b * b).toDouble()
+        }
+        val n = pixeles.size * 3
+        val media = suma / n
+        val desviacion = maxOf(sqrt(maxOf(sumaCuadrados / n - media * media, 0.0)), 1.0 / sqrt(n.toDouble()))
+        val m = media.toFloat()
+        val d = desviacion.toFloat()
+
         entrada.rewind()
         for (p in pixeles) {
-            entrada.putFloat((((p shr 16) and 0xFF) - 127.5f) / 128f)
-            entrada.putFloat((((p shr 8) and 0xFF) - 127.5f) / 128f)
-            entrada.putFloat(((p and 0xFF) - 127.5f) / 128f)
+            entrada.putFloat((((p shr 16) and 0xFF) - m) / d)
+            entrada.putFloat((((p shr 8) and 0xFF) - m) / d)
+            entrada.putFloat(((p and 0xFF) - m) / d)
         }
         entrada.rewind()
 
@@ -66,9 +82,10 @@ class ReconocedorFacial(context: Context) : Closeable {
     }
 
     companion object {
-        const val DIMENSION = 192
-        private const val TAM = 112
-        private const val MODELO = "mobilefacenet.tflite"
+        /** Debe coincidir con la base de datos (sql/vectores_512.sql). */
+        const val DIMENSION = 512
+        private const val TAM = 160
+        private const val MODELO = "facenet_512.tflite"
 
         fun normalizar(v: FloatArray): FloatArray {
             var suma = 0f

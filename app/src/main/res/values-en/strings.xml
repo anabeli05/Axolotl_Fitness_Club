@@ -68,7 +68,7 @@
     <string name="cliente_facial_access_title">Facial recognition access</string>
     <string name="cliente_facial_camera_hint">Look at the reception camera to enter and exit</string>
     <string name="cliente_clients_now_title">Clients right now</string>
-    <string name="cliente_gym_schedule">Gym hours: 06:00 - 00:00</string>
+    <string name="cliente_gym_schedule">Gym hours: 06:00 - 22:00</string>
     <string name="cliente_least_busy_title">Least busy hours</string>
     <string name="cliente_least_busy_chart">Average entries</string>
     <string name="cliente_least_busy_best">Best times to come:</string>
@@ -463,7 +463,7 @@
     <string name="label_advisories">Advisories</string>
     <string name="label_expenses">Expenses</string>
     <string name="label_total">Total</string>
-    <string name="label_total_format">Total: $%s</string>
+    <string name="label_total_format">Total: %s</string>
 
     <!-- Encargado: Personal -->
     <string name="confirm_add_staff">Are you sure you want to register %1$s as %2$s?</string>
