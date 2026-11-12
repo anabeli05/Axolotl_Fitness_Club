@@ -1,17 +1,6 @@
 package com.example.gymcontrol.ui.cliente.perfil
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.ExifInterface
-import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,26 +13,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.ContactPhone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -52,67 +39,58 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.content.ContextCompat
 import com.example.gymcontrol.R
-import com.example.gymcontrol.ui.components.ClienteScaffold
-import com.example.gymcontrol.ui.theme.GymColors
-import kotlinx.coroutines.Dispatchers
+import com.example.gymcontrol.data.biometria.FotoPerfil
+import com.example.gymcontrol.data.remote.AuthRepository
+import com.example.gymcontrol.data.remote.ClienteRow
+import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ContactoEmergencia
+import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
+import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
-private val InnerBackground = Color.Black.copy(alpha = 0.35f)
-
-// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
-private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 @Composable
 fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf("Ana López") }
-    var phone by remember { mutableStateOf("3121111111") }
-    var email by remember { mutableStateOf("ana@email.com") }
-    var photo by remember { mutableStateOf<ImageBitmap?>(null) }
-    val membership = "M-1001"
+    // Datos reales del cliente en sesión (se cargan de clientes_lista)
+    var cliente by remember { mutableStateOf<ClienteRow?>(null) }
+    var name by remember { mutableStateOf(SesionActual.nombre ?: "") }
+    var phone by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(SesionActual.correo ?: "") }
+    val membership = cliente?.numeroMembresia ?: ""
+    // Foto tomada en recepción al registrar el rostro (no se puede cambiar)
+    var foto by remember { mutableStateOf<ImageBitmap?>(null) }
+    var contacto by remember { mutableStateOf<ContactoEmergencia?>(null) }
+
+    LaunchedEffect(Unit) {
+        val correo = SesionActual.correo ?: return@LaunchedEffect
+        try {
+            ClientesRepository.porCorreo(correo)?.let {
+                cliente = it
+                name = it.nombre
+                phone = it.telefono
+                email = it.gmail
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, context.getString(R.string.perfil_load_error), Toast.LENGTH_SHORT).show()
+        }
+        // Si fallan, se queda el avatar con iniciales y el contacto "Sin registrar"
+        try { contacto = ClientesRepository.miContacto(correo) } catch (_: Exception) { }
+        try { foto = FotoPerfil.aImagen(ClientesRepository.fotoPerfil(correo)) } catch (_: Exception) { }
+    }
 
     var showEditDialog by remember { mutableStateOf(false) }
+    var showContactDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
-    var showPhotoDialog by remember { mutableStateOf(false) }
 
-    // Galería (selector de fotos del sistema, no necesita permisos)
-    val galleryLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            scope.launch {
-                val bitmap = withContext(Dispatchers.IO) { loadBitmap(context, uri) }
-                if (bitmap != null) photo = bitmap.asImageBitmap()
-                else Toast.makeText(context, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    // Cámara (toma la foto en el momento)
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) photo = bitmap.asImageBitmap()
-    }
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) cameraLauncher.launch(null)
-        else Toast.makeText(context, "Se necesita permiso de cámara para tomar la foto", Toast.LENGTH_SHORT).show()
-    }
-
-    ClienteScaffold(
+    ClienteScaffoldClaro(
         currentSection = "Perfil",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_axolotl
+        logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
             modifier = Modifier
@@ -123,139 +101,172 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Mi perfil",
-                    color = GymColors.TextPrimary,
+                    stringResource(R.string.perfil_title),
+                    color = ClienteTema.Texto,
                     fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
             item {
+                val forma = RoundedCornerShape(20.dp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(GymColors.Surface, RoundedCornerShape(14.dp))
-                        .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+                        .background(ClienteTema.Beige, forma)
+                        .border(2.dp, ClienteTema.Borde, forma)
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfileAvatar(
-                        name = name,
-                        photo = photo,
-                        onEditPhoto = { showPhotoDialog = true }
-                    )
+                    ProfileAvatar(name = name, foto = foto)
 
-                    Spacer(Modifier.height(14.dp))
-
-                    Text(
-                        text = name,
-                        color = GymColors.TextPrimary,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "Membresía : $membership",
-                        color = GymColors.TextSecondary,
-                        fontSize = 16.sp
-                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(name, color = ClienteTema.Texto, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(2.dp))
+                    Text("${stringResource(R.string.label_membership)} : $membership", color = ClienteTema.Texto, fontSize = 15.sp)
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Estado:",
-                            color = GymColors.TextSecondary,
-                            fontSize = 16.sp
-                        )
+                        Text(stringResource(R.string.perfil_status_label), color = ClienteTema.Texto, fontSize = 15.sp)
                         Spacer(Modifier.width(8.dp))
-                        StatusBadge(isActive = true)
+                        StatusBadge(isActive = cliente?.let { it.activa && it.estado == "ACTIVO" } ?: true)
+                    }
+                    cliente?.let {
+                        Spacer(Modifier.height(4.dp))
+                        val planName = translatedPlanName(it.plan)
+                        val planPrefix = stringResource(R.string.label_plan_prefix, planName)
+                        val expiresLabel = stringResource(R.string.label_expires)
+                        Text(
+                            "$planPrefix · $expiresLabel: ${ClientesRepository.fechaApp(it.fechaFin)}",
+                            color = ClienteTema.TextoSec,
+                            fontSize = 13.sp
+                        )
                     }
 
-                    Spacer(Modifier.height(18.dp))
+                    Spacer(Modifier.height(16.dp))
 
-                    ActionRow(
-                        icon = Icons.Filled.Edit,
-                        label = "Editar datos",
-                        onClick = { showEditDialog = true }
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    ActionRow(
-                        icon = Icons.Filled.Lock,
-                        label = "Cambiar contraseña",
-                        onClick = { showPasswordDialog = true }
-                    )
+                    ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_data)) { showEditDialog = true }
+                    Spacer(Modifier.height(8.dp))
+                    ActionRow(Icons.Filled.ContactPhone, stringResource(R.string.perfil_action_edit_contact)) { showContactDialog = true }
+                    Spacer(Modifier.height(8.dp))
+                    ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
 
-                    Spacer(Modifier.height(14.dp))
+                    Spacer(Modifier.height(12.dp))
 
-                    // Datos personales
+                    // Datos personales (caja café)
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(InnerBackground, RoundedCornerShape(10.dp))
+                            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Datos Personales",
-                            color = GymColors.TextPrimary,
-                            fontSize = 17.sp,
+                            stringResource(R.string.perfil_personal_data_title),
+                            color = ClienteTema.CajaAcento,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.height(8.dp))
                         Box(
-                            modifier = Modifier
+                            Modifier
                                 .fillMaxWidth()
                                 .height(1.dp)
-                                .background(GymColors.Border)
+                                .background(ClienteTema.CajaAcento.copy(alpha = 0.5f))
                         )
                         Spacer(Modifier.height(12.dp))
+                        InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
+                        Spacer(Modifier.height(14.dp))
+                        InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
+                        Spacer(Modifier.height(14.dp))
+                        InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), email)
+                    }
 
-                        InfoRow(icon = Icons.Filled.Person, label = "Nombre:", value = name)
+                    Spacer(Modifier.height(12.dp))
+
+                    // Contacto de emergencia (lo puede editar el propio cliente)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            stringResource(R.string.perfil_emergency_title),
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(1.dp)
+                                .background(Color.White.copy(alpha = 0.5f))
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        val sinRegistrar = stringResource(R.string.perfil_contact_not_set)
+                        InfoRow(
+                            Icons.Filled.Person, stringResource(R.string.perfil_label_name),
+                            contacto?.nombre?.ifBlank { null } ?: sinRegistrar
+                        )
                         Spacer(Modifier.height(14.dp))
-                        InfoRow(icon = Icons.Filled.Phone, label = "Teléfono:", value = phone)
-                        Spacer(Modifier.height(14.dp))
-                        InfoRow(icon = Icons.Filled.Email, label = "Correo:", value = email)
+                        InfoRow(
+                            Icons.Filled.Phone, stringResource(R.string.perfil_label_phone),
+                            contacto?.telefono?.ifBlank { null } ?: sinRegistrar
+                        )
                     }
                 }
             }
         }
     }
 
-    if (showPhotoDialog) {
-        PhotoDialog(
-            hasPhoto = photo != null,
-            onDismiss = { showPhotoDialog = false },
-            onCamera = {
-                showPhotoDialog = false
-                val granted = ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.CAMERA
-                ) == PackageManager.PERMISSION_GRANTED
-                if (granted) cameraLauncher.launch(null)
-                else cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-            },
-            onGallery = {
-                showPhotoDialog = false
-                galleryLauncher.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            },
-            onRemove = {
-                showPhotoDialog = false
-                photo = null
+    if (showEditDialog) {
+        EditDataDialog(
+            name = name,
+            initialPhone = phone,
+            email = email,
+            onDismiss = { showEditDialog = false },
+            onSave = { newPhone ->
+                val c = cliente
+                if (c == null) {
+                    Toast.makeText(context, context.getString(R.string.perfil_not_loaded_yet), Toast.LENGTH_SHORT).show()
+                    return@EditDataDialog
+                }
+                scope.launch {
+                    try {
+                        // Solo el teléfono es editable; nombre y correo se mandan como están
+                        ClientesRepository.editar(c.id, c.nombre, newPhone.trim(), c.gmail, c.estado)
+                        phone = newPhone.trim()
+                        cliente = c.copy(telefono = phone)
+                        showEditDialog = false
+                        Toast.makeText(context, context.getString(R.string.perfil_data_updated), Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         )
     }
 
-    if (showEditDialog) {
-        EditDataDialog(
-            initialName = name,
-            initialPhone = phone,
-            initialEmail = email,
-            onDismiss = { showEditDialog = false },
-            onSave = { newName, newPhone, newEmail ->
-                // TODO: guardar cambios en Supabase
-                name = newName
-                phone = newPhone
-                email = newEmail
-                showEditDialog = false
+    if (showContactDialog) {
+        EditContactDialog(
+            initialName = contacto?.nombre ?: "",
+            initialPhone = contacto?.telefono ?: "",
+            onDismiss = { showContactDialog = false },
+            onSave = { nuevoNombre, nuevoTelefono ->
+                scope.launch {
+                    try {
+                        ClientesRepository.editarMiContacto(email, nuevoNombre, nuevoTelefono)
+                        contacto = ContactoEmergencia(nuevoNombre.trim(), nuevoTelefono)
+                        showContactDialog = false
+                        Toast.makeText(context, context.getString(R.string.perfil_contact_updated), Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         )
     }
@@ -263,90 +274,47 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     if (showPasswordDialog) {
         PasswordDialog(
             onDismiss = { showPasswordDialog = false },
-            onSave = { /* TODO: actualizar contraseña en Supabase */ showPasswordDialog = false }
-        )
-    }
-}
-
-// Lee la imagen reduciendo su tamaño y corrigiendo la rotación
-private fun loadBitmap(context: Context, uri: Uri, maxSize: Int = 600): Bitmap? = try {
-    val resolver = context.contentResolver
-
-    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-    resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
-
-    var sample = 1
-    while (bounds.outWidth / sample > maxSize * 2 || bounds.outHeight / sample > maxSize * 2) {
-        sample *= 2
-    }
-
-    val options = BitmapFactory.Options().apply { inSampleSize = sample }
-    val bitmap = resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
-
-    val orientation = resolver.openInputStream(uri)?.use {
-        ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
-    } ?: ExifInterface.ORIENTATION_NORMAL
-
-    val degrees = when (orientation) {
-        ExifInterface.ORIENTATION_ROTATE_90 -> 90f
-        ExifInterface.ORIENTATION_ROTATE_180 -> 180f
-        ExifInterface.ORIENTATION_ROTATE_270 -> 270f
-        else -> 0f
-    }
-
-    if (bitmap != null && degrees != 0f) {
-        Bitmap.createBitmap(
-            bitmap, 0, 0, bitmap.width, bitmap.height,
-            Matrix().apply { postRotate(degrees) }, true
-        )
-    } else bitmap
-} catch (e: Exception) {
-    null
-}
-
-// Foto (o iniciales si no hay foto) con el lápiz para cambiarla
-@Composable
-private fun ProfileAvatar(name: String, photo: ImageBitmap?, onEditPhoto: () -> Unit) {
-    Box(modifier = Modifier.size(124.dp)) {
-        Box(
-            modifier = Modifier
-                .size(116.dp)
-                .align(Alignment.BottomStart)
-                .clip(CircleShape)
-                .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
-                .border(3.dp, CardBorder, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (photo != null) {
-                Image(
-                    bitmap = photo,
-                    contentDescription = "Foto de perfil",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Text(
-                    text = initials(name),
-                    color = GymColors.TextPrimary,
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            onSave = { actual, nueva ->
+                scope.launch {
+                    try {
+                        AuthRepository.cambiarContrasena(email, actual, nueva)
+                        showPasswordDialog = false
+                        Toast.makeText(context, context.getString(R.string.perfil_password_updated), Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        val msg = e.message?.substringBefore("\nCode:") ?: ""
+                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
-        }
+        )
+    }
+}
 
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .align(Alignment.TopEnd)
-                .background(GymColors.Border, CircleShape)
-                .clickable(onClick = onEditPhoto),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Edit,
-                contentDescription = "Cambiar foto",
-                tint = GymColors.TextPrimary,
-                modifier = Modifier.size(18.dp)
+// Avatar fijo: la foto tomada al registrar el rostro, o las iniciales si aún no tiene.
+// El cliente no puede cambiarla.
+@Composable
+private fun ProfileAvatar(name: String, foto: ImageBitmap?) {
+    Box(
+        modifier = Modifier
+            .size(116.dp)
+            .clip(CircleShape)
+            .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
+            .border(3.dp, ClienteTema.Azul, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        if (foto != null) {
+            Image(
+                bitmap = foto,
+                contentDescription = stringResource(R.string.perfil_photo_desc),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Text(
+                initials(name),
+                color = ClienteTema.Texto,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -358,51 +326,48 @@ private fun initials(name: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
 
+// Caja de acción (café): icono y flecha casi negros, texto blanco cálido
 @Composable
 private fun ActionRow(icon: ImageVector, label: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(48.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(InnerBackground)
+            .background(ClienteTema.Caja)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null, tint = GymColors.TextPrimary, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(14.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(12.dp))
         Text(
-            text = label,
-            color = GymColors.TextPrimary,
-            fontSize = 17.sp,
+            label,
+            color = ClienteTema.CajaValor,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
         )
         Icon(
             Icons.Filled.ChevronRight,
             contentDescription = null,
-            tint = GymColors.TextSecondary,
+            tint = ClienteTema.CajaAcento,
             modifier = Modifier.size(24.dp)
         )
     }
 }
 
+// Fila de información: icono y etiqueta casi negros, valor en blanco cálido
 @Composable
 private fun InfoRow(icon: ImageVector, label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = GymColors.TextSecondary, modifier = Modifier.size(24.dp))
+        Icon(icon, contentDescription = null, tint = ClienteTema.CajaAcento, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(12.dp))
+        Text(label, color = ClienteTema.CajaAcento, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(88.dp))
         Text(
-            text = label,
-            color = GymColors.TextSecondary,
-            fontSize = 16.sp,
-            modifier = Modifier.width(88.dp)
-        )
-        Text(
-            text = value,
-            color = GymColors.TextPrimary,
-            fontSize = 16.sp,
+            value,
+            color = ClienteTema.CajaValor,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -413,26 +378,23 @@ private fun InfoRow(icon: ImageVector, label: String, value: String) {
 
 @Composable
 private fun StatusBadge(isActive: Boolean) {
-    val color = if (isActive) GymColors.Green else GymColors.Red
-    val label = if (isActive) "Activo" else "Inactivo"
-
+    val color = if (isActive) ClienteTema.Verde else ClienteTema.Rojo
     Box(
         modifier = Modifier
-            .size(84.dp, 30.dp)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
-            .border(1.dp, color, RoundedCornerShape(10.dp)),
+            .size(64.dp, 24.dp)
+            .background(color, RoundedCornerShape(12.dp)),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = label,
-            color = color,
-            fontSize = 14.sp,
+            if (isActive) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
+            color = Color.White,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Bold
         )
     }
 }
 
-// ---------- Diálogos con el mismo estilo de las tarjetas (borde degradado) ----------
+// ---------- Diálogos ----------
 
 @Composable
 private fun GymDialog(
@@ -444,16 +406,18 @@ private fun GymDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GymColors.Surface, RoundedCornerShape(14.dp))
-                .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
+                .border(1.5.dp, ClienteTema.Borde, RoundedCornerShape(16.dp))
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = title,
-                color = GymColors.TextPrimary,
+                title,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
             content()
         }
@@ -471,116 +435,64 @@ private fun DialogButtons(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
     ) {
         OutlinedButton(
             onClick = onDismiss,
-            modifier = Modifier
-                .weight(1f)
-                .height(44.dp),
+            modifier = Modifier.weight(1f).height(44.dp),
             shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.Red),
-            border = BorderStroke(1.dp, GymColors.Red)
-        ) {
-            Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
+            border = BorderStroke(1.dp, ClienteTema.Rojo)
+        ) { Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
         Button(
             onClick = onConfirm,
             enabled = confirmEnabled,
-            modifier = Modifier
-                .weight(1f)
-                .height(44.dp),
+            modifier = Modifier.weight(1f).height(44.dp),
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = GymColors.Purple,
-                contentColor = GymColors.TextPrimary
+                containerColor = ClienteTema.Azul,
+                contentColor = Color.White
             )
-        ) {
-            Text(confirmText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
-private fun PhotoDialog(
-    hasPhoto: Boolean,
-    onDismiss: () -> Unit,
-    onCamera: () -> Unit,
-    onGallery: () -> Unit,
-    onRemove: () -> Unit
-) {
-    GymDialog(title = "Foto de perfil", onDismiss = onDismiss) {
-        ActionRow(icon = Icons.Filled.PhotoCamera, label = "Tomar foto", onClick = onCamera)
-        ActionRow(icon = Icons.Filled.PhotoLibrary, label = "Elegir de la galería", onClick = onGallery)
-        if (hasPhoto) {
-            ActionRow(icon = Icons.Filled.Delete, label = "Quitar foto", onClick = onRemove)
-        }
-        OutlinedButton(
-            onClick = onDismiss,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.Red),
-            border = BorderStroke(1.dp, GymColors.Red)
-        ) {
-            Text("Cancelar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
+        ) { Text(confirmText, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
     }
 }
 
 @Composable
 private fun EditDataDialog(
-    initialName: String,
+    name: String,
     initialPhone: String,
-    initialEmail: String,
+    email: String,
     onDismiss: () -> Unit,
-    onSave: (String, String, String) -> Unit
+    onSave: (String) -> Unit
 ) {
-    var name by remember { mutableStateOf(initialName) }
     var phone by remember { mutableStateOf(initialPhone) }
-    var email by remember { mutableStateOf(initialEmail) }
 
-    // Avisos que aparecen unos segundos cuando se intenta escribir un carácter no permitido
-    var nameWarning by remember { mutableStateOf(false) }
-    var nameTick by remember { mutableStateOf(0) }
     var phoneWarning by remember { mutableStateOf(false) }
     var phoneTick by remember { mutableStateOf(0) }
 
-    LaunchedEffect(nameTick) {
-        if (nameTick > 0) {
-            nameWarning = true
-            delay(2500)
-            nameWarning = false
-        }
-    }
     LaunchedEffect(phoneTick) {
-        if (phoneTick > 0) {
-            phoneWarning = true
-            delay(2500)
-            phoneWarning = false
-        }
+        if (phoneTick > 0) { phoneWarning = true; delay(2500); phoneWarning = false }
     }
 
-    // Reglas: nombre solo letras y espacios (mínimo 3 letras); teléfono exactamente 10 dígitos
-    val nameValid = nameHasMinLetters(name)
-    val nameShort = name.isNotEmpty() && !nameValid
     val phoneIncomplete = phone.isNotEmpty() && phone.length < 10
-    val isValid = nameValid && phone.length == 10
+    val isValid = phone.length == 10
 
-    GymDialog(title = "Editar datos", onDismiss = onDismiss) {
+    GymDialog(title = stringResource(R.string.perfil_edit_dialog_title), onDismiss = onDismiss) {
+        // Nombre y correo: solo lectura
         GymTextField(
             value = name,
-            onValueChange = { new ->
-                when {
-                    !new.all { it.isLetter() || it == ' ' } -> nameTick++
-                    new.length <= 40 -> name = new
-                }
-            },
-            label = "Nombre",
-            isError = nameWarning || nameShort,
-            errorText = if (nameWarning) "Solo se permiten letras" else "Mínimo 3 letras"
+            onValueChange = {},
+            label = stringResource(R.string.perfil_field_name),
+            enabled = false
         )
+        GymTextField(
+            value = email,
+            onValueChange = {},
+            label = stringResource(R.string.perfil_field_email),
+            enabled = false
+        )
+
+        // Único campo editable
         GymTextField(
             value = phone,
             onValueChange = { new ->
@@ -589,46 +501,104 @@ private fun EditDataDialog(
                     new.length <= 10 -> phone = new
                 }
             },
-            label = "Teléfono",
+            label = stringResource(R.string.perfil_field_phone),
             keyboardType = KeyboardType.Number,
             isError = phoneWarning || phoneIncomplete,
-            errorText = if (phoneWarning) "Solo se permiten números"
-            else "Deben ser 10 dígitos (${phone.length}/10)"
-        )
-        GymTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = "Correo",
-            keyboardType = KeyboardType.Email
+            errorText = if (phoneWarning) stringResource(R.string.perfil_error_phone_digits)
+            else stringResource(R.string.error_phone_10_digits, phone.length)
         )
 
         DialogButtons(
-            confirmText = "Guardar",
+            confirmText = stringResource(R.string.save),
             confirmEnabled = isValid,
-            onConfirm = { onSave(name.trim(), phone, email) },
+            onConfirm = { onSave(phone) },
+            onDismiss = onDismiss
+        )
+    }
+}
+
+// Contacto de emergencia: nombre (mínimo 3 letras) y teléfono de 10 dígitos, los dos obligatorios
+@Composable
+private fun EditContactDialog(
+    initialName: String,
+    initialPhone: String,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit
+) {
+    var contactName by remember { mutableStateOf(initialName) }
+    var contactPhone by remember { mutableStateOf(initialPhone) }
+
+    val nameValid = contactName.count { it.isLetter() } >= 3
+    val phoneIncomplete = contactPhone.isNotEmpty() && contactPhone.length < 10
+    val isValid = nameValid && contactPhone.length == 10
+
+    GymDialog(title = stringResource(R.string.perfil_emergency_title), onDismiss = onDismiss) {
+        GymTextField(
+            value = contactName,
+            onValueChange = { new ->
+                if (new.length <= 60 && new.all { it.isLetter() || it == ' ' }) contactName = new
+            },
+            label = stringResource(R.string.client_form_emergency_name),
+            isError = contactName.isNotBlank() && !nameValid,
+            errorText = stringResource(R.string.encargado_client_form_min_letters)
+        )
+        GymTextField(
+            value = contactPhone,
+            onValueChange = { new ->
+                if (new.length <= 10 && new.all { it in '0'..'9' }) contactPhone = new
+            },
+            label = stringResource(R.string.client_form_emergency_phone),
+            keyboardType = KeyboardType.Number,
+            isError = phoneIncomplete,
+            errorText = stringResource(R.string.perfil_phone_length, contactPhone.length)
+        )
+        DialogButtons(
+            confirmText = stringResource(R.string.save),
+            confirmEnabled = isValid,
+            onConfirm = { onSave(contactName, contactPhone) },
             onDismiss = onDismiss
         )
     }
 }
 
 @Composable
-private fun PasswordDialog(
-    onDismiss: () -> Unit,
-    onSave: (String) -> Unit
-) {
+private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+    var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
 
-    GymDialog(title = "Cambiar contraseña", onDismiss = onDismiss) {
+    // Mínimo 8 caracteres y que la confirmación coincida
+    val tooShort = newPassword.isNotEmpty() && newPassword.length < 8
+    val mismatch = confirmPassword.isNotEmpty() && confirmPassword != newPassword
+    val canSave = currentPassword.isNotEmpty() && newPassword.length >= 8 && confirmPassword == newPassword
+
+    GymDialog(title = stringResource(R.string.change_password), onDismiss = onDismiss) {
+        GymTextField(
+            value = currentPassword,
+            onValueChange = { currentPassword = it },
+            label = stringResource(R.string.current_password),
+            isPassword = true
+        )
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
-            label = "Nueva contraseña",
-            isPassword = true
+            label = stringResource(R.string.new_password),
+            isPassword = true,
+            isError = tooShort,
+            errorText = stringResource(R.string.perfil_password_min_length)
         )
-
+        GymTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            label = stringResource(R.string.perfil_confirm_password),
+            isPassword = true,
+            isError = mismatch,
+            errorText = stringResource(R.string.passwords_dont_match)
+        )
         DialogButtons(
-            confirmText = "Actualizar",
-            onConfirm = { onSave(newPassword) },
+            confirmText = stringResource(R.string.perfil_confirm_update),
+            confirmEnabled = canSave,
+            onConfirm = { onSave(currentPassword, newPassword) },
             onDismiss = onDismiss
         )
     }
@@ -642,11 +612,13 @@ private fun GymTextField(
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text,
     isError: Boolean = false,
-    errorText: String? = null
+    errorText: String? = null,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         label = { Text(label) },
         singleLine = true,
         isError = isError,
@@ -658,18 +630,32 @@ private fun GymTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GymColors.Purple,
-            unfocusedBorderColor = GymColors.Border,
-            focusedTextColor = GymColors.TextPrimary,
-            unfocusedTextColor = GymColors.TextPrimary,
-            focusedLabelColor = GymColors.Purple,
-            unfocusedLabelColor = GymColors.TextSecondary,
-            cursorColor = GymColors.Gold,
-            errorBorderColor = GymColors.Red,
-            errorTextColor = GymColors.TextPrimary,
-            errorLabelColor = GymColors.Red,
-            errorCursorColor = GymColors.Red,
-            errorSupportingTextColor = GymColors.Red
+            focusedBorderColor = ClienteTema.Azul,
+            unfocusedBorderColor = ClienteTema.Borde,
+            focusedTextColor = ClienteTema.Texto,
+            unfocusedTextColor = ClienteTema.Texto,
+            focusedLabelColor = ClienteTema.Azul,
+            unfocusedLabelColor = ClienteTema.TextoSec,
+            cursorColor = ClienteTema.Azul,
+            errorBorderColor = ClienteTema.Rojo,
+            errorTextColor = ClienteTema.Texto,
+            errorLabelColor = ClienteTema.Rojo,
+            errorCursorColor = ClienteTema.Rojo,
+            errorSupportingTextColor = ClienteTema.Rojo,
+            // Campos de solo lectura (nombre y correo)
+            disabledTextColor = ClienteTema.TextoSec.copy(alpha = 0.6f),
+            disabledBorderColor = ClienteTema.Borde.copy(alpha = 0.4f),
+            disabledLabelColor = ClienteTema.TextoSec.copy(alpha = 0.5f)
         )
     )
+}
+
+@Composable
+private fun translatedPlanName(plan: String?): String {
+    return when (plan?.lowercase()?.trim()) {
+        "trimestral", "quarterly" -> stringResource(R.string.plan_quarterly)
+        "mensual", "monthly" -> stringResource(R.string.plan_monthly)
+        "visita", "día", "day", "day pass" -> stringResource(R.string.plan_day)
+        else -> plan ?: "—"
+    }
 }

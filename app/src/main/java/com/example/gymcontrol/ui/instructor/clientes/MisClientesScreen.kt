@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,23 +32,30 @@ import com.example.gymcontrol.ui.components.SesionActual
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.ScaffoldTab
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
+private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 private val INSTRUCTOR_TABS = listOf(
     ScaffoldTab("Mis clientes", Icons.Filled.Group),
     ScaffoldTab("Perfil", Icons.Filled.Person)
 )
 
-// Días que se pueden elegir (de lunes a sábado)
-private val DIAS = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb")
-
 private data class ClienteAsignado(
     val id: Long,
     val nombre: String,
     val dias: String,
     val objetivo: String
+)
+
+@Composable
+private fun getDias(): List<String> = listOf(
+    stringResource(R.string.day_mon),
+    stringResource(R.string.day_tue),
+    stringResource(R.string.day_wed),
+    stringResource(R.string.day_thu),
+    stringResource(R.string.day_fri),
+    stringResource(R.string.day_sat)
 )
 
 @Composable
@@ -69,13 +77,13 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
 
     LaunchedEffect(Unit) { recargar() }
 
-    // null = formulario cerrado, número = índice del cliente que se edita
     var indiceEditando by remember { mutableStateOf<Int?>(null) }
+    val diasList = getDias()
 
     ClienteScaffold(
         currentSection = "Mis clientes",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_axolotl,
+        logoRes = R.drawable.logo_final,
         tabs = INSTRUCTOR_TABS
     ) {
         LazyColumn(
@@ -87,15 +95,17 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Usuarios asignados",
-                    color = GymColors.TextPrimary,
+                    text = stringResource(R.string.instructor_assigned_users_title),
+                    color = ClienteTema.Texto,
                     fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
             mensaje?.let { msg ->
-                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
+                item { Text(msg, color = ClienteTema.Rojo, fontSize = 14.sp) }
             }
 
             itemsIndexed(clientes) { index, cliente ->
@@ -108,8 +118,8 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
             if (clientes.isEmpty()) {
                 item {
                     Text(
-                        text = "No tienes clientes asignados",
-                        color = GymColors.TextSecondary,
+                        text = stringResource(R.string.instructor_no_assigned_clients),
+                        color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -127,6 +137,7 @@ fun MisClientesScreen(onNavigate: (String) -> Unit = {}) {
         EditarClienteDialog(
             diasInicial = cliente.dias,
             objetivoInicial = cliente.objetivo,
+            diasList = diasList,
             onDismiss = { indiceEditando = null },
             onGuardar = { nuevosDias, nuevoObjetivo ->
                 indiceEditando = null
@@ -149,22 +160,21 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Círculo con iniciales (luego se puede reemplazar por la foto del cliente)
         Box(
             modifier = Modifier
                 .size(60.dp)
-                .background(GymColors.Purple.copy(alpha = 0.18f), CircleShape)
+                .background(ClienteTema.AzulSel.copy(alpha = 0.18f), CircleShape)
                 .border(2.dp, CardBorder, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = iniciales(cliente.nombre),
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -175,20 +185,20 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = cliente.nombre,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = cliente.dias.ifBlank { "Sin días asignados" },
-                color = GymColors.TextSecondary,
+                text = cliente.dias.ifBlank { stringResource(R.string.instructor_client_no_days) },
+                color = ClienteTema.TextoSec,
                 fontSize = 15.sp
             )
             Spacer(Modifier.height(2.dp))
             Text(
-                text = "Objetivo: ${cliente.objetivo.ifBlank { "—" }}",
-                color = GymColors.TextSecondary,
+                text = stringResource(R.string.instructor_client_objective, cliente.objetivo.ifBlank { "—" }),
+                color = ClienteTema.TextoSec,
                 fontSize = 15.sp
             )
         }
@@ -199,13 +209,13 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
             onClick = onEditar,
             modifier = Modifier.size(width = 88.dp, height = 40.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = GymColors.Purple,
-                contentColor = GymColors.TextPrimary
+                containerColor = ClienteTema.Azul,
+                contentColor = ClienteTema.Texto
             ),
             shape = RoundedCornerShape(10.dp),
             contentPadding = PaddingValues(0.dp)
         ) {
-            Text("Editar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.common_edit), fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -216,22 +226,20 @@ private fun iniciales(nombre: String): String =
         .take(2)
         .joinToString("") { it.first().uppercase() }
 
-// "Lun, Mié, Vie" -> {Lun, Mié, Vie} | "Lun a Vie" -> {Lun, Mar, Mié, Jue, Vie}
-private fun parsearDias(texto: String): Set<String> {
+private fun parsearDias(texto: String, dias: List<String>): Set<String> {
     val limpio = texto.trim()
     if (" a " in limpio) {
         val partes = limpio.split(" a ", limit = 2).map { it.trim() }
-        val desde = DIAS.indexOf(partes[0])
-        val hasta = DIAS.indexOf(partes[1])
-        if (desde >= 0 && hasta >= desde) return DIAS.subList(desde, hasta + 1).toSet()
+        val desde = dias.indexOf(partes[0])
+        val hasta = dias.indexOf(partes[1])
+        if (desde >= 0 && hasta >= desde) return dias.subList(desde, hasta + 1).toSet()
     }
-    return limpio.split(",").map { it.trim() }.filter { it in DIAS }.toSet()
+    return limpio.split(",").map { it.trim() }.filter { it in dias }.toSet()
 }
 
-// {Lun, Mar, Mié, Jue, Vie} -> "Lun a Vie" | {Lun, Mié, Vie} -> "Lun, Mié, Vie"
-private fun formatearDias(seleccionados: Set<String>): String {
-    val ordenados = DIAS.filter { it in seleccionados }
-    val indices = ordenados.map { DIAS.indexOf(it) }
+private fun formatearDias(seleccionados: Set<String>, dias: List<String>): String {
+    val ordenados = dias.filter { it in seleccionados }
+    val indices = ordenados.map { dias.indexOf(it) }
     val consecutivos = indices.zipWithNext().all { (a, b) -> b == a + 1 }
     return if (ordenados.size >= 3 && consecutivos) {
         "${ordenados.first()} a ${ordenados.last()}"
@@ -244,10 +252,11 @@ private fun formatearDias(seleccionados: Set<String>): String {
 private fun EditarClienteDialog(
     diasInicial: String,
     objetivoInicial: String,
+    diasList: List<String>,
     onDismiss: () -> Unit,
     onGuardar: (dias: String, objetivo: String) -> Unit
 ) {
-    var seleccionados by remember { mutableStateOf(parsearDias(diasInicial)) }
+    var seleccionados by remember { mutableStateOf(parsearDias(diasInicial, diasList)) }
     var objetivo by remember { mutableStateOf(objetivoInicial) }
     val esValido = seleccionados.isNotEmpty() && objetivo.isNotBlank()
 
@@ -255,7 +264,7 @@ private fun EditarClienteDialog(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(GymColors.Surface, RoundedCornerShape(14.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
                 .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
         ) {
             Column(
@@ -265,13 +274,14 @@ private fun EditarClienteDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Días que asistirá",
-                    color = GymColors.TextPrimary,
+                    text = stringResource(R.string.instructor_dialog_days_title),
+                    color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.height(10.dp))
                 SelectorDias(
+                    diasList = diasList,
                     seleccionados = seleccionados,
                     onToggle = { dia ->
                         seleccionados = if (dia in seleccionados) seleccionados - dia else seleccionados + dia
@@ -281,8 +291,8 @@ private fun EditarClienteDialog(
                 Spacer(Modifier.height(22.dp))
 
                 Text(
-                    text = "Objetivo",
-                    color = GymColors.TextPrimary,
+                    text = stringResource(R.string.instructor_dialog_objective_title),
+                    color = ClienteTema.Texto,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -292,22 +302,21 @@ private fun EditarClienteDialog(
                 Spacer(Modifier.height(28.dp))
 
                 Button(
-                    onClick = { onGuardar(formatearDias(seleccionados), objetivo.trim()) },
+                    onClick = { onGuardar(formatearDias(seleccionados, diasList), objetivo.trim()) },
                     enabled = esValido,
                     modifier = Modifier.size(width = 160.dp, height = 44.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = GymColors.Purple,
-                        contentColor = GymColors.TextPrimary,
-                        disabledContainerColor = GymColors.Purple.copy(alpha = 0.45f),
-                        disabledContentColor = GymColors.TextPrimary.copy(alpha = 0.7f)
+                        containerColor = ClienteTema.Azul,
+                        contentColor = ClienteTema.Texto,
+                        disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
+                        disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Guardar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
-            // X para cerrar el formulario
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
@@ -317,8 +326,8 @@ private fun EditarClienteDialog(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "Cerrar",
-                    tint = GymColors.TextSecondary,
+                    contentDescription = stringResource(R.string.common_close),
+                    tint = ClienteTema.TextoSec,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -326,11 +335,10 @@ private fun EditarClienteDialog(
     }
 }
 
-// Botones Lun a Sáb en dos filas de tres; tocar uno lo marca o lo desmarca
 @Composable
-private fun SelectorDias(seleccionados: Set<String>, onToggle: (String) -> Unit) {
+private fun SelectorDias(diasList: List<String>, seleccionados: Set<String>, onToggle: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DIAS.chunked(3).forEach { fila ->
+        diasList.chunked(3).forEach { fila ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -344,14 +352,14 @@ private fun SelectorDias(seleccionados: Set<String>, onToggle: (String) -> Unit)
                             .weight(1f)
                             .height(40.dp)
                             .clip(forma)
-                            .background(if (activo) GymColors.Purple else Color.Transparent)
-                            .border(1.dp, GymColors.Purple, forma)
+                            .background(if (activo) ClienteTema.AzulSel else Color.Transparent)
+                            .border(1.dp, ClienteTema.AzulSel, forma)
                             .clickable { onToggle(dia) },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = dia,
-                            color = if (activo) GymColors.TextPrimary else GymColors.TextSecondary,
+                            color = if (activo) ClienteTema.Texto else ClienteTema.TextoSec,
                             fontSize = 15.sp,
                             fontWeight = if (activo) FontWeight.Bold else FontWeight.Normal
                         )
@@ -370,16 +378,16 @@ private fun CampoPill(valor: String, onCambio: (String) -> Unit) {
         singleLine = true,
         shape = RoundedCornerShape(50),
         textStyle = TextStyle(
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 16.sp,
             textAlign = TextAlign.Center
         ),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = GymColors.Purple,
-            unfocusedBorderColor = GymColors.Purple,
-            focusedTextColor = GymColors.TextPrimary,
-            unfocusedTextColor = GymColors.TextPrimary,
-            cursorColor = GymColors.Gold
+            focusedBorderColor = ClienteTema.AzulSel,
+            unfocusedBorderColor = ClienteTema.AzulSel,
+            focusedTextColor = ClienteTema.Texto,
+            unfocusedTextColor = ClienteTema.Texto,
+            cursorColor = ClienteTema.AzulSel
         ),
         modifier = Modifier.fillMaxWidth()
     )

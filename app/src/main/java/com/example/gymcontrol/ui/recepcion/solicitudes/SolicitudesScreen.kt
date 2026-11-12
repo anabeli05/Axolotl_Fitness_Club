@@ -1,5 +1,6 @@
 package com.example.gymcontrol.ui.recepcion.solicitudes
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -16,26 +17,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.ClientesRepository
 import com.example.gymcontrol.data.remote.SolicitudAdminRow
 import com.example.gymcontrol.data.remote.SolicitudesRepository
-import kotlinx.coroutines.launch
+import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import kotlinx.coroutines.launch
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
-private val RECEPCION_SECTIONS = listOf("Home", "Clientes", "Solicitudes")
+// Getter: se recalcula al cambiar entre modo claro y oscuro
+private val CardBorder
+    get() = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
-// Mismo tamaño que en ClientesScreen: badge, chip de costo y botones de acción
 private val ChipWidth = 96.dp
 private val ChipHeight = 36.dp
-private val ActionWidth = 44.dp // dos botones (44 + 8 + 44) = 96.dp
+private val ActionWidth = 44.dp
 
-// Resolución pendiente de confirmar
 private class Resolucion(val solicitud: SolicitudAdminRow, val estado: String)
 
 @Composable
@@ -59,7 +61,6 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
 
     GymScaffold(
         currentSection = "Solicitudes",
-        sections = RECEPCION_SECTIONS,
         onNavigate = onNavigate
     ) {
         LazyColumn(
@@ -71,15 +72,15 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Pendientes: $pendientes",
-                    color = GymColors.TextSecondary,
+                    text = stringResource(R.string.recepcion_solicitudes_pending_badge, pendientes),
+                    color = ClienteTema.TextoSec,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             mensaje?.let { msg ->
-                item { Text(msg, color = GymColors.Red, fontSize = 14.sp) }
+                item { Text(msg, color = ClienteTema.Rojo, fontSize = 14.sp) }
             }
 
             items(requests, key = { it.id }) { req ->
@@ -98,8 +99,8 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
             if (requests.isEmpty() && mensaje == null) {
                 item {
                     Text(
-                        text = "No hay solicitudes",
-                        color = GymColors.TextSecondary,
+                        text = stringResource(R.string.recepcion_solicitudes_empty),
+                        color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -113,46 +114,65 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
 
     confirmar?.let { r ->
         val aprobar = r.estado == "APROBADA"
+        val confirmTitle = stringResource(R.string.common_confirm)
+        val confirmText = if (aprobar) {
+            stringResource(R.string.recepcion_solicitudes_confirm_approve_text, r.solicitud.cliente, r.solicitud.instructor)
+        } else {
+            stringResource(R.string.recepcion_solicitudes_confirm_reject_text, r.solicitud.cliente, r.solicitud.instructor)
+        }
         AlertDialog(
             onDismissRequest = { confirmar = null },
-            containerColor = GymColors.Surface,
+            containerColor = ClienteTema.Beige,
             shape = RoundedCornerShape(16.dp),
-            title = { Text("Confirmar", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    confirmTitle,
+                    color = ClienteTema.Texto,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
             text = {
                 Text(
-                    "¿Estás seguro de ${if (aprobar) "aprobar" else "rechazar"} la solicitud de " +
-                            "${r.solicitud.cliente} con ${r.solicitud.instructor}?",
-                    color = GymColors.TextSecondary
+                    confirmText,
+                    color = ClienteTema.TextoSec,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             },
             confirmButton = {
-                Button(
-                    onClick = {
-                        confirmar = null
-                        scope.launch {
-                            try {
-                                SolicitudesRepository.resolver(r.solicitud.id, r.estado)
-                                mensaje = null
-                            } catch (e: Exception) {
-                                mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo guardar"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                ) {
+                    OutlinedButton(
+                        onClick = { confirmar = null },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, ClienteTema.Borde),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                    ) { Text(stringResource(R.string.cancel)) }
+
+                    Button(
+                        onClick = {
+                            confirmar = null
+                            scope.launch {
+                                try {
+                                    SolicitudesRepository.resolver(r.solicitud.id, r.estado)
+                                    mensaje = null
+                                } catch (e: Exception) {
+                                    mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo guardar"
+                                }
+                                recargar()
                             }
-                            recargar()
-                        }
-                    },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (aprobar) GymColors.Green else GymColors.Red,
-                        contentColor = Color.White
-                    )
-                ) { Text(if (aprobar) "Aprobar" else "Rechazar", fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = { confirmar = null },
-                    shape = RoundedCornerShape(10.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, GymColors.Border),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
-                ) { Text("Cancelar") }
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (aprobar) ClienteTema.Verde else ClienteTema.Rojo,
+                            contentColor = Color.White
+                        )
+                    ) { Text(if (aprobar) stringResource(R.string.recepcion_solicitudes_approve_btn) else stringResource(R.string.recepcion_solicitudes_reject_btn), fontWeight = FontWeight.Bold) }
+                }
             }
         )
     }
@@ -172,7 +192,7 @@ private fun SolicitudCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -180,16 +200,16 @@ private fun SolicitudCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = clientName,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(8.dp))
-            Text("Membresía: $membership", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text(stringResource(R.string.recepcion_scanner_membership_prefix, membership), color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Instructor: $instructor", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text(stringResource(R.string.recepcion_solicitudes_instructor_prefix, instructor), color = ClienteTema.TextoSec, fontSize = 17.sp)
             Spacer(Modifier.height(2.dp))
-            Text("Fecha: $date", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text(stringResource(R.string.recepcion_solicitudes_date_prefix, date), color = ClienteTema.TextoSec, fontSize = 17.sp)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -199,20 +219,19 @@ private fun SolicitudCard(
             Spacer(Modifier.height(10.dp))
             CostChip(cost = cost)
 
-            // Los botones solo aparecen mientras la solicitud está pendiente
             if (status == "PENDIENTE") {
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     IconSquareButton(
                         icon = Icons.Filled.Check,
-                        color = GymColors.Green,
-                        description = "Aprobar",
+                        color = ClienteTema.Verde,
+                        description = stringResource(R.string.recepcion_solicitudes_approve_btn),
                         onClick = onApprove
                     )
                     IconSquareButton(
                         icon = Icons.Filled.Close,
-                        color = GymColors.Red,
-                        description = "Rechazar",
+                        color = ClienteTema.Rojo,
+                        description = stringResource(R.string.recepcion_solicitudes_reject_btn),
                         onClick = onReject
                     )
                 }
@@ -224,20 +243,26 @@ private fun SolicitudCard(
 @Composable
 private fun StatusChip(status: String) {
     val color = when (status) {
-        "APROBADA" -> GymColors.Green
-        "RECHAZADA" -> GymColors.Red
-        else -> GymColors.Gold
+        "APROBADA" -> ClienteTema.Verde
+        "RECHAZADA" -> ClienteTema.Rojo
+        else -> ClienteTema.AzulSel
+    }
+    // Pastel en aprobada/rechazada; la pendiente (dorada) conserva su tinte translúcido
+    val fondo = when (status) {
+        "APROBADA" -> ClienteTema.VerdePastel
+        "RECHAZADA" -> ClienteTema.RojoPastel
+        else -> color.copy(alpha = 0.15f)
     }
     val label = when (status) {
-        "APROBADA" -> "Aprobada"
-        "RECHAZADA" -> "Rechazada"
-        else -> "Pendiente"
+        "APROBADA" -> stringResource(R.string.recepcion_solicitudes_status_approved)
+        "RECHAZADA" -> stringResource(R.string.recepcion_solicitudes_status_rejected)
+        else -> stringResource(R.string.recepcion_solicitudes_status_pending)
     }
 
     Box(
         modifier = Modifier
             .size(ChipWidth, ChipHeight)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+            .background(fondo, RoundedCornerShape(10.dp))
             .border(1.dp, color, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
     ) {
@@ -255,13 +280,13 @@ private fun CostChip(cost: String) {
     Box(
         modifier = Modifier
             .size(ChipWidth, ChipHeight)
-            .background(GymColors.Purple.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
-            .border(1.dp, GymColors.Purple, RoundedCornerShape(10.dp)),
+            .background(ClienteTema.Navy, RoundedCornerShape(10.dp))
+            .border(1.dp, ClienteTema.Borde, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "$$cost",
-            color = GymColors.TextPrimary,
+            color = ClienteTema.Texto,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )

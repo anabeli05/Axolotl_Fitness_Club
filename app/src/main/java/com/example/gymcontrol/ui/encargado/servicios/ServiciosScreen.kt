@@ -25,27 +25,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.gymcontrol.GymApp
+import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.data.remote.ServicioRow
 import com.example.gymcontrol.data.remote.ServiciosRepository
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
-// Borde degradado en tonos rojos para el cuadro de eliminar
 private val DeleteBorder = Brush.linearGradient(
-    listOf(Color(0xFFFF6B6B), GymColors.Red, Color(0xFF7A0A0A))
+    listOf(Color(0xFFFF6B6B), ClienteTema.Rojo, Color(0xFF7A0A0A))
 )
 
-// El nombre debe tener al menos `min` letras (espacios y números no cuentan)
 private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter() } >= min
 
 @Composable
@@ -107,21 +107,21 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                             price = ""
                             showForm = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
+                        colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Nuevo Servicio", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.encargado_servicios_new_button), fontWeight = FontWeight.Bold)
                     }
                 }
 
                 if (cargando) {
-                    item { Text("Cargando...", color = GymColors.TextSecondary) }
+                    item { Text(stringResource(R.string.common_loading), color = ClienteTema.TextoSec, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) }
                 }
                 errorMsg?.let { msg ->
-                    item { Text(msg, color = GymColors.Red) }
+                    item { Text(msg, color = ClienteTema.Rojo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) }
                 }
 
                 itemsIndexed(servicios) { index, service ->
@@ -151,11 +151,9 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                     onDurationChange = { duration = it },
                     onPriceChange = { price = it },
                     onDismiss = { closeForm() },
-                    onSave = {
+                    onSave = { dur ->
                         val nombre = name.trim()
-                        val dias = duration.toInt()
-                        val dur = if (dias == 1) "1 día" else "$dias días"
-                        val precio = price.toDouble()
+                        val precio = price.toDoubleOrNull() ?: 0.0
                         val idx = editingIndex
                         scope.launch {
                             try {
@@ -179,8 +177,8 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
 
     deleting?.let { target ->
         DeleteConfirmDialog(
-            title = "¿Eliminar servicio?",
-            message = "Se eliminará el servicio ${target.nombre}. Esta acción no se puede deshacer.",
+            title = stringResource(R.string.encargado_servicios_delete_confirm_title),
+            message = stringResource(R.string.delete_service_confirm, target.nombre),
             onConfirm = {
                 scope.launch {
                     try {
@@ -208,13 +206,13 @@ private fun DeleteConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
-        containerColor = GymColors.Surface,
+        containerColor = ClienteTema.Beige,
         shape = RoundedCornerShape(16.dp),
-        icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = GymColors.Red) },
+        icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
         title = {
             Text(
                 title,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -223,28 +221,32 @@ private fun DeleteConfirmDialog(
         text = {
             Text(
                 message,
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
         },
         confirmButton = {
-            Button(
-                onClick = onConfirm,
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GymColors.Red,
-                    contentColor = Color.White
-                )
-            ) { Text("Eliminar", fontWeight = FontWeight.Bold) }
-        },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, GymColors.Border),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
-            ) { Text("Cancelar") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, ClienteTema.Borde),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                ) { Text(stringResource(R.string.cancel)) }
+
+                Button(
+                    onClick = onConfirm,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ClienteTema.Rojo,
+                        contentColor = Color.White
+                    )
+                ) { Text(stringResource(R.string.common_delete), fontWeight = FontWeight.Bold) }
+            }
         }
     )
 }
@@ -257,12 +259,12 @@ private fun ServiceCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, borderBrush, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -270,20 +272,22 @@ private fun ServiceCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(10.dp))
+            val dias = duration.filter { it.isDigit() }.toIntOrNull() ?: 1
+            val durationText = pluralStringResource(R.plurals.days_count, count = dias, dias)
             Text(
-                text = "Duración: $duration",
-                color = GymColors.TextSecondary,
+                text = stringResource(R.string.label_duration_format, durationText),
+                color = ClienteTema.TextoSec,
                 fontSize = 16.sp
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Precio: $price",
-                color = GymColors.Gold,
+                text = stringResource(R.string.label_price_format, price),
+                color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -294,12 +298,12 @@ private fun ServiceCard(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             IconCircleButton(
                 icon = Icons.Filled.Edit,
-                color = GymColors.Orange,
+                color = ClienteTema.AzulSel,
                 onClick = onEdit
             )
             IconCircleButton(
                 icon = Icons.Filled.Close,
-                color = GymColors.Red,
+                color = ClienteTema.Rojo,
                 onClick = onDelete
             )
         }
@@ -336,10 +340,13 @@ private fun ServiceFormDialog(
     onDurationChange: (String) -> Unit,
     onPriceChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSave: () -> Unit
+    onSave: (String) -> Unit
 ) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
     val nameValid = nameHasMinLetters(name)
+    val dias = duration.toIntOrNull() ?: 1
+    val unit = stringResource(if (dias == 1) R.string.unit_day else R.string.unit_days)
+    val dur = stringResource(R.string.service_duration_format, dias, unit)
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -353,24 +360,27 @@ private fun ServiceFormDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(GymColors.Surface, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
                 .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isEditing) "Editar servicio" else "Nuevo servicio",
-                    color = GymColors.TextPrimary,
+                    text = if (isEditing) stringResource(R.string.encargado_servicios_edit_title) else stringResource(R.string.encargado_servicios_new_title),
+                    color = ClienteTema.Texto,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = GymColors.TextSecondary)
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = ClienteTema.TextoSec)
                 }
             }
 
@@ -379,31 +389,31 @@ private fun ServiceFormDialog(
             RestrictedField(
                 value = name,
                 onValueChange = onNameChange,
-                label = "Nombre",
+                label = stringResource(R.string.encargado_servicios_name_label),
                 accept = { s -> s.all { it.isLetterOrDigit() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras y números",
-                errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_servicios_name_warning),
+                errorText = if (name.isNotEmpty() && !nameValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = duration,
                 onValueChange = onDurationChange,
-                label = "Duración (días)",
+                label = stringResource(R.string.encargado_servicios_duration_label),
                 accept = { s -> s.all { it in '0'..'9' } },
                 maxLength = 3,
-                warningText = "Solo se permiten números",
+                warningText = stringResource(R.string.encargado_servicios_duration_warning),
                 keyboardType = KeyboardType.Number,
-                errorText = if (duration.isNotEmpty() && duration.toInt() == 0) "Debe ser mayor a 0" else null
+                errorText = if (duration.isNotEmpty() && duration.toInt() == 0) stringResource(R.string.encargado_servicios_duration_error) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = price,
                 onValueChange = onPriceChange,
-                label = "Costo",
+                label = stringResource(R.string.encargado_servicios_cost_label),
                 accept = { s -> MONEY_REGEX.matches(s) },
                 maxLength = 9,
-                warningText = "Solo números (máx. 2 decimales)",
+                warningText = stringResource(R.string.encargado_servicios_amount_warning),
                 keyboardType = KeyboardType.Decimal,
                 prefix = "$"
             )
@@ -411,20 +421,20 @@ private fun ServiceFormDialog(
             Spacer(Modifier.height(18.dp))
 
             Button(
-                onClick = onSave,
+                onClick = { onSave(dur) },
                 enabled = nameValid &&
                         (duration.toIntOrNull() ?: 0) > 0 &&
                         (price.toDoubleOrNull() ?: 0.0) > 0.0,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GymColors.Purple,
-                    contentColor = GymColors.TextPrimary,
-                    disabledContainerColor = GymColors.Purple.copy(alpha = 0.45f),
-                    disabledContentColor = GymColors.TextPrimary.copy(alpha = 0.7f)
+                    containerColor = ClienteTema.Azul,
+                    contentColor = ClienteTema.Texto,
+                    disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
+                    disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                 ),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isEditing) "Guardar" else "Crear Servicio", fontWeight = FontWeight.Bold)
+                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_servicios_create_button), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -432,21 +442,19 @@ private fun ServiceFormDialog(
 
 @Composable
 private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = GymColors.Purple,
-    unfocusedBorderColor = GymColors.Border,
-    focusedTextColor = GymColors.TextPrimary,
-    unfocusedTextColor = GymColors.TextPrimary,
-    focusedLabelColor = GymColors.Purple,
-    cursorColor = GymColors.Gold,
-    errorBorderColor = GymColors.Red,
-    errorTextColor = GymColors.TextPrimary,
-    errorLabelColor = GymColors.Red,
-    errorCursorColor = GymColors.Red,
-    errorSupportingTextColor = GymColors.Red
+    focusedBorderColor = ClienteTema.AzulSel,
+    unfocusedBorderColor = ClienteTema.Borde,
+    focusedTextColor = ClienteTema.Texto,
+    unfocusedTextColor = ClienteTema.Texto,
+    focusedLabelColor = ClienteTema.AzulSel,
+    cursorColor = ClienteTema.AzulSel,
+    errorBorderColor = ClienteTema.Rojo,
+    errorTextColor = ClienteTema.Texto,
+    errorLabelColor = ClienteTema.Rojo,
+    errorCursorColor = ClienteTema.Rojo,
+    errorSupportingTextColor = ClienteTema.Rojo
 )
 
-// Campo que rechaza lo que no cumple `accept` (muestra un aviso unos segundos)
-// y limita la longitud. `errorText` es un error fijo (ej. "faltan dígitos").
 @Composable
 private fun RestrictedField(
     value: String,
@@ -480,14 +488,14 @@ private fun RestrictedField(
                 new.length <= maxLength -> onValueChange(new)
             }
         },
-        label = { Text(label, color = if (shownError != null) GymColors.Red else GymColors.TextSecondary) },
+        label = { Text(label, color = if (shownError != null) ClienteTema.Rojo else ClienteTema.TextoSec) },
         singleLine = true,
         isError = shownError != null,
         supportingText = if (shownError != null) {
             { Text(shownError) }
         } else null,
         prefix = if (prefix != null) {
-            { Text(prefix, color = GymColors.TextPrimary) }
+            { Text(prefix, color = ClienteTema.Texto) }
         } else null,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth(),

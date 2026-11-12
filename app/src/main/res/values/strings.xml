@@ -1,0 +1,552 @@
+<resources>
+    <!-- App & Login -->
+    <string name="app_name">Axolotl Fitness Club</string>
+    <string name="login_email">Correo</string>
+    <string name="login_password">Contraseña</string>
+    <string name="hide_password">Ocultar contraseña</string>
+    <string name="show_password">Mostrar contraseña</string>
+    <string name="accept_terms_prefix">Acepto los </string>
+    <string name="terms_and_conditions">Términos y Condiciones</string>
+    <string name="accept_terms_and"> y la </string>
+    <string name="privacy_policy">Política de Privacidad</string>
+    <string name="login_button">Ingresar</string>
+    <string name="logging_in">Entrando...</string>
+    <string name="error_invalid_credentials">Usuario o contraseña incorrectos</string>
+    <string name="error_connection_prefix">Error de conexión: </string>
+    <string name="change_password">Cambiar contraseña</string>
+    <string name="password_updated_success">Contraseña actualizada. Ya puedes iniciar sesión.</string>
+    <string name="current_password">Contraseña actual</string>
+    <string name="new_password">Nueva contraseña</string>
+    <string name="repeat_new_password">Repetir nueva contraseña</string>
+    <string name="password_requirements">Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</string>
+    <string name="passwords_dont_match">Las contraseñas no coinciden</string>
+    <string name="error_change_failed">No se pudo cambiar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="saving">Guardando...</string>
+    <string name="save">Guardar</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="logout_confirmation">¿Seguro que quieres salir?</string>
+    <string name="exit">Salir</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">Inicio</string>
+    <string name="tab_advisories">Asesorías</string>
+    <string name="tab_payments">Pagos</string>
+    <string name="tab_profile">Perfil</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_clients">Clientes</string>
+    <string name="tab_requests">Solicitudes</string>
+    <string name="tab_staff">Personal</string>
+    <string name="tab_services">Servicios</string>
+    <string name="tab_expenses">Gastos</string>
+    <string name="tab_reports">Reportes</string>
+
+    <!-- Roles & Language -->
+    <string name="role_reception">Recepción</string>
+    <string name="role_manager">Encargado</string>
+    <string name="role_instructor">Instructor</string>
+    <string name="role_client">Cliente</string>
+    <string name="change_language">Cambiar Idioma</string>
+
+    <!-- Global / Common Components -->
+    <string name="common_people_per_hour">Personas por hora</string>
+    <string name="chart_active">Activos</string>
+    <string name="chart_inactive">Inactivos</string>
+    <string name="status_active">Activo</string>
+    <string name="status_inactive">Inactivo</string>
+    <string name="common_confirm">Confirmar</string>
+    <string name="common_yes_continue">Sí, continuar</string>
+    <string name="common_edit">Editar</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="common_loading">Cargando...</string>
+    <string name="common_close">Cerrar</string>
+    <string name="common_accept">Aceptar</string>
+    <string name="common_back">Volver</string>
+    <string name="common_return">Regresar</string>
+
+    <!-- Cliente: Home -->
+    <string name="cliente_facial_access_title">Acceso con reconocimiento facial</string>
+    <string name="cliente_facial_camera_hint">Mira a la cámara de recepción para entrar y salir</string>
+    <string name="cliente_clients_now_title">Clientes ahorita</string>
+    <string name="cliente_gym_schedule">Horario del gimnasio: 06:00 - 00:00</string>
+    <string name="cliente_least_busy_title">Horarios de menor afluencia</string>
+    <string name="cliente_least_busy_chart">Promedio de entradas</string>
+    <string name="cliente_least_busy_best">Mejores horarios para venir:</string>
+    <string name="cliente_least_busy_item">• %1$s – %2$s · %3$s entradas en promedio</string>
+    <string name="cliente_least_busy_note">Calculado con las entradas reales de las últimas 4 semanas.</string>
+    <string name="cliente_least_busy_empty">Aún no hay suficientes registros de entrada.</string>
+    <string name="cliente_greeting_morning">Buenos días</string>
+    <string name="cliente_greeting_afternoon">Buenas tardes</string>
+    <string name="cliente_greeting_evening">Buenas noches</string>
+    <string name="cliente_welcome_subtitle">Qué bueno verte por aquí. ¡A darle con todo hoy!</string>
+    <string name="cliente_person_inside_now">persona dentro ahora</string>
+    <string name="cliente_people_inside_now">personas dentro ahora</string>
+
+    <!-- Cliente: Pagos -->
+    <string name="cliente_pagos_title">Métodos de Pago</string>
+    <string name="cliente_pago_transferencia_title">Pago por\nTransferencia</string>
+    <string name="cliente_pago_transferencia_dialog_title">Pago por Transferencia</string>
+    <string name="cliente_pago_transferencia_sub">Transferencia bancaria directa</string>
+    <string name="cliente_pago_transferencia_instructions">Ingresa la CLABE en tu banca móvil y coloca tu número de membresía o nombre completo en el concepto de pago.</string>
+    <string name="cliente_pago_deposito_title">Pago por Depósito</string>
+    <string name="cliente_pago_deposito_sub">Depósito en sucursal bancaria o corresponsal</string>
+    <string name="cliente_pago_deposito_instructions">Presenta el número de tarjeta en cualquier sucursal bancaria o tienda de conveniencia para realizar tu depósito.</string>
+    <string name="cliente_pago_efectivo_title">Pago en Efectivo</string>
+    <string name="cliente_pago_efectivo_desc">Pago físico en recepción\n(Gimnasio Axolotl)</string>
+    <string name="cliente_pago_efectivo_sub">Pago físico en recepción (Gimnasio Axolotl)</string>
+    <string name="cliente_pago_efectivo_instructions">Acude directamente a la recepción del gimnasio y proporciona tu nombre o número de membresía al encargado.</string>
+    <string name="cliente_pago_label_banco">Banco:</string>
+    <string name="cliente_pago_label_clabe">CLABE:</string>
+    <string name="cliente_pago_label_cuenta">Cuenta:</string>
+    <string name="cliente_pago_label_beneficiario">Beneficiario:</string>
+    <string name="cliente_pago_label_concepto">Concepto:</string>
+    <string name="cliente_pago_label_no_tarjeta">No. Tarjeta:</string>
+    <string name="cliente_pago_label_corresponsales">Corresponsales:</string>
+    <string name="cliente_pago_label_sucursal">Sucursal:</string>
+    <string name="cliente_pago_label_ubicacion">Ubicación:</string>
+    <string name="cliente_pago_label_horario">Horario:</string>
+    <string name="cliente_pago_label_atencion">Atención:</string>
+    <string name="cliente_pago_val_horario">Lunes a Domingo (06:00 - 00:00 hrs)</string>
+    <string name="cliente_pago_val_caja">Caja principal</string>
+    <string name="cliente_pago_val_recepcion">Recepción - Gimnasio Axolotl</string>
+    <string name="cliente_pago_val_concepto">Tu número de Membresía</string>
+    <string name="cliente_pago_val_beneficiario_gym">Gimnasio Axolotl S.A. de C.V.</string>
+
+    <!-- Cliente: Asesorías -->
+    <string name="cliente_asesorias_title">Asesorías</string>
+    <string name="cliente_asesorias_choose_instructor">Elige tu instructor</string>
+    <string name="cliente_asesorias_no_instructors">Aún no hay instructores disponibles</string>
+    <string name="cliente_asesorias_quota">Cupo: %1$d/%2$d</string>
+    <string name="cliente_asesorias_per_month">%1$s /mes</string>
+    <string name="cliente_asesorias_status_approved">Aprobada</string>
+    <string name="cliente_asesorias_status_pending">Pendiente</string>
+    <string name="cliente_asesorias_no_quota">Sin cupo</string>
+    <string name="cliente_asesorias_request">Solicitar</string>
+    <string name="cliente_asesorias_cancel_dialog_title">¿Cancelar solicitud?</string>
+    <string name="cliente_asesorias_cancel_dialog_desc">Se cancelará tu solicitud de asesoría con %1$s.</string>
+
+    <!-- Cliente e Instructor: Perfil -->
+    <string name="perfil_title">Mi perfil</string>
+    <string name="perfil_status_label">Estado:</string>
+    <string name="perfil_action_edit_data">Editar datos</string>
+    <string name="perfil_action_change_password">Cambiar contraseña</string>
+    <string name="perfil_personal_data_title">Datos Personales</string>
+    <string name="perfil_label_name">Nombre:</string>
+    <string name="perfil_label_phone">Teléfono:</string>
+    <string name="perfil_label_email">Correo:</string>
+    <string name="perfil_photo_desc">Foto de perfil</string>
+    <string name="perfil_change_photo_desc">Cambiar foto</string>
+    <string name="perfil_photo_dialog_title">Foto de perfil</string>
+    <string name="perfil_photo_take">Tomar foto</string>
+    <string name="perfil_photo_gallery">Elegir de la galería</string>
+    <string name="perfil_photo_remove">Quitar foto</string>
+    <string name="perfil_edit_dialog_title">Editar datos</string>
+    <string name="perfil_field_name">Nombre</string>
+    <string name="perfil_field_email">Correo</string>
+    <string name="perfil_field_phone">Teléfono</string>
+    <string name="perfil_error_phone_digits">Solo se permiten números</string>
+    <string name="perfil_error_min_letters">Mínimo 3 letras</string>
+    <string name="perfil_error_letters_only">Solo se permiten letras</string>
+    <string name="perfil_confirm_update">Actualizar</string>
+    <string name="perfil_password_min_length">Mínimo 8 caracteres</string>
+    <string name="perfil_confirm_password">Confirmar contraseña</string>
+    <string name="perfil_load_error">No se pudieron cargar tus datos</string>
+    <string name="perfil_image_load_error">No se pudo cargar la imagen</string>
+    <string name="perfil_camera_permission_required">Se necesita permiso de cámara para tomar la foto</string>
+    <string name="perfil_not_loaded_yet">Aún no se cargan tus datos</string>
+    <string name="perfil_data_updated">Datos actualizados</string>
+    <string name="perfil_action_edit_phone">Cambiar teléfono</string>
+    <string name="perfil_staff_photo_hint">Tu foto de perfil la toma el Encargado</string>
+    <string name="foto_cliente_close">Cerrar</string>
+    <string name="foto_cliente_update_face">Actualizar rostro</string>
+    <string name="foto_update">Actualizar foto</string>
+    <string name="foto_retake">Repetir</string>
+    <string name="foto_face_hint">Colócate frente a la cámara</string>
+    <string name="foto_ready_hint">Rostro detectado. Pulsa «Tomar foto».</string>
+    <string name="foto_preview_hint">¿Se ve bien? Guárdala o repítela.</string>
+    <string name="foto_no_face">No se detectó un rostro. Intenta de nuevo.</string>
+    <string name="foto_save_error">No se pudo guardar la foto</string>
+    <string name="perfil_emergency_title">Contacto de emergencia</string>
+    <string name="perfil_action_edit_contact">Editar contacto de emergencia</string>
+    <string name="perfil_contact_not_set">Sin registrar</string>
+    <string name="perfil_contact_updated">Contacto de emergencia actualizado</string>
+    <string name="perfil_phone_length">Deben ser 10 dígitos (%1$d/10)</string>
+    <string name="perfil_password_updated">Contraseña actualizada</string>
+
+    <!-- Instructor: Mis Clientes & Perfil -->
+    <string name="instructor_assigned_users_title">Usuarios asignados</string>
+    <string name="instructor_no_assigned_clients">No tienes clientes asignados</string>
+    <string name="instructor_client_no_days">Sin días asignados</string>
+    <string name="instructor_client_objective">Objetivo: %1$s</string>
+    <string name="instructor_dialog_days_title">Días que asistirá</string>
+    <string name="instructor_dialog_objective_title">Objetivo</string>
+    <string name="instructor_max_capacity_label">Capacidad máx:</string>
+    <string name="instructor_capacity_full">Lleno</string>
+    <string name="instructor_capacity_available">Cupo libre</string>
+
+    <!-- Encargado: Dashboard -->
+    <string name="encargado_stat_people_inside_now">Personas dentro ahora</string>
+    <string name="encargado_stat_active_clients">Clientes Activos</string>
+    <string name="encargado_stat_inactive_clients">Clientes Inactivos</string>
+    <string name="encargado_stat_month_income">Ingresos del mes</string>
+    <string name="encargado_chart_hourly_occupancy">Personas por hora (hoy)</string>
+    <string name="encargado_chart_clients_status">Clientes Activos/Inactivos</string>
+    <string name="encargado_chart_income_per_day">Ingresos por Día</string>
+    <string name="encargado_peak_hour_prefix">Hora pico hoy: %1$s (%2$d personas)</string>
+
+    <!-- Encargado / Recepción: Clientes Form & List -->
+    <string name="encargado_clients_search_placeholder">Nombre o membresía</string>
+    <string name="encargado_clients_new_client_button">Nuevo Cliente</string>
+    <string name="encargado_clients_not_found">No se encontraron clientes</string>
+    <string name="encargado_clients_renew_button">Renovar</string>
+    <string name="encargado_clients_choose_plan">Elige el plan:</string>
+    <string name="encargado_client_form_edit_title">Editar cliente</string>
+    <string name="encargado_client_form_new_title">Nuevo cliente</string>
+    <string name="encargado_client_form_name_label">Nombre</string>
+    <string name="encargado_client_form_name_warning">Solo se permiten letras</string>
+    <string name="encargado_client_form_min_letters">Mínimo 3 letras</string>
+    <string name="encargado_client_form_lastname_label">Apellido</string>
+    <string name="encargado_client_form_phone_label">Teléfono</string>
+    <string name="encargado_client_form_phone_warning">Solo se permiten números</string>
+    <string name="encargado_client_form_email_label">Correo</string>
+    <string name="encargado_client_form_email_warning">El correo no lleva espacios</string>
+    <string name="encargado_client_form_email_invalid">Correo no válido</string>
+    <string name="client_form_emergency_title">Contacto de emergencia (obligatorio)</string>
+    <string name="client_form_emergency_name">Nombre del contacto</string>
+    <string name="client_form_emergency_name_missing">Escribe el nombre del contacto</string>
+    <string name="client_form_emergency_phone">Teléfono del contacto</string>
+    <string name="client_form_payment_method">Método de pago</string>
+    <string name="client_form_transfer_note">La membresía se activará cuando el Encargado confirme la transferencia.</string>
+    <string name="encargado_client_form_plan_placeholder">Selecciona un plan</string>
+    <string name="encargado_client_form_plan_label">Plan</string>
+    <string name="encargado_client_form_create_button">Crear Cliente</string>
+
+    <!-- Encargado: Gastos -->
+    <string name="encargado_gastos_new_button">Nuevo Gasto</string>
+    <string name="encargado_gastos_delete_confirm_title">¿Eliminar gasto?</string>
+    <string name="encargado_gastos_edit_title">Editar gasto</string>
+    <string name="encargado_gastos_new_title">Nuevo gasto</string>
+    <string name="encargado_gastos_concept_label">Concepto</string>
+    <string name="encargado_gastos_concept_warning">Solo se permiten letras y números</string>
+    <string name="encargado_gastos_category_label">Categoría</string>
+    <string name="encargado_gastos_category_warning">Solo se permiten letras</string>
+    <string name="encargado_gastos_amount_label">Monto</string>
+    <string name="encargado_gastos_date_label">Fecha</string>
+    <string name="encargado_gastos_create_button">Crear Gasto</string>
+    <string name="encargado_gastos_choose_date">Elegir fecha</string>
+
+    <!-- Encargado: Reportes -->
+    <string name="encargado_reportes_title">Reporte mensual</string>
+    <string name="encargado_reportes_col_periodo">Periodo</string>
+    <string name="encargado_reportes_col_servicios">Servicios</string>
+    <string name="encargado_reportes_col_asesorias">Asesorías</string>
+    <string name="encargado_reportes_col_gastos">Gastos</string>
+    <string name="encargado_reportes_col_total">Total</string>
+
+    <!-- Encargado: Servicios -->
+    <string name="encargado_servicios_new_button">Nuevo Servicio</string>
+    <string name="encargado_servicios_delete_confirm_title">¿Eliminar servicio?</string>
+    <string name="encargado_servicios_edit_title">Editar servicio</string>
+    <string name="encargado_servicios_new_title">Nuevo servicio</string>
+    <string name="encargado_servicios_name_label">Nombre</string>
+    <string name="encargado_servicios_name_warning">Solo se permiten letras y números</string>
+    <string name="encargado_servicios_duration_label">Duración (días)</string>
+    <string name="encargado_servicios_duration_warning">Solo se permiten números</string>
+    <string name="encargado_servicios_duration_error">Debe ser mayor a 0</string>
+    <string name="encargado_servicios_cost_label">Costo</string>
+    <string name="encargado_servicios_create_button">Crear Servicio</string>
+
+    <!-- Encargado: Usuarios / Personal -->
+    <string name="encargado_usuarios_add_button">Agregar personal</string>
+    <string name="encargado_usuarios_delete_confirm_title">¿Eliminar al personal?</string>
+    <string name="encargado_usuarios_new_staff_title">Nuevo personal</string>
+    <string name="encargado_usuarios_edit_staff_title">Editar personal</string>
+    <string name="encargado_usuarios_email_assigned">Correo asignado</string>
+    <string name="encargado_usuarios_initial_pwd_notice">La contraseña inicial es Axolotl2026 y se envía al correo del usuario.</string>
+    <string name="encargado_usuarios_role_label">Rol</string>
+    <string name="encargado_usuarios_advisory_cost_label">Costo asesoría</string>
+    <string name="encargado_usuarios_max_capacity_label">Capacidad máxima</string>
+    <string name="encargado_usuarios_create_staff_button">Crear personal</string>
+    <string name="encargado_usuarios_status_label">Estado</string>
+
+    <!-- Recepción: Clientes Screen -->
+    <string name="recepcion_clients_inside_since">Dentro · desde %1$s</string>
+    <string name="recepcion_clients_outside">Fuera</string>
+
+    <!-- Recepción: Registro Rostro -->
+    <string name="recepcion_face_reg_look_camera">Pide al cliente que mire a la cámara</string>
+    <string name="recepcion_face_reg_save_error">No se pudo guardar el rostro</string>
+    <string name="recepcion_face_reg_update_title">Actualizar rostro</string>
+    <string name="recepcion_face_reg_register_title">Registrar rostro</string>
+    <string name="recepcion_face_model_load_error">No se pudo cargar el modelo facial</string>
+
+    <!-- Recepción: Acceso Facial Scanner -->
+    <string name="recepcion_scanner_title">Reconocimiento facial</string>
+    <string name="recepcion_scanner_scan_face_title">Escanear rostro</string>
+    <string name="recepcion_scanner_stand_in_front">Colócate frente a la cámara</string>
+    <string name="recepcion_scanner_verifying">Verificando…</string>
+    <string name="recepcion_scanner_client_info_title">Información del cliente</string>
+    <string name="recepcion_scanner_empty_prompt">Escanea un rostro para ver la información del cliente</string>
+    <string name="recepcion_scanner_membership_prefix">Membresía: %1$s</string>
+    <string name="recepcion_scanner_inside_since">Dentro desde %1$s</string>
+    <string name="recepcion_scanner_entry_btn">Entrada</string>
+    <string name="recepcion_scanner_exit_btn">Salida</string>
+    <string name="recepcion_scanner_inside_count">Dentro: %1$d</string>
+    <string name="recepcion_scanner_db_error">Sin conexión con la base de datos</string>
+    <string name="recepcion_scanner_denied_inactive">Acceso denegado: membresía inactiva. Pasa a renovar</string>
+    <string name="recepcion_scanner_repeated">%1$s ya fue registrado hace un momento</string>
+    <string name="recepcion_scanner_already_inside">%1$s ya tiene una entrada registrada</string>
+    <string name="recepcion_scanner_no_entry">%1$s no tiene una entrada abierta</string>
+    <string name="recepcion_scanner_denied_unregistered">Acceso denegado: rostro no registrado</string>
+    <string name="recepcion_scanner_entry_success">%1$s ha ingresado · %2$s</string>
+    <string name="recepcion_scanner_exit_success">%1$s ha salido</string>
+    <string name="recepcion_scanner_duration_less_min">menos de 1 min</string>
+
+    <!-- Recepción: Solicitudes -->
+    <string name="recepcion_solicitudes_pending_badge">%1$d pendientes</string>
+    <string name="recepcion_solicitudes_empty">No hay solicitudes</string>
+    <string name="recepcion_solicitudes_confirm_title">Confirmar</string>
+    <string name="recepcion_solicitudes_confirm_approve_text">¿Estás seguro de aprobar la solicitud de %1$s con %2$s?</string>
+    <string name="recepcion_solicitudes_confirm_reject_text">¿Estás seguro de rechazar la solicitud de %1$s con %2$s?</string>
+    <string name="recepcion_solicitudes_approve_btn">Aprobar</string>
+    <string name="recepcion_solicitudes_reject_btn">Rechazar</string>
+    <string name="recepcion_solicitudes_status_approved">Aprobada</string>
+    <string name="recepcion_solicitudes_status_rejected">Rechazada</string>
+    <string name="recepcion_solicitudes_status_pending">Pendiente</string>
+    <string name="cliente_asesorias_cancel">Cancelar</string>
+
+    <!-- Legal -->
+    <string name="legal_back">Regresar</string>
+    <string name="legal_last_updated">Última actualización: Noviembre 2026</string>
+
+    <!-- Additional UI Strings -->
+    <string name="encargado_gastos_delete_confirm_message">Se eliminará el gasto %1$s. Esta acción no se puede deshacer.</string>
+    <string name="encargado_gastos_card_category">Categoría: %1$s</string>
+    <string name="encargado_gastos_card_amount">Monto: %1$s</string>
+    <string name="encargado_gastos_card_date">Fecha: %1$s</string>
+    <string name="encargado_gastos_amount_warning">Solo números (máx. 2 decimales)</string>
+    <string name="encargado_servicios_delete_confirm_message">Se eliminará el servicio %1$s. Esta acción no se puede deshacer.</string>
+    <string name="encargado_servicios_card_duration">Duración: %1$s</string>
+    <string name="encargado_servicios_card_price">Precio: %1$s</string>
+    <string name="encargado_servicios_amount_warning">Solo números (máx. 2 decimales)</string>
+    <string name="encargado_usuarios_delete_confirm_message">%1$s se eliminará definitivamente del sistema. Esta acción no se puede deshacer.</string>
+    <string name="encargado_usuarios_confirm_create">¿Estás seguro de dar de alta a %1$s como %2$s?</string>
+    <string name="encargado_usuarios_confirm_save">¿Estás seguro de guardar los cambios de %1$s?</string>
+    <string name="encargado_confirm_register_client">¿Estás seguro de registrar a %1$s?</string>
+    <string name="encargado_confirm_save_client">¿Estás seguro de guardar los cambios de %1$s?</string>
+    <string name="encargado_confirm_renew_client">¿Estás seguro de renovar a %1$s con el plan %2$s?</string>
+    <string name="encargado_peak_hour_display">Hora pico hoy: %1$s (%2$d personas). Entradas de hoy: %3$d</string>
+    <string name="day_mon">Lun</string>
+    <string name="day_tue">Mar</string>
+    <string name="day_wed">Mié</string>
+    <string name="day_thu">Jue</string>
+    <string name="day_fri">Vie</string>
+    <string name="day_sat">Sáb</string>
+    <string name="day_sun">Dom</string>
+    <string name="common_date_placeholder">dd/mm/aaaa</string>
+    <string name="recepcion_solicitudes_instructor_prefix">Instructor: %1$s</string>
+    <string name="recepcion_solicitudes_date_prefix">Fecha: %1$s</string>
+    <!-- General & Status -->
+    <string name="label_expires">Vence</string>
+    <string name="label_membership">Membresía</string>
+    <string name="label_registration">Registro</string>
+    <string name="label_inside">Dentro</string>
+    <string name="label_outside">Fuera</string>
+    <string name="label_inside_since">Dentro · desde %s</string>
+    <string name="btn_new_client">+ Nuevo cliente</string>
+    <string name="placeholder_search_client">Nombre o membresía</string>
+
+    <!-- Planes -->
+    <string name="plan_day">Visita / Día</string>
+    <string name="plan_monthly">Mensual</string>
+    <string name="plan_quarterly">Trimestral</string>
+    <string name="label_plan_prefix">Plan: %s</string>
+    <string name="bank_title">Banco</string>
+
+    <!-- Recepción / Scanner / Facial -->
+    <string name="facial_recognition_title">Reconocimiento facial</string>
+    <string name="scan_face">Escanear rostro</string>
+    <string name="client_info">Información del cliente</string>
+    <string name="scan_prompt">Escanea un rostro para ver la información del cliente</string>
+    <string name="label_instructor">Instructor</string>
+    <string name="label_date">Fecha</string>
+
+    <!-- Encargado: Personal / Staff -->
+    <string name="btn_add_staff">Agregar personal</string>
+    <string name="label_role">Rol</string>
+    <string name="label_email">Correo</string>
+    <string name="label_phone">Teléfono</string>
+
+    <!-- Encargado: Servicios -->
+    <string name="label_duration">Duración</string>
+    <string name="label_days">días</string>
+    <string name="label_price">Precio</string>
+    <string name="delete_service_confirm">Se eliminará el servicio %s. Esta acción no se puede deshacer.</string>
+
+    <!-- Encargado: Gastos -->
+    <string name="label_category">Categoría</string>
+    <string name="label_amount">Monto</string>
+    <string name="delete_expense_confirm">Se eliminará el gasto %s. Esta acción no se puede deshacer.</string>
+
+    <!-- Buttons & Labels -->
+    <string name="btn_accept">Aceptar</string>
+    <string name="btn_understood">Entendido</string>
+    <string name="label_status">Estado: </string>
+    <string name="encargado_clients_renew_title">Renovar a %1$s</string>
+
+    <!-- Terms and Conditions -->
+    <string name="term_1_title">1. Aceptación de los Términos</string>
+    <string name="term_1_content">Al acceder y utilizar la aplicación Axolotl Fitness Club (GymControl), el usuario declara haber leído, entendido y aceptado en su totalidad los presentes Términos y Condiciones de Uso Responsable. En caso de no estar de acuerdo, deberá abstenerse de utilizar la plataforma. La aceptación se hace en la pantalla de inicio de sesión, mediante una casilla que debe marcarse para poder iniciar sesión.</string>
+    <string name="term_2_title">2. Objeto del Servicio</string>
+    <string name="term_2_content">La aplicación es un servicio móvil para Android de Axolotl Fitness Club, que cuenta con sucursales. Permite controlar el acceso de los clientes, administrar membresías, solicitar asesorías con instructores, registrar pagos y generar reportes.</string>
+    <string name="term_3_title">3. Roles de Usuario</string>
+    <string name="term_3_content">La aplicación tiene cuatro tipos de usuario (cliente, instructor, recepción y dueño o encargado), y cada uno solo accede a las funciones de su rol.</string>
+    <string name="term_4_title">4. Capacidad para Usar la Aplicación</string>
+    <string name="term_4_content">Solo pueden usar la aplicación personas de 18 años o más.</string>
+    <string name="term_5_title">5. Uso Responsable de la Cuenta</string>
+    <string name="term_5_content">La cuenta y credenciales de acceso son de carácter personal e intransferible. El usuario es el único responsable de mantener la confidencialidad de sus credenciales y de toda actividad realizada desde su cuenta. Las cuentas las da de alta el personal; no hay autorregistro. La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo. Una cuenta inactiva no puede iniciar sesión. Tras 5 intentos fallidos, la cuenta se bloquea durante 15 minutos.</string>
+    <string name="term_6_title">6. Pagos, Membresías y Cancelaciones</string>
+    <string name="term_6_content">Las tarifas, vigencias de suscripciones y condiciones de renovación se rigen según el plan contratado. El acceso a las instalaciones está sujeto a encontrarse al corriente con el pago de la membresía correspondiente.\n\nExisten membresías de un día, mensual y trimestral. Una membresía está activa cuando su estado es activa y su fecha de vencimiento es la del día o posterior. Si está vencida, no se permite el ingreso hasta que se renueve. La renovación la hacen recepción o el encargado.\n\nSolo el encargado da de baja a un cliente, y la cuenta queda inactiva. Una cuenta inactiva por un tiempo determinado puede ser eliminada de forma manual por recepción o por el encargado.\n\nSe aceptan pagos en efectivo, con tarjeta y por transferencia. Recepción confirma los pagos en efectivo y con tarjeta; el encargado confirma las transferencias y también puede confirmar los otros dos. Un pago queda pendiente, aceptado o rechazado. Los montos se expresan en pesos mexicanos. La aplicación registra los pagos y no procesa cobros en línea. Los servicios adicionales, como el uso del instructor, se cobran aparte.</string>
+    <string name="term_7_title">7. Acceso al Gimnasio</string>
+    <string name="term_7_content">El cliente es identificado en recepción mediante reconocimiento facial. El primer escaneo registra la entrada y el siguiente, la salida, de forma automática; para entrar se necesita una membresía activa. Recepción se reserva el derecho de negar el ingreso. Está prohibido intentar entrar suplantando a otra persona.</string>
+    <string name="term_8_title">8. Aforo y Horarios de Afluencia</string>
+    <string name="term_8_content">La aplicación muestra una cantidad aproximada de personas dentro del gimnasio, calculada con los registros de entrada y salida. Es informativa y puede no coincidir exactamente con la real.</string>
+    <string name="term_9_title">9. Asesorías con Instructores</string>
+    <string name="term_9_content">El cliente solicita una asesoría con un instructor y la solicitud se aprueba o se rechaza. El costo lo define cada instructor y cada instructor tiene un máximo de clientes. El instructor define con cada cliente los días de asistencia y su objetivo.</string>
+    <string name="term_10_title">10. Avisos y Notificaciones</string>
+    <string name="term_10_content">El aviso de vencimiento de la membresía se envía al cliente fuera de la aplicación.</string>
+    <string name="term_11_title">11. Normas de Convivencia y Seguridad en las Instalaciones</string>
+    <string name="term_11_content">El uso del gimnasio exige respetar las normas internas de higiene, seguridad y uso adecuado de los equipos y pesas. Queda estrictamente prohibido el comportamiento ofensivo o que atente contra la integridad física de los usuarios y el personal.</string>
+    <string name="term_12_title">12. Salud y Condición Física</string>
+    <string name="term_12_content">El usuario reconoce que la actividad física implica riesgos inherentes. Es responsabilidad del usuario consultar con un médico antes de iniciar cualquier programa de entrenamiento y notificar cualquier condición médica relevante a los instructores. La aplicación no incluye seguimiento de progreso físico ni sustituye la opinión médica.</string>
+    <string name="term_13_title">13. Uso Aceptable de la Aplicación</string>
+    <string name="term_13_content">No se debe compartir la cuenta, intentar entrar a funciones de otro rol, manipular los datos del sistema ni usar la aplicación con fines ilícitos.</string>
+    <string name="term_14_title">14. Propiedad Intelectual</string>
+    <string name="term_14_content">La aplicación, su diseño, su código, el nombre y el logotipo Axolotl están protegidos por derechos de autor. © 2026 Axolotl. Todos los derechos reservados. Queda prohibido copiar, modificar, distribuir o hacer ingeniería inversa de la aplicación sin autorización por escrito de Axolotl.</string>
+    <string name="term_15_title">15. Disponibilidad del Servicio</string>
+    <string name="term_15_content">La aplicación depende de internet y de un servicio en la nube, por lo que no se garantiza que funcione sin interrupciones ni que esté disponible durante el mantenimiento.</string>
+    <string name="term_16_title">16. Datos Personales</string>
+    <string name="term_16_content">El tratamiento de los datos personales se rige por la Política de Privacidad.</string>
+    <string name="term_17_title">17. Suspensión y Terminación</string>
+    <string name="term_17_content">La baja de un cliente la hace el encargado y deja la cuenta inactiva.</string>
+    <string name="term_18_title">18. Modificaciones a los Términos</string>
+    <string name="term_18_content">El gimnasio se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor a partir de su publicación en la aplicación.</string>
+    <string name="term_19_title">19. Contacto</string>
+    <string name="term_19_content">Teléfono: +52 314 139 7633\nCorreo: contacto@axolotlgym.com</string>
+
+    <!-- Privacy Policy -->
+    <string name="privacy_1_title">1. Responsable del Tratamiento de los Datos</string>
+    <string name="privacy_1_content">Axolotl Fitness Club, gimnasio con sucursales. El tratamiento de los datos se realiza para todas sus sucursales. Los medios de contacto del responsable son el teléfono y el correo indicados en el punto 12.</string>
+    <string name="privacy_2_title">2. Información que Recopilamos</string>
+    <string name="privacy_2_content">Recopilamos la información necesaria para la prestación del servicio:\na) De todos los usuarios: nombre completo, correo electrónico, número de teléfono, contraseña (se guarda con hash y no puede leerse), rol, estado de la cuenta, fecha de registro, intentos fallidos de acceso y fecha de bloqueo temporal.\nb) Fotografía de perfil. La del cliente se toma en recepción al registrar su rostro y solo Recepción puede actualizarla; la del personal la toma el encargado al darlo de alta y puede actualizarla.\nc) Del cliente: tipo de membresía, fechas de inicio y vencimiento y estado de la membresía; registro de asistencias (fecha, hora, tipo entrada o salida y método de registro); pagos (monto, tipo de pago, estado, quién lo confirmó y fecha); solicitudes de asesoría y asesorías activas (instructor, días de asistencia y objetivo); y un contacto de emergencia. El cliente declara contar con la autorización de la persona cuyo dato proporciona como contacto de emergencia.\nd) Datos biométricos: representación numérica del rostro, usada para identificar al cliente al entrar.\ne) Del instructor: especialidad, horario, costo de la asesoría y máximo de clientes que puede atender.\nf) Datos de pago: monto, tipo y estado del pago.\ng) No se recaban fecha de nacimiento ni condiciones médicas.</string>
+    <string name="privacy_3_title">3. Finalidad del Tratamiento de Datos</string>
+    <string name="privacy_3_content">Los datos personales se utilizan exclusivamente para los fines de Axolotl:\n(a) autenticación e identificación del cliente para el control de acceso a las instalaciones mediante reconocimiento facial;\n(b) administración de membresías y pagos;\n(c) asignación y seguimiento de asesorías con instructores;\n(d) cálculo de la cantidad de personas dentro del gimnasio y generación de reportes de ingresos y gastos;\n(e) envío de notificaciones importantes sobre el servicio, como el aviso de vencimiento de la membresía, fuera de la aplicación; y\n(f) contactar a la persona indicada en caso de una emergencia del cliente.\n\nLos datos no se usan para ningún otro fin y no existen finalidades secundarias, como promociones o publicidad.</string>
+    <string name="privacy_4_title">4. Datos Biométricos (Reconocimiento Facial)</string>
+    <string name="privacy_4_content">El dato facial se usa solo para identificar al cliente al ingresar al gimnasio. Su consentimiento se solicita de forma expresa y separada al registrar el rostro del cliente.</string>
+    <string name="privacy_5_title">5. Quién Puede Ver los Datos</string>
+    <string name="privacy_5_content">a) El cliente ve sus propios datos.\nb) El instructor ve a los clientes que tiene asignados: nombre, días de asistencia y objetivo.\nc) Recepción ve nombre, tipo de membresía, fecha de vencimiento y foto del cliente al identificarlo y en su lista de clientes, y puede crear, editar y renovar clientes.\nd) El dueño o encargado administra usuarios, membresías, pagos, servicios y gastos, ve la foto de perfil de los clientes y consulta los reportes.</string>
+    <string name="privacy_6_title">6. No Compartimos sus Datos con Terceros</string>
+    <string name="privacy_6_content">Los datos no se venden, no se comparten y no se transfieren a terceros con ningún fin. La base de datos se aloja en Supabase, proveedor de servicio en la nube, únicamente para su almacenamiento.</string>
+    <string name="privacy_7_title">7. Protección y Confidencialidad</string>
+    <string name="privacy_7_content">Implementamos medidas de seguridad técnicas y administrativas para proteger la información personal contra acceso no autorizado, alteración, pérdida o divulgación indebida. En particular: las contraseñas se almacenan con hash; la aplicación no puede leerlas ni modificar las tablas de usuarios y roles; el rol se valida tanto en la aplicación como en funciones de la base de datos; y la cuenta se bloquea 15 minutos tras 5 intentos fallidos.</string>
+    <string name="privacy_8_title">8. Conservación y Eliminación de Datos</string>
+    <string name="privacy_8_content">Al dar de baja a un cliente, su cuenta queda inactiva. Una cuenta inactiva durante un tiempo determinado puede ser eliminada de forma manual por recepción o por el encargado.</string>
+    <string name="privacy_9_title">9. Derechos ARCO (Acceso, Rectificación, Cancelación y Oposición)</string>
+    <string name="privacy_9_content">El titular de los datos tiene derecho a consultar, rectificar o solicitar la eliminación de su información personal, a oponerse a su tratamiento y a revocar su consentimiento. Para ello puede dirigirse a la recepción de cualquier sucursal o comunicarse al teléfono +52 314 139 7633 o al correo contacto@axolotlgym.com.</string>
+    <string name="privacy_10_title">10. Mayoría de Edad</string>
+    <string name="privacy_10_content">La aplicación está dirigida únicamente a personas de 18 años o más y no recaba datos de menores.</string>
+    <string name="privacy_11_title">11. Cambios en la Política de Privacidad</string>
+    <string name="privacy_11_content">Nos reservamos el derecho de actualizar la presente Política de Privacidad en cualquier momento. Cualquier cambio será notificado oportunamente a través de la plataforma.</string>
+    <string name="privacy_12_title">12. Contacto en Materia de Privacidad</string>
+    <string name="privacy_12_content">Teléfono: +52 314 139 7633\nCorreo: contacto@axolotlgym.com</string>
+    <string name="privacy_13_title">13. Aceptación</string>
+    <string name="privacy_13_content">La Política de Privacidad y los Términos y Condiciones se muestran en la pantalla de inicio de sesión mediante enlaces, y el usuario debe marcar una casilla de aceptación para poder iniciar sesión.</string>
+    <string name="privacy_14_title">14. Marco Legal</string>
+    <string name="privacy_14_content">El tratamiento de los datos personales se rige por la legislación mexicana de protección de datos personales en posesión de particulares.</string>
+
+    <string name="label_membership_format">Membresía: %s</string>
+    <string name="label_expires_format">Vence: %s</string>
+    <string name="title_delete_staff">¿Eliminar al personal?</string>
+    <string name="delete_staff_confirm">%s se eliminará definitivamente del sistema. Esta acción no se puede deshacer.</string>
+    <string name="label_duration_format">Duración: %s</string>
+    <string name="label_price_format">Precio: %s</string>
+    <string name="label_category_format">Categoría: %s</string>
+    <string name="label_amount_format">Monto: %s</string>
+    <string name="label_date_format">Fecha: %s</string>
+    <string name="unit_day">día</string>
+    <string name="unit_days">días</string>
+    <string name="corresponsales_formatted">OXXO, 7-Eleven\nFarmacias del Ahorro</string>
+    <string name="title_monthly_report">Reporte mensual</string>
+    <string name="label_services">Servicios</string>
+    <string name="label_advisories">Asesorías</string>
+    <string name="label_expenses">Gastos</string>
+    <string name="label_total">Total</string>
+    <string name="label_total_format">Total: %s</string>
+
+    <!-- Encargado: Personal -->
+    <string name="confirm_add_staff">¿Estás seguro de dar de alta a %1$s como %2$s?</string>
+    <string name="staff_added_success">Alta realizada. Se envió la contraseña al correo.</string>
+    <string name="staff_added_warning">Alta realizada, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026</string>
+
+    <!-- Servicios -->
+    <string name="duration_days_format">%1$d %2$s</string>
+
+    <!-- Reconocimiento Facial -->
+    <string name="facial_prompt_camera">Colócate frente a la cámara</string>
+    <string name="facial_prompt_position_camera">Colócate frente a la cámara</string>
+    <string name="facial_prompt_center_face">Centra tu rostro en el recuadro</string>
+    <string name="facial_prompt_hold_still">No te muevas</string>
+    <string name="facial_prompt_look_camera">Mira a la cámara</string>
+    <string name="facial_prompt_ready_retire">Listo. Puedes retirarte de la cámara</string>
+    <string name="facial_prompt_single_person">Solo una persona frente a la cámara</string>
+    <string name="facial_prompt_come_closer">Acércate a la cámara</string>
+    <string name="facial_prompt_verifying">Verificando…</string>
+    <string name="facial_prompt_saving">Guardando rostro…</string>
+    <string name="facial_prompt_ask_client">Pide al cliente que mire a la cámara</string>
+    <string name="facial_registered_success">Rostro de %s registrado</string>
+
+    <!-- Plurales / Días de Servicios -->
+    <plurals name="days_count">
+        <item quantity="one">%d día</item>
+        <item quantity="other">%d días</item>
+    </plurals>
+
+    <!-- Recepción: Clientes y Diálogos -->
+    <string name="confirm_register_client">¿Estás seguro de registrar a %s?</string>
+    <string name="confirm_save_client_changes">¿Estás seguro de guardar los cambios de %s?</string>
+    <string name="client_registered_success_email">Cliente %s registrado. Se envió su membresía y contraseña al correo.</string>
+    <string name="client_registered_warning_email">Cliente %s registrado, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026</string>
+
+    <!-- Validación de Campos -->
+    <string name="error_phone_10_digits">Deben ser 10 dígitos (%1$d/10)</string>
+
+    <!-- Dashboard -->
+    <string name="peak_hour_today">Hora pico: %1$s (%2$d personas). Entradas de hoy: %3$d</string>
+
+    <!-- Personal -->
+    <string name="confirm_edit_staff">¿Estás seguro de guardar los cambios de %s?</string>
+
+    <!-- Servicios -->
+    <string name="service_duration_format">%1$d %2$s</string>
+
+    <!-- Recepción e Información de Cliente -->
+    <string name="client_info_title">Información del cliente</string>
+    <string name="scan_face_prompt">Escanea un rostro para ver la información del cliente</string>
+    <string name="status_label">Estado: %s</string>
+    <string name="inside_since_format">Dentro desde %s</string>
+
+    <!-- Mensajes de Entrada y Salida con Variables Dinámicas -->
+    <string name="access_entered_at">%1$s ha ingresado - %2$s</string>
+    <string name="access_already_registered_just_now">%s ya fue registrado hace un momento</string>
+    <string name="access_already_registered_ago">%1$s ya fue registrado %2$s</string>
+    <string name="access_exited_under_minute">%1$s ha salido. Estuvo menos de un minuto</string>
+    <string name="access_exited_short_time">%1$s ha salido. Estuvo menos de %2$d minutos</string>
+    <string name="access_exited_duration">%1$s ha salido. Estuvo %2$s</string>
+
+    <!-- Validaciones de Acceso Facial -->
+    <string name="access_already_inside">%s ya tiene una entrada registrada</string>
+    <string name="access_no_open_entry">%s no tiene una entrada abierta</string>
+    <string name="access_denied_inactive">Acceso denegado: membresía inactiva. Pasa a renovar</string>
+    <string name="access_denied_unregistered_face">Acceso denegado: rostro no registrado</string>
+    <string name="access_error_no_connection">Sin conexión con la base de datos</string>
+</resources>

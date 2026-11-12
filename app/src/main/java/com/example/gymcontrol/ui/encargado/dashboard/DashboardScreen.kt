@@ -5,8 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.ClientesMesRow
+import com.example.gymcontrol.data.remote.IngresoDiaRow
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.OcupacionRepository
 import com.example.gymcontrol.data.remote.OcupacionRow
 import com.example.gymcontrol.data.remote.ResumenRepository
@@ -18,16 +23,27 @@ import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SimpleBarChart
 import com.example.gymcontrol.ui.components.StatCard
 import com.example.gymcontrol.ui.components.StatIconType
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 import java.util.Locale
 
-private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Gastos", "Reportes")
+private val ADMIN_SECTIONS = listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
 
 @Composable
 fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
     var ocupacion by remember { mutableStateOf<List<OcupacionRow>>(emptyList()) }
     var resumen by remember { mutableStateOf<ResumenRow?>(null) }
+    var clientesMes by remember { mutableStateOf<List<ClientesMesRow>>(emptyList()) }
+    var ingresosDia by remember { mutableStateOf<List<IngresoDiaRow>>(emptyList()) }
+    var dentro by remember { mutableStateOf<Int?>(null) }
+
+    // Personas dentro ahora (entradas − salidas de hoy), cada 5 segundos
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { dentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
+            delay(5_000)
+        }
+    }
 
     // Se actualiza cada 30 segundos
     LaunchedEffect(Unit) {
@@ -39,6 +55,16 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             }
             try {
                 resumen = ResumenRepository.obtener()
+            } catch (e: Exception) {
+                // si falla, se conserva lo último que se cargó
+            }
+            try {
+                clientesMes = ResumenRepository.clientesPorMes()
+            } catch (e: Exception) {
+                // si falla, se conserva lo último que se cargó
+            }
+            try {
+                ingresosDia = ResumenRepository.ingresosSemana()
             } catch (e: Exception) {
                 // si falla, se conserva lo último que se cargó
             }
@@ -56,16 +82,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
         val hora = "%02d:00".format(h)
         hora to (conteo[hora] ?: 0)
     }
-    val maximo = datos.maxOfOrNull { it.second } ?: 0
     val pico = datos.maxByOrNull { it.second }?.takeIf { it.second > 0 }
-    val colores = datos.map { (_, n) ->
-        when {
-            maximo == 0 -> GymColors.Gold
-            n * 3 >= maximo * 2 -> GymColors.Red
-            n * 3 >= maximo -> GymColors.Gold
-            else -> GymColors.Green
-        }
-    }
 
     GymScaffold(
         currentSection = "Dashboard",
@@ -81,42 +98,53 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 StatCard(
-                    title = "Clientes Activos",
+                    title = stringResource(R.string.encargado_stat_people_inside_now),
+                    value = dentro?.toString() ?: "—",
+                    valueColor = ClienteTema.AzulSel,
+                    iconType = StatIconType.PERSON,
+                    iconColor = ClienteTema.AzulSel,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            item {
+                StatCard(
+                    title = stringResource(R.string.encargado_stat_active_clients),
                     value = "$activos",
-                    valueColor = GymColors.Green,
+                    valueColor = ClienteTema.Verde,
                     iconType = StatIconType.PERSON,
-                    iconColor = GymColors.Green,
+                    iconColor = ClienteTema.Verde,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             item {
                 StatCard(
-                    title = "Clientes Inactivos",
+                    title = stringResource(R.string.encargado_stat_inactive_clients),
                     value = "$inactivos",
-                    valueColor = GymColors.Red,
+                    valueColor = ClienteTema.Rojo,
                     iconType = StatIconType.PERSON,
-                    iconColor = GymColors.Red,
+                    iconColor = ClienteTema.Rojo,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             item {
                 StatCard(
-                    title = "Ingresos del mes",
+                    title = stringResource(R.string.encargado_stat_month_income),
                     value = ingresosTexto,
-                    valueColor = GymColors.Gold,
+                    valueColor = ClienteTema.AzulSel,
                     iconType = StatIconType.MONEY,
-                    iconColor = GymColors.Gold,
+                    iconColor = ClienteTema.AzulSel,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             item {
                 SimpleBarChart(
-                    title = "Personas por hora (hoy)",
+                    title = stringResource(R.string.encargado_chart_hourly_occupancy),
                     entries = datos.map { BarEntry(it.first.take(2), it.second.toFloat()) },
-                    barColors = colores,
+                    barColor = ClienteTema.AzulSel,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -124,8 +152,13 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             if (pico != null) {
                 item {
                     Text(
-                        text = "Hora pico: ${pico.first} (${pico.second} personas). Entradas de hoy: ${datos.sumOf { it.second }}",
-                        color = GymColors.TextSecondary,
+                        text = stringResource(
+                            R.string.peak_hour_today,
+                            pico.first,
+                            pico.second,
+                            datos.sumOf { it.second }
+                        ),
+                        color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )
                 }
@@ -133,33 +166,35 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 GroupedBarChart(
-                    title = "Clientes Activos/Inactivos",
-                    entries = listOf(
-                        GroupedBarEntry("Ene", 830f, 330f),
-                        GroupedBarEntry("Feb", 540f, 570f),
-                        GroupedBarEntry("Mar", 370f, 160f),
-                        GroupedBarEntry("Abr", 290f, 350f),
-                        GroupedBarEntry("May", 520f, 400f),
-                        GroupedBarEntry("Jun", 660f, 390f),
-                        GroupedBarEntry("Jul", 270f, 520f),
-                        GroupedBarEntry("Ago", 370f, 240f),
-                        GroupedBarEntry("Sep", 420f, 790f),
-                        GroupedBarEntry("Oct", 570f, 150f),
-                        GroupedBarEntry("Nov", 330f, 60f),
-                        GroupedBarEntry("Dic", 150f, 250f)
-                    ),
+                    title = stringResource(R.string.encargado_chart_clients_status),
+                    entries = clientesMes.map {
+                        GroupedBarEntry(
+                            ResumenRepository.mesCorto(it.periodo),
+                            it.activos.toFloat(),
+                            it.inactivos.toFloat()
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
             item {
                 SimpleBarChart(
-                    title = "Ingresos por Día",
-                    entries = listOf(
-                        BarEntry("Lun", 210f), BarEntry("Mar", 270f), BarEntry("Mié", 155f),
-                        BarEntry("Jue", 310f), BarEntry("Vie", 185f), BarEntry("Sáb", 345f)
-                    ),
-                    barColor = GymColors.Gold,
+                    title = stringResource(R.string.encargado_chart_income_per_day),
+                    // El domingo solo aparece si ese día hubo cobros.
+                    // El total llega 100 veces más grande, por eso se divide entre 100.
+                    entries = ingresosDia
+                        .filter { it.diaSemana != 7 || it.total > 0.0 }
+                        .map {
+                            BarEntry(
+                                ResumenRepository.diaCorto(it.diaSemana),
+                                (it.total / 100.0).toFloat()
+                            )
+                        },
+                    barColor = ClienteTema.AzulSel,
+                    // Eje fijo de 5 en 5: 0, 5, 10... hasta 30 (solo crece si un dato lo supera)
+                    yStep = 5f,
+                    yMax = 30f,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

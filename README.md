@@ -6,13 +6,14 @@ Proyecto base para Android Studio creado en Kotlin + Jetpack Compose.
 
 ### Cliente
 - Login por número de membresía y contraseña.
-- Inicio con QR de acceso, horario y ocupación por hora.
+- Inicio con personas dentro del gimnasio (acceso por reconocimiento facial), horario y ocupación por hora.
 - Asesorías con instructores, costo y botón Solicitar/Pendiente.
 - Perfil editable, membresía, estado y cambio de contraseña.
 
 ### Recepción
 - Login por correo y contraseña.
-- Vista principal de escaneo QR.
+- Vista principal de acceso por reconocimiento facial (entrada = 1 / salida = 0, automático).
+- Registro del rostro del cliente desde Clientes (tocar la foto del cliente).
 - Clientes con buscador, membresía, fecha de registro, estado y renovación.
 - Formulario para nuevo cliente.
 - Solicitudes de asesoría con aprobación/rechazo.
@@ -105,6 +106,15 @@ Cuando termines la app, elimina `RoleDevMenu()` de `GymNavGraph.kt` y crea la na
 2. Crear ViewModels.
 3. Definir contrato real del backend.
 4. Implementar autenticación.
-5. Implementar QR/cámara.
+5. Implementar reconocimiento facial/cámara (ver `sql/reconocimiento_facial.sql`).
 6. Conectar CRUD de com.example.gymcontrol.ui.encargado.clientes, usuarios, servicios y gastos.
 7. Implementar solicitudes y reportes.
+
+## Reconocimiento facial
+
+- Base de datos: correr una vez `sql/reconocimiento_facial.sql` en Supabase (SQL Editor).
+- Modelo: `app/src/main/assets/mobilefacenet.tflite` (MobileFaceNet, licencia BSD-3, de FaceRecognitionAuth de Marcos Carlomagno).
+- Detección: ML Kit Face Detection; si hay varias personas se toma el rostro más cercano (el más grande).
+- Solo se guarda un vector de 192 números por cliente (`rostros_clientes`), nunca fotos.
+- Movimientos en `registros_acceso` (`es_entrada`: TRUE = entrada, FALSE = salida) y estado en `clientes.dentro`.
+- Umbral de similitud: `_umbral_rostro()` en el SQL (0.70).

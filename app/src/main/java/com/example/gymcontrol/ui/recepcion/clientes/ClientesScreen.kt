@@ -18,23 +18,38 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.R
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.data.remote.CorreoRepository
 import com.example.gymcontrol.data.remote.PlanRow
-import com.example.gymcontrol.ui.components.SesionActual
-import kotlinx.coroutines.launch
+import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.FotoClienteAvatar
+import com.example.gymcontrol.ui.components.FotoClienteDialog
+import com.example.gymcontrol.ui.components.FotosClientes
+import androidx.compose.ui.graphics.ImageBitmap
 import com.example.gymcontrol.ui.components.GymScaffold
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.components.SesionActual
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-private val CardBorder = Brush.linearGradient(listOf(GymColors.Purple, GymColors.Gold))
-private val RECEPCION_SECTIONS = listOf("Home", "Clientes", "Solicitudes")
+// Getter: se recalcula al cambiar entre modo claro y oscuro
+private val CardBorder
+    get() = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
 private val ActionButtonWidth = 96.dp
 private val ActionButtonHeight = 36.dp
@@ -50,9 +65,20 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var errorForm by remember { mutableStateOf<String?>(null) }
     var renovando by remember { mutableStateOf<ClienteRow?>(null) }
     var info by remember { mutableStateOf<String?>(null) }
-    // Pregunta "¿Estás seguro?" pendiente: mensaje + acción
+    var conRostro by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var registrandoRostro by remember { mutableStateOf<ClienteRow?>(null) }
+    var viendoFoto by remember { mutableStateOf<Pair<ClienteRow, ImageBitmap>?>(null) }
+    // Sube cada vez que se registra o actualiza el rostro, para recargar su foto en la lista
+    var versionFoto by remember { mutableStateOf(mapOf<Long, Int>()) }
+    var dentro by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
+
+    val msgRegister = stringResource(R.string.confirm_register_client, "%s")
+    val msgSave = stringResource(R.string.confirm_save_client_changes, "%s")
+    val successEmailFormat = stringResource(R.string.client_registered_success_email, "%s")
+    val warningEmailFormat = stringResource(R.string.client_registered_warning_email, "%s")
+    val msgRenew = stringResource(R.string.encargado_confirm_renew_client, "%s", "%s")
 
     suspend fun recargar() {
         try {
@@ -61,6 +87,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
         } catch (e: Exception) {
             errorMsg = "No se pudo cargar: ${e.message}"
         }
+        try { conRostro = AccesoFacialRepository.clientesConRostro() } catch (_: Exception) {}
     }
 
     fun mensaje(e: Exception, def: String) = e.message?.substringBefore("\nCode:") ?: def
@@ -70,13 +97,26 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
         try { planes = ClientesRepository.planes() } catch (_: Exception) {}
     }
 
+    LaunchedEffect(Unit) {
+        launch {
+            try {
+                AccesoFacialRepository.movimientos().collect {
+                    try { dentro = AccesoFacialRepository.clientesDentro() } catch (_: Exception) {}
+                }
+            } catch (_: Exception) {}
+        }
+        while (true) {
+            try { dentro = AccesoFacialRepository.clientesDentro() } catch (_: Exception) {}
+            delay(30_000)
+        }
+    }
+
     val clients = todos.filter {
         it.nombre.contains(search, true) || it.numeroMembresia.contains(search, true)
     }
 
     GymScaffold(
         currentSection = "Clientes",
-        sections = RECEPCION_SECTIONS,
         onNavigate = onNavigate
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -91,19 +131,21 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     OutlinedTextField(
                         value = search,
                         onValueChange = { search = it },
-                        placeholder = { Text("Nombre o membresía", color = GymColors.TextSecondary) },
+                        placeholder = { Text(stringResource(R.string.placeholder_search_client), color = ClienteTema.TextoSec) },
                         leadingIcon = {
-                            Icon(Icons.Filled.Search, contentDescription = null, tint = GymColors.TextSecondary)
+                            Icon(Icons.Filled.Search, contentDescription = null, tint = ClienteTema.TextoSec)
                         },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GymColors.Purple,
-                            unfocusedBorderColor = GymColors.Border,
-                            focusedTextColor = GymColors.TextPrimary,
-                            unfocusedTextColor = GymColors.TextPrimary,
-                            cursorColor = GymColors.Gold
+                            focusedBorderColor = ClienteTema.AzulSel,
+                            unfocusedBorderColor = ClienteTema.Borde,
+                            focusedTextColor = ClienteTema.Texto,
+                            unfocusedTextColor = ClienteTema.Texto,
+                            cursorColor = ClienteTema.AzulSel,
+                            focusedContainerColor = ClienteTema.CampoFondo,
+                            unfocusedContainerColor = ClienteTema.CampoFondo
                         )
                     )
                 }
@@ -115,27 +157,37 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             errorForm = null
                             showForm = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ClienteTema.AzulSel,
+                            contentColor = ClienteTema.SobreDorado
+                        ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Nuevo Cliente", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.btn_new_client), fontWeight = FontWeight.Bold)
                     }
                 }
 
-                errorMsg?.let { msg -> item { Text(msg, color = GymColors.Red) } }
-                info?.let { msg -> item { Text(msg, color = GymColors.Green, fontSize = 13.sp) } }
+                errorMsg?.let { msg -> item { Text(msg, color = ClienteTema.Rojo, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) } }
+                info?.let { msg -> item { Text(msg, color = ClienteTema.Verde, fontSize = 13.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth()) } }
 
                 itemsIndexed(clients) { _, client ->
                     ClientCard(
+                        clienteId = client.id,
                         name = client.nombre,
-                        membership = client.numeroMembresia.ifBlank { "—" } +
-                                if (client.fechaFin != null) " · vence ${ClientesRepository.fechaApp(client.fechaFin)}"
-                                else " · sin membresía",
+                        membershipNum = client.numeroMembresia,
+                        fechaFin = client.fechaFin,
                         registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
+                        tieneRostro = client.id in conRostro,
+                        recargaFoto = versionFoto[client.id] ?: 0,
+                        dentroDesde = dentro[client.id],
+                        // Con foto: se ve en grande (y desde ahí se puede actualizar el rostro)
+                        onRostro = { foto ->
+                            if (foto != null) viendoFoto = client to foto else registrandoRostro = client
+                        },
                         onEdit = {
                             editing = client
                             errorForm = null
@@ -148,8 +200,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 if (clients.isEmpty()) {
                     item {
                         Text(
-                            text = "No se encontraron clientes",
-                            color = GymColors.TextSecondary,
+                            text = stringResource(R.string.encargado_clients_not_found),
+                            color = ClienteTema.TextoSec,
                             fontSize = 14.sp,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -163,6 +215,13 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             if (showForm) {
                 val c = editing
                 val partes = c?.nombre?.trim()?.split(" ", limit = 2)
+                // Al editar se carga el contacto de emergencia que ya tiene el cliente
+                var contacto by remember(c?.id) { mutableStateOf<ContactoEmergencia?>(null) }
+                LaunchedEffect(c?.id) {
+                    if (c != null) contacto = try {
+                        ClientesRepository.contactoEmergencia(SesionActual.correo ?: "", c.id)
+                    } catch (_: Exception) { null }
+                }
                 ClientFormDialog(
                     isEditing = c != null,
                     plans = planes.map { it.nombre },
@@ -171,26 +230,30 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     initialLastName = partes?.getOrNull(1) ?: "",
                     initialPhone = c?.telefono ?: "",
                     initialEmail = c?.gmail ?: "",
+                    initialContactName = contacto?.nombre ?: "",
+                    initialContactPhone = contacto?.telefono ?: "",
                     onDismiss = {
                         showForm = false
                         editing = null
                         errorForm = null
                     },
-                    onSave = { nombre, telefono, correo, plan ->
+                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo ->
                         if (c == null) {
-                            confirmar = "¿Estás seguro de registrar a $nombre?" to {
+                            confirmar = String.format(Locale.getDefault(), msgRegister, nombre) to {
                                 scope.launch {
                                     try {
                                         val nuevo = ClientesRepository.crear(
                                             nombre, telefono, correo, plan ?: "",
-                                            SesionActual.correo ?: ""
+                                            SesionActual.correo ?: "",
+                                            contactoNombre, contactoTelefono, metodo
                                         )
                                         showForm = false
                                         errorForm = null
                                         recargar()
                                         val enviado = CorreoRepository.enviarBienvenida(correo)
-                                        info = if (enviado) "Cliente ${nuevo.numero} registrado. Se envió su membresía y contraseña al correo."
-                                        else "Cliente ${nuevo.numero} registrado, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026"
+                                        info = if (enviado) String.format(Locale.getDefault(), successEmailFormat, nuevo.numero)
+                                        else String.format(Locale.getDefault(), warningEmailFormat, nuevo.numero)
+                                        registrandoRostro = todos.firstOrNull { it.id == nuevo.id }
                                     } catch (e: Exception) {
                                         errorForm = mensaje(e, "No se pudo registrar")
                                     }
@@ -198,10 +261,10 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 Unit
                             }
                         } else {
-                            confirmar = "¿Estás seguro de guardar los cambios de ${c.nombre}?" to {
+                            confirmar = String.format(Locale.getDefault(), msgSave, c.nombre) to {
                                 scope.launch {
                                     try {
-                                        ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado)
+                                        ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado, contactoNombre, contactoTelefono)
                                         showForm = false
                                         editing = null
                                         errorForm = null
@@ -224,7 +287,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     onDismiss = { renovando = null },
                     onRenovar = { plan ->
                         renovando = null
-                        confirmar = "¿Estás seguro de renovar a ${cl.nombre} con el plan $plan?" to {
+                        confirmar = String.format(Locale.getDefault(), msgRenew, cl.nombre, plan) to {
                             scope.launch {
                                 try {
                                     val vence = ClientesRepository.renovar(cl.id, plan, SesionActual.correo ?: "")
@@ -240,13 +303,55 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
+            viendoFoto?.let { (cl, foto) ->
+                FotoClienteDialog(
+                    nombre = cl.nombre,
+                    foto = foto,
+                    onDismiss = { viendoFoto = null },
+                    accion = stringResource(R.string.foto_cliente_update_face) to {
+                        viendoFoto = null
+                        registrandoRostro = cl
+                    }
+                )
+            }
+
+            registrandoRostro?.let { cl ->
+                RegistroRostroDialog(
+                    cliente = cl,
+                    yaTieneRostro = cl.id in conRostro,
+                    onDismiss = { registrandoRostro = null },
+                    onRegistrado = {
+                        FotosClientes.olvidar(cl.id)  // la foto es nueva: se vuelve a descargar
+                        versionFoto = versionFoto + (cl.id to ((versionFoto[cl.id] ?: 0) + 1))
+                        conRostro = conRostro + cl.id
+                        registrandoRostro = null
+                        info = "Rostro de ${cl.nombre} registrado para el acceso"
+                    }
+                )
+            }
+
             confirmar?.let { (texto, accion) ->
                 AlertDialog(
                     onDismissRequest = { confirmar = null },
-                    containerColor = GymColors.Surface,
+                    containerColor = ClienteTema.Beige,
                     shape = RoundedCornerShape(16.dp),
-                    title = { Text("Confirmar", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold) },
-                    text = { Text(texto, color = GymColors.TextSecondary) },
+                    title = {
+                        Text(
+                            stringResource(R.string.common_confirm),
+                            color = ClienteTema.Texto,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    text = {
+                        Text(
+                            texto,
+                            color = ClienteTema.TextoSec,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
                     confirmButton = {
                         Button(
                             onClick = {
@@ -254,16 +359,19 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 accion()
                             },
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple)
-                        ) { Text("Sí, continuar", fontWeight = FontWeight.Bold) }
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = ClienteTema.AzulSel,
+                                contentColor = ClienteTema.SobreDorado
+                            )
+                        ) { Text(stringResource(R.string.common_yes_continue), fontWeight = FontWeight.Bold) }
                     },
                     dismissButton = {
                         OutlinedButton(
                             onClick = { confirmar = null },
                             shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, GymColors.Border),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
-                        ) { Text("Cancelar") }
+                            border = BorderStroke(1.dp, ClienteTema.Borde),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                        ) { Text(stringResource(R.string.cancel)) }
                     }
                 )
             }
@@ -273,50 +381,67 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 
 @Composable
 private fun ClientCard(
+    clienteId: Long,
     name: String,
-    membership: String,
+    membershipNum: String,
+    fechaFin: String?,
     registrationDate: String,
     isActive: Boolean,
+    tieneRostro: Boolean = false,
+    recargaFoto: Int = 0,
+    dentroDesde: String? = null,
+    onRostro: (ImageBitmap?) -> Unit = {},
     onEdit: () -> Unit,
     onRenovar: () -> Unit
 ) {
+    val labelMembership = stringResource(R.string.label_membership)
+    val labelRegistration = stringResource(R.string.label_registration)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(GymColors.Surface, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Espacio para la foto del cliente (círculo de relleno por ahora)
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .background(Color.Black, CircleShape)
-                .border(1.dp, GymColors.Border, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                tint = GymColors.TextSecondary,
-                modifier = Modifier.size(34.dp)
-            )
-        }
+        // Borde verde = rostro registrado. Al tocarla: foto en grande o registrar el rostro
+        FotoClienteAvatar(
+            clienteId = clienteId,
+            size = 52.dp,
+            borderWidth = if (tieneRostro) 2.dp else 1.dp,
+            borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
+            recarga = recargaFoto,
+            onClick = onRostro
+        )
 
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.height(8.dp))
-            Text("Membresía: $membership", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "$labelMembership: " + membershipNum.ifBlank { "—" },
+                color = ClienteTema.TextoSec,
+                fontSize = 17.sp
+            )
+            if (fechaFin != null) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(fechaFin)),
+                    color = ClienteTema.TextoSec,
+                    fontSize = 17.sp
+                )
+            }
             Spacer(Modifier.height(2.dp))
-            Text("Registro: $registrationDate", color = GymColors.TextSecondary, fontSize = 17.sp)
+            Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Spacer(Modifier.height(6.dp))
+            AccesoBadge(dentroDesde)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -325,11 +450,10 @@ private fun ClientCard(
             StatusBadge(isActive = isActive)
             Spacer(Modifier.height(10.dp))
 
-            // Activo -> lápiz | Inactivo -> botón "Renovar" (mismo tamaño)
             if (isActive) {
                 IconSquareButton(
                     icon = Icons.Filled.Edit,
-                    color = GymColors.Orange,
+                    color = ClienteTema.AzulSel,
                     onClick = onEdit,
                     modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
                 )
@@ -337,12 +461,12 @@ private fun ClientCard(
                 OutlinedButton(
                     onClick = onRenovar,
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.Orange),
-                    border = BorderStroke(1.dp, GymColors.Orange),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.AzulSel),
+                    border = BorderStroke(1.dp, ClienteTema.AzulSel),
                     modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("Renovar", fontSize = 17.sp)
+                    Text(stringResource(R.string.encargado_clients_renew_button), fontSize = 17.sp)
                 }
             }
         }
@@ -352,7 +476,7 @@ private fun ClientCard(
 @Composable
 private fun IconSquareButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -363,20 +487,46 @@ private fun IconSquareButton(
         contentAlignment = Alignment.Center
     ) {
         IconButton(onClick = onClick, modifier = Modifier.fillMaxSize()) {
-            Icon(icon, contentDescription = "Editar", tint = color, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = stringResource(R.string.common_edit), tint = color, modifier = Modifier.size(20.dp))
         }
     }
 }
 
 @Composable
+private fun AccesoBadge(dentroDesde: String?) {
+    val color = if (dentroDesde != null) ClienteTema.Verde else ClienteTema.TextoSec
+    val labelInsideSince = stringResource(R.string.label_inside_since, horaEntrada(dentroDesde ?: ""))
+    val labelOutside = stringResource(R.string.label_outside)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(10.dp).background(color, CircleShape))
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = if (dentroDesde != null) labelInsideSince else labelOutside,
+            color = color,
+            fontSize = 15.sp,
+            fontWeight = if (dentroDesde != null) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+private val HORA = DateTimeFormatter.ofPattern("hh:mm a", Locale.getDefault())
+
+private fun horaEntrada(iso: String): String =
+    runCatching { OffsetDateTime.parse(iso).atZoneSameInstant(ZoneId.systemDefault()).format(HORA) }
+        .getOrDefault("—")
+
+// Chip de estado: fondo pastel + borde del mismo color (se lee bien en claro y oscuro)
+@Composable
 private fun StatusBadge(isActive: Boolean) {
-    val color = if (isActive) GymColors.Green else GymColors.Red
-    val label = if (isActive) "Activo" else "Inactivo"
+    val color = if (isActive) ClienteTema.Verde else ClienteTema.Rojo
+    val fondo = if (isActive) ClienteTema.VerdePastel else ClienteTema.RojoPastel
+    val label = if (isActive) stringResource(R.string.status_active) else stringResource(R.string.status_inactive)
 
     Box(
         modifier = Modifier
             .size(ActionButtonWidth, ActionButtonHeight)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp)),
+            .background(fondo, RoundedCornerShape(10.dp))
+            .border(1.dp, color, RoundedCornerShape(10.dp)),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -398,12 +548,12 @@ private fun RenovarDialog(
     var plan by remember { mutableStateOf(cliente.plan ?: planes.firstOrNull()?.nombre ?: "") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = GymColors.Surface,
+        containerColor = ClienteTema.Beige,
         shape = RoundedCornerShape(16.dp),
-        title = { Text("Renovar a ${cliente.nombre}", color = GymColors.TextPrimary, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.encargado_clients_renew_title, cliente.nombre), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
         text = {
             Column {
-                Text("Elige el plan:", color = GymColors.TextSecondary)
+                Text(stringResource(R.string.encargado_clients_choose_plan), color = ClienteTema.TextoSec)
                 Spacer(Modifier.height(8.dp))
                 planes.forEach { p ->
                     Row(
@@ -413,28 +563,38 @@ private fun RenovarDialog(
                         RadioButton(
                             selected = plan == p.nombre,
                             onClick = { plan = p.nombre },
-                            colors = RadioButtonDefaults.colors(selectedColor = GymColors.Gold)
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = ClienteTema.AzulSel,
+                                unselectedColor = ClienteTema.TextoSec
+                            )
                         )
-                        Text("${p.nombre} · $${p.precio.toInt()}", color = GymColors.TextPrimary)
+                        Text("${p.nombre} · $${p.precio.toInt()}", color = ClienteTema.Texto)
                     }
                 }
             }
         },
         confirmButton = {
-            Button(
-                onClick = { onRenovar(plan) },
-                enabled = plan.isNotBlank(),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = GymColors.Purple)
-            ) { Text("Renovar", fontWeight = FontWeight.Bold) }
-        },
-        dismissButton = {
-            OutlinedButton(
-                onClick = onDismiss,
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, GymColors.Border),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = GymColors.TextPrimary)
-            ) { Text("Cancelar") }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
+                OutlinedButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, ClienteTema.Borde),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
+                ) { Text(stringResource(R.string.cancel)) }
+
+                Button(
+                    onClick = { onRenovar(plan) },
+                    enabled = plan.isNotBlank(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ClienteTema.AzulSel,
+                        contentColor = ClienteTema.SobreDorado
+                    )
+                ) { Text(stringResource(R.string.encargado_clients_renew_button), fontWeight = FontWeight.Bold) }
+            }
         }
     )
 }

@@ -16,13 +16,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.R
+import com.example.gymcontrol.ui.components.ClienteTema
 import kotlinx.coroutines.delay
 
 // El nombre debe tener al menos `min` letras (espacios y números no cuentan)
@@ -33,7 +36,10 @@ private fun nameHasMinLetters(s: String, min: Int = 3) = s.count { it.isLetter()
 fun ClientFormDialog(
     isEditing: Boolean,
     onDismiss: () -> Unit,
-    onSave: (nombre: String, telefono: String, correo: String, plan: String?) -> Unit,
+    onSave: (
+        nombre: String, telefono: String, correo: String, plan: String?,
+        contactoNombre: String, contactoTelefono: String, metodo: String
+    ) -> Unit,
     plans: List<String> = emptyList(),
     error: String? = null,
     // Datos con los que arranca el formulario (vacíos al crear, con los del cliente al editar)
@@ -41,7 +47,10 @@ fun ClientFormDialog(
     initialLastName: String = "",
     initialPhone: String = "",
     initialEmail: String = "",
-    initialPlan: String? = null
+    initialPlan: String? = null,
+    // Contacto de emergencia: solo nombre y teléfono (obligatorio)
+    initialContactName: String = "",
+    initialContactPhone: String = ""
 ) {
     var name by remember { mutableStateOf(initialName) }
     var lastName by remember { mutableStateOf(initialLastName) }
@@ -49,14 +58,20 @@ fun ClientFormDialog(
     var email by remember { mutableStateOf(initialEmail) }
     var selectedPlan by remember { mutableStateOf(initialPlan) }
     var planMenuExpanded by remember { mutableStateOf(false) }
+    var contactName by remember(initialContactName) { mutableStateOf(initialContactName) }
+    var contactPhone by remember(initialContactPhone) { mutableStateOf(initialContactPhone) }
+    var metodo by remember { mutableStateOf(com.example.gymcontrol.data.remote.METODOS_PAGO.first()) }
 
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
     // Reglas: nombre y apellido solo letras (mínimo 3), teléfono 10 dígitos, correo con formato válido, plan elegido
     val nameValid = nameHasMinLetters(name)
     val lastNameValid = nameHasMinLetters(lastName)
     val emailValid = Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+    // El contacto de emergencia es obligatorio: nombre (mínimo 3 letras) y teléfono de 10 dígitos
+    val contactValid = nameHasMinLetters(contactName) && contactPhone.length == 10
     val canSave = nameValid &&
+            contactValid &&
             lastNameValid &&
             phone.length == 10 &&
             emailValid &&
@@ -74,24 +89,27 @@ fun ClientFormDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(GymColors.Surface, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
                 .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (isEditing) "Editar cliente" else "Nuevo cliente",
-                    color = GymColors.TextPrimary,
+                    text = if (isEditing) stringResource(R.string.encargado_client_form_edit_title) else stringResource(R.string.encargado_client_form_new_title),
+                    color = ClienteTema.Texto,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = "Cerrar", tint = GymColors.TextSecondary)
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = ClienteTema.TextoSec)
                 }
             }
 
@@ -100,45 +118,77 @@ fun ClientFormDialog(
             RestrictedField(
                 value = name,
                 onValueChange = { name = it },
-                label = "Nombre",
+                label = stringResource(R.string.encargado_client_form_name_label),
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras",
-                errorText = if (name.isNotEmpty() && !nameValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_client_form_name_warning),
+                errorText = if (name.isNotEmpty() && !nameValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = lastName,
                 onValueChange = { lastName = it },
-                label = "Apellido",
+                label = stringResource(R.string.encargado_client_form_lastname_label),
                 accept = { s -> s.all { it.isLetter() || it == ' ' } },
                 maxLength = 30,
-                warningText = "Solo se permiten letras",
-                errorText = if (lastName.isNotEmpty() && !lastNameValid) "Mínimo 3 letras" else null
+                warningText = stringResource(R.string.encargado_client_form_name_warning),
+                errorText = if (lastName.isNotEmpty() && !lastNameValid) stringResource(R.string.encargado_client_form_min_letters) else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = "Teléfono",
+                label = stringResource(R.string.encargado_client_form_phone_label),
                 accept = { s -> s.all { it in '0'..'9' } },
                 maxLength = 10,
-                warningText = "Solo se permiten números",
+                warningText = stringResource(R.string.encargado_client_form_phone_warning),
                 keyboardType = KeyboardType.Number,
                 errorText = if (phone.isNotEmpty() && phone.length < 10) {
-                    "Deben ser 10 dígitos (${phone.length}/10)"
+                    stringResource(R.string.error_phone_10_digits, phone.length)
                 } else null
             )
             Spacer(Modifier.height(10.dp))
             RestrictedField(
                 value = email,
                 onValueChange = { email = it },
-                label = "Correo",
+                label = stringResource(R.string.encargado_client_form_email_label),
                 accept = { s -> s.none { it.isWhitespace() } },
                 maxLength = 60,
-                warningText = "El correo no lleva espacios",
+                warningText = stringResource(R.string.encargado_client_form_email_warning),
                 keyboardType = KeyboardType.Email,
-                errorText = if (email.isNotEmpty() && !emailValid) "Correo no válido" else null
+                errorText = if (email.isNotEmpty() && !emailValid) stringResource(R.string.encargado_client_form_email_invalid) else null
+            )
+            Spacer(Modifier.height(14.dp))
+            Text(
+                stringResource(R.string.client_form_emergency_title),
+                color = ClienteTema.Texto,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(6.dp))
+            RestrictedField(
+                value = contactName,
+                onValueChange = { contactName = it },
+                label = stringResource(R.string.client_form_emergency_name),
+                accept = { s -> s.all { it.isLetter() || it == ' ' } },
+                maxLength = 60,
+                warningText = stringResource(R.string.encargado_client_form_name_warning),
+                errorText = if (contactName.isNotBlank() && !nameHasMinLetters(contactName)) stringResource(R.string.encargado_client_form_min_letters)
+                else if (contactName.isBlank() && contactPhone.isNotEmpty()) stringResource(R.string.client_form_emergency_name_missing)
+                else null
+            )
+            Spacer(Modifier.height(10.dp))
+            RestrictedField(
+                value = contactPhone,
+                onValueChange = { contactPhone = it },
+                label = stringResource(R.string.client_form_emergency_phone),
+                accept = { s -> s.all { it in '0'..'9' } },
+                maxLength = 10,
+                warningText = stringResource(R.string.encargado_client_form_phone_warning),
+                keyboardType = KeyboardType.Number,
+                errorText = if (contactPhone.isNotEmpty() && contactPhone.length < 10) {
+                    "Deben ser 10 dígitos (${contactPhone.length}/10)"
+                } else null
             )
             Spacer(Modifier.height(10.dp))
 
@@ -150,10 +200,10 @@ fun ClientFormDialog(
                     value = selectedPlan ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text("Selecciona un plan", color = GymColors.TextSecondary) },
-                    label = { Text("Plan", color = GymColors.TextSecondary) },
+                    placeholder = { Text(stringResource(R.string.encargado_client_form_plan_placeholder), color = ClienteTema.TextoSec) },
+                    label = { Text(stringResource(R.string.encargado_client_form_plan_label), color = ClienteTema.TextoSec) },
                     trailingIcon = {
-                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = GymColors.TextSecondary)
+                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ClienteTema.TextoSec)
                     },
                     modifier = Modifier
                         .menuAnchor()
@@ -164,11 +214,11 @@ fun ClientFormDialog(
                 ExposedDropdownMenu(
                     expanded = planMenuExpanded,
                     onDismissRequest = { planMenuExpanded = false },
-                    modifier = Modifier.background(GymColors.Surface)
+                    modifier = Modifier.background(ClienteTema.Beige)
                 ) {
                     plans.forEach { plan ->
                         DropdownMenuItem(
-                            text = { Text(plan, color = GymColors.TextPrimary) },
+                            text = { Text(plan, color = ClienteTema.Texto) },
                             onClick = {
                                 selectedPlan = plan
                                 planMenuExpanded = false
@@ -178,9 +228,27 @@ fun ClientFormDialog(
                 }
             }
 
+            if (!isEditing) {
+                Spacer(Modifier.height(10.dp))
+                Text(stringResource(R.string.client_form_payment_method), color = ClienteTema.TextoSec, fontSize = 13.sp)
+                com.example.gymcontrol.data.remote.METODOS_PAGO.forEach { m ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = metodo == m,
+                            onClick = { metodo = m },
+                            colors = RadioButtonDefaults.colors(selectedColor = ClienteTema.AzulSel)
+                        )
+                        Text(m, color = ClienteTema.Texto, fontSize = 13.sp)
+                    }
+                }
+                if (metodo == "Transferencia") {
+                    Text(stringResource(R.string.client_form_transfer_note), color = ClienteTema.TextoSec, fontSize = 12.sp)
+                }
+            }
+
             error?.let {
                 Spacer(Modifier.height(8.dp))
-                Text(it, color = GymColors.Red, fontSize = 13.sp)
+                Text(it, color = ClienteTema.Rojo, fontSize = 13.sp)
             }
 
             Spacer(Modifier.height(18.dp))
@@ -191,20 +259,23 @@ fun ClientFormDialog(
                         "${name.trim()} ${lastName.trim()}".trim(),
                         phone,
                         email.trim(),
-                        selectedPlan
+                        selectedPlan,
+                        contactName.trim(),
+                        contactPhone,
+                        metodo
                     )
                 },
                 enabled = canSave,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GymColors.Purple,
-                    contentColor = GymColors.TextPrimary,
-                    disabledContainerColor = GymColors.Purple.copy(alpha = 0.45f),
-                    disabledContentColor = GymColors.TextPrimary.copy(alpha = 0.7f)
+                    containerColor = ClienteTema.Azul,
+                    contentColor = ClienteTema.Texto,
+                    disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
+                    disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                 ),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (isEditing) "Guardar" else "Crear Cliente", fontWeight = FontWeight.Bold)
+                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_client_form_create_button), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -212,17 +283,17 @@ fun ClientFormDialog(
 
 @Composable
 private fun fieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = GymColors.Purple,
-    unfocusedBorderColor = GymColors.Border,
-    focusedTextColor = GymColors.TextPrimary,
-    unfocusedTextColor = GymColors.TextPrimary,
-    focusedLabelColor = GymColors.Purple,
-    cursorColor = GymColors.Gold,
-    errorBorderColor = GymColors.Red,
-    errorTextColor = GymColors.TextPrimary,
-    errorLabelColor = GymColors.Red,
-    errorCursorColor = GymColors.Red,
-    errorSupportingTextColor = GymColors.Red
+    focusedBorderColor = ClienteTema.AzulSel,
+    unfocusedBorderColor = ClienteTema.Borde,
+    focusedTextColor = ClienteTema.Texto,
+    unfocusedTextColor = ClienteTema.Texto,
+    focusedLabelColor = ClienteTema.AzulSel,
+    cursorColor = ClienteTema.AzulSel,
+    errorBorderColor = ClienteTema.Rojo,
+    errorTextColor = ClienteTema.Texto,
+    errorLabelColor = ClienteTema.Rojo,
+    errorCursorColor = ClienteTema.Rojo,
+    errorSupportingTextColor = ClienteTema.Rojo
 )
 
 // Campo que rechaza lo que no cumple `accept` (muestra un aviso unos segundos)
@@ -259,7 +330,7 @@ private fun RestrictedField(
                 new.length <= maxLength -> onValueChange(new)
             }
         },
-        label = { Text(label, color = if (shownError != null) GymColors.Red else GymColors.TextSecondary) },
+        label = { Text(label, color = if (shownError != null) ClienteTema.Rojo else ClienteTema.TextoSec) },
         singleLine = true,
         isError = shownError != null,
         supportingText = if (shownError != null) {

@@ -1,13 +1,24 @@
 package com.example.gymcontrol.ui.cliente.home
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.Canvas
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.gymcontrol.ui.components.SesionActual
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,32 +30,74 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
-import com.example.gymcontrol.ui.components.BarEntry
-import com.example.gymcontrol.ui.components.ClienteScaffold
-import com.example.gymcontrol.ui.components.SimpleBarChart
-import com.example.gymcontrol.ui.theme.GymColors
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.qrcode.QRCodeWriter
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-
-private val Purple = Color(0xFFA54FD9)
-private val CardBackground = Color(0xFF1E1F20)
-private val TextPrimary = Color.White
-private val TextSecondary = Color(0xFFB5B5B5)
+import com.example.gymcontrol.data.remote.AccesoFacialRepository
+import com.example.gymcontrol.data.remote.AfluenciaRepository
+import com.example.gymcontrol.data.remote.AfluenciaRow
+import com.example.gymcontrol.data.remote.ResumenRepository
+import com.example.gymcontrol.data.remote.OcupacionRepository
+import com.example.gymcontrol.data.remote.OcupacionRow
+import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
+import com.example.gymcontrol.ui.components.ClienteTema
+import kotlinx.coroutines.delay
+import java.util.Calendar
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 @Composable
 fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
-    val membership = "M-1001" // TODO: tomar la membresía del cliente en sesión
+    // El nombre del cliente en sesión ya viene del login
+    val userName = SesionActual.nombre ?: ""
 
-    ClienteScaffold(
+    // Personas dentro del gimnasio ahora (entradas − salidas de hoy); se actualiza cada 5 s
+    var personasDentro by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { personasDentro = AccesoFacialRepository.ocupacionActual() } catch (_: Exception) { }
+            delay(5_000)
+        }
+    }
+
+    // Entradas de hoy por hora (vista ocupacion_por_hora); se actualiza cada 30 s
+    var ocupacion by remember { mutableStateOf<List<OcupacionRow>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { ocupacion = OcupacionRepository.hoy() } catch (_: Exception) { }
+            delay(30_000)
+        }
+    }
+
+    // Promedio real de entradas por día y hora (últimos 28 días); se actualiza cada 10 min
+    var afluencia by remember { mutableStateOf<List<AfluenciaRow>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            try { afluencia = AfluenciaRepository.semanal() } catch (_: Exception) { }
+            delay(600_000)
+        }
+    }
+
+    // Bloques de 2 horas de 6am a 12am, con 0 donde no hubo entradas
+    val conteo = ocupacion.associate { it.hora to it.personas }
+    val datosHora = (6..22 step 2).map { h ->
+        val etiqueta = when {
+            h < 12 -> "${h}am"
+            h == 12 -> "12pm"
+            else -> "${h - 12}pm"
+        }
+        val total = (conteo["%02d:00".format(h)] ?: 0) + (conteo["%02d:00".format(h + 1)] ?: 0)
+        etiqueta to total.toFloat()
+    }
+
+    ClienteScaffoldClaro(
         currentSection = "Inicio",
         onNavigate = onNavigate,
-        logoRes = R.drawable.logo_axolotl
+        logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
             modifier = Modifier
@@ -54,10 +107,12 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
             verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(vertical = 20.dp)
         ) {
+            item { WelcomeMessage(name = userName) }
+
             item {
                 Text(
-                    text = "Escanea código QR",
-                    color = TextPrimary,
+                    text = stringResource(R.string.cliente_facial_access_title),
+                    color = ClienteTema.Texto,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -65,35 +120,29 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Un contenido más largo genera un QR más denso (como el del mockup)
-                    QrCard(content = "AXOLOTL-GYM|ACCESO|$membership")
+                    AccesoFacialCard(personasDentro = personasDentro)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "QR de acceso · $membership",
-                        color = TextSecondary,
+                        text = stringResource(R.string.cliente_facial_camera_hint),
+                        color = ClienteTema.TextoSec,
                         fontSize = 13.sp
                     )
                 }
             }
 
             item {
-                SimpleBarChart(
-                    title = "Clientes ahora mismo",
-                    entries = listOf(
-                        BarEntry("6am", 25f), BarEntry("8am", 35f), BarEntry("10am", 30f),
-                        BarEntry("12pm", 15f), BarEntry("2pm", 27f), BarEntry("4pm", 42f),
-                        BarEntry("6pm", 47f), BarEntry("8pm", 55f), BarEntry("10pm", 63f),
-                        BarEntry("12am", 30f)
-                    ),
-                    barColor = GymColors.Gold,
-                    modifier = Modifier.fillMaxWidth()
+                BarrasClaro(
+                    titulo = stringResource(R.string.cliente_clients_now_title),
+                    datos = datosHora
                 )
             }
 
+            item { MenorAfluencia(afluencia) }
+
             item {
                 Text(
-                    text = "Horario del gimnasio: 06:00 - 22:00",
-                    color = TextSecondary,
+                    text = stringResource(R.string.cliente_gym_schedule),
+                    color = ClienteTema.TextoSec,
                     fontSize = 13.sp
                 )
             }
@@ -101,52 +150,308 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
     }
 }
 
+private fun etiquetaHora(h: Int): String = when {
+    h == 0 || h == 24 -> "12am"
+    h < 12 -> "${h}am"
+    h == 12 -> "12pm"
+    else -> "${h - 12}pm"
+}
+
+/**
+ * Horarios de menor afluencia: promedio de entradas del día elegido en bloques de 2 h
+ * y los 3 bloques más tranquilos. Cambia con los registros reales de entrada.
+ */
 @Composable
-private fun QrCard(content: String) {
-    Box(
-        modifier = Modifier
-            .size(250.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(CardBackground)
-            .drawBehind { drawCornerBrackets() },
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(184.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.White)
-                .padding(6.dp),
-            contentAlignment = Alignment.Center
+private fun MenorAfluencia(datos: List<AfluenciaRow>) {
+    val hoy = java.time.LocalDate.now().dayOfWeek.value
+    var dia by remember { mutableStateOf(hoy) }
+
+    val porHora = datos.filter { it.diaSemana == dia }.associate { it.hora to it.promedio }
+    val bloques = (6..22 step 2).map { h ->
+        h to ((porHora[h] ?: 0.0) + (porHora[h + 1] ?: 0.0)).toFloat()
+    }
+    val menores = bloques.sortedWith(compareBy({ it.second }, { it.first })).take(3)
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.cliente_least_busy_title),
+            color = ClienteTema.Texto,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            QrCode(content = content, modifier = Modifier.fillMaxSize())
+            (1..7).forEach { d ->
+                val sel = d == dia
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (sel) ClienteTema.AzulSel else ClienteTema.Beige)
+                        .clickable { dia = d }
+                        .padding(vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        ResumenRepository.diaCorto(d),
+                        color = if (sel) Color.White else ClienteTema.Texto,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+
+        if (datos.isEmpty()) {
+            Text(
+                stringResource(R.string.cliente_least_busy_empty),
+                color = ClienteTema.TextoSec,
+                fontSize = 13.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            return@Column
+        }
+
+        BarrasClaro(
+            titulo = stringResource(R.string.cliente_least_busy_chart),
+            datos = bloques.map { (h, v) -> etiquetaHora(h) to v }
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            stringResource(R.string.cliente_least_busy_best),
+            color = ClienteTema.Texto,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        menores.forEach { (h, v) ->
+            Text(
+                stringResource(
+                    R.string.cliente_least_busy_item,
+                    etiquetaHora(h), etiquetaHora(h + 2), "%.1f".format(v)
+                ),
+                color = ClienteTema.TextoSec,
+                fontSize = 14.sp
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.cliente_least_busy_note),
+            color = ClienteTema.TextoSec,
+            fontSize = 11.sp
+        )
+    }
+}
+
+@Composable
+private fun WelcomeMessage(name: String) {
+    val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
+        in 5..11 -> stringResource(R.string.cliente_greeting_morning)
+        in 12..18 -> stringResource(R.string.cliente_greeting_afternoon)
+        else -> stringResource(R.string.cliente_greeting_evening)
+    }
+    val firstName = name.trim().split(" ").firstOrNull().orEmpty()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "$greeting, $firstName",
+            color = ClienteTema.Texto,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.cliente_welcome_subtitle),
+            color = ClienteTema.TextoSec,
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
+    // Escala según el valor más alto (múltiplo de 5, mínimo 5)
+    val max = ceil(maxOf(datos.maxOfOrNull { it.second } ?: 0f, 5f) / 5f) * 5f
+    val altoMax = 150.dp
+    val marcas = (0..5).map { (max * it / 5).roundToInt() }
+    var seleccionado by remember { mutableStateOf<Int?>(null) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = titulo,
+            color = ClienteTema.Texto,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(14.dp))
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            // Eje Y (números)
+            Box(
+                modifier = Modifier
+                    .width(28.dp)
+                    .height(altoMax)
+            ) {
+                marcas.forEach { m ->
+                    val fraccion = m / max
+                    Text(
+                        text = m.toString(),
+                        color = ClienteTema.TextoSec,
+                        fontSize = 10.sp,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 6.dp)
+                            .offset(y = altoMax * (1f - fraccion) - 7.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                // Área de barras (sin líneas horizontales, solo el eje vertical)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(altoMax)
+                        .drawBehind {
+                            drawLine(
+                                color = Color(0xFF888888),
+                                start = Offset(0f, 0f),
+                                end = Offset(0f, size.height),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                            // Línea base (eje X)
+                            drawLine(
+                                color = Color(0xFF888888),
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, size.height),
+                                strokeWidth = 1.5.dp.toPx()
+                            )
+                        },
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    datos.forEachIndexed { index, (_, valor) ->
+                        val activo = seleccionado == index
+                        val colorBarra by animateColorAsState(
+                            targetValue = if (activo) Color(0xFFF2D675) else ClienteTema.Barras,
+                            label = "colorBarra"
+                        )
+                        val anchoBarra by animateDpAsState(
+                            targetValue = if (activo) 22.dp else 18.dp,
+                            label = "anchoBarra"
+                        )
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            if (activo) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            Color(0xFFF2D675),
+                                            RoundedCornerShape(6.dp)
+                                        )
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = valor.toInt().toString(),
+                                        color = Color(0xFF1A1A1A),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
+                                Spacer(Modifier.height(3.dp))
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .width(anchoBarra)
+                                    .height(altoMax * (valor / max))
+                                    .background(
+                                        colorBarra,
+                                        RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+                                    )
+                                    .clickable {
+                                        seleccionado = if (activo) null else index
+                                    }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                // Etiquetas de hora: cada una usa el mismo ancho que su barra
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    datos.forEach { (etiqueta, _) ->
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = etiqueta,
+                                color = ClienteTema.TextoSec,
+                                fontSize = 9.sp,
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
-// Dibuja un QR real (escaneable) a partir del texto recibido
 @Composable
-private fun QrCode(content: String, modifier: Modifier = Modifier) {
-    val matrix = remember(content) {
-        val hints = mapOf(
-            EncodeHintType.MARGIN to 0,
-            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M
-        )
-        QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, 0, 0, hints)
-    }
-
-    Canvas(modifier = modifier) {
-        val cell = size.width / matrix.width
-        for (x in 0 until matrix.width) {
-            for (y in 0 until matrix.height) {
-                if (matrix.get(x, y)) {
-                    drawRect(
-                        color = Color.Black,
-                        topLeft = Offset(x * cell, y * cell),
-                        size = Size(cell + 0.5f, cell + 0.5f) // +0.5 evita líneas finas entre módulos
-                    )
-                }
-            }
+private fun AccesoFacialCard(personasDentro: Int?) {
+    Box(
+        modifier = Modifier
+            .size(250.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(ClienteTema.Beige)
+            .drawBehind { drawCornerBrackets() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Filled.Face,
+                contentDescription = null,
+                tint = ClienteTema.AzulSel,
+                modifier = Modifier.size(96.dp)
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = personasDentro?.toString() ?: "—",
+                color = ClienteTema.Texto,
+                fontSize = 34.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = if (personasDentro == 1) stringResource(R.string.cliente_person_inside_now) else stringResource(R.string.cliente_people_inside_now),
+                color = ClienteTema.TextoSec,
+                fontSize = 13.sp
+            )
         }
     }
 }
@@ -177,5 +482,5 @@ private fun DrawScope.drawCornerBrackets() {
             quadraticBezierTo(w - i, h - i, w - i, h - i - r); lineTo(w - i, h - i - len)
         }
     )
-    corners.forEach { drawPath(it, color = Purple, style = stroke) }
+    corners.forEach { drawPath(it, color = ClienteTema.Borde, style = stroke) }
 }

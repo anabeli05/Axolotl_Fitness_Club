@@ -16,9 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.ui.theme.GymColors
 
 enum class StatIconType { PERSON, MONEY }
 
@@ -27,25 +27,25 @@ fun StatCard(
     title: String,
     value: String,
     modifier: Modifier = Modifier,
-    valueColor: Color = GymColors.TextPrimary,
+    valueColor: Color = ClienteTema.Texto,
     iconType: StatIconType? = null,
-    iconColor: Color = GymColors.Gold
+    iconColor: Color = ClienteTema.AzulSel
 ) {
     val borderBrush = Brush.linearGradient(
-        colors = listOf(GymColors.Purple, GymColors.Gold)
+        colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel)
     )
 
-    Box(
+    // Icono a la izquierda y texto en el espacio que sobra: así nunca se encima
+    Row(
         modifier = modifier
-            .background(GymColors.Surface, RoundedCornerShape(16.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
             .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         if (iconType != null) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top = 10.dp)
                     .size(55.dp)
                     .background(iconColor.copy(alpha = 0.15f), CircleShape),
                 contentAlignment = Alignment.Center
@@ -60,26 +60,27 @@ fun StatCard(
                     modifier = Modifier.size(35.dp)
                 )
             }
+            Spacer(Modifier.width(12.dp))
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp),
+            modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = title,
-                color = GymColors.TextSecondary,
+                color = ClienteTema.TextoSec,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = value,
                 color = valueColor,
                 fontSize = 25.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
         }
     }

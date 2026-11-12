@@ -28,16 +28,27 @@ import com.example.gymcontrol.ui.components.LocalOnLogout
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.encargado.dashboard.DashboardScreen
 import com.example.gymcontrol.ui.encargado.gastos.GastosScreen
+import com.example.gymcontrol.ui.encargado.pagos.PagosScreen
 import com.example.gymcontrol.ui.encargado.reportes.ReportesScreen
 import com.example.gymcontrol.ui.encargado.servicios.ServiciosScreen
-import com.example.gymcontrol.ui.encargado.usuarios.NuevoUsuarioScreen
 import com.example.gymcontrol.ui.encargado.usuarios.UsuariosScreen
 import com.example.gymcontrol.ui.instructor.clientes.MisClientesScreen
 import com.example.gymcontrol.ui.instructor.perfil.InstructorPerfilScreen
+import com.example.gymcontrol.ui.legal.PrivacyPolicyScreen
+import com.example.gymcontrol.ui.legal.TermsScreen
 import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
-import com.example.gymcontrol.ui.recepcion.scanner.QrScannerScreen
+import com.example.gymcontrol.ui.recepcion.scanner.AccesoFacialScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
+import com.example.gymcontrol.ui.recepcion.perfil.RecepcionPerfilScreen
 import com.example.gymcontrol.ui.theme.GymColors
+import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
+
+private const val LEGAL_ACEPTADO = "legal_aceptado"
+
+private fun aceptarLegal(navController: NavHostController) {
+    navController.previousBackStackEntry?.savedStateHandle?.set(LEGAL_ACEPTADO, true)
+    navController.popBackStack()
+}
 
 @Composable
 fun GymNavGraph() {
@@ -59,19 +70,43 @@ fun GymNavGraph() {
                 .background(GymColors.Background)
         ) {
             NavHost(navController = navController, startDestination = Routes.LOGIN) {
-                composable(Routes.LOGIN) {
-                    LoginScreen { role ->
-                        SesionActual.iniciar(role)
-                        val target = when (role) {
-                            UserRole.CLIENTE -> Routes.CLIENT_HOME
-                            UserRole.RECEPCION -> Routes.RECEPTION_SCANNER
-                            UserRole.INSTRUCTOR -> Routes.INSTRUCTOR_CLIENTS
-                            UserRole.ENCARGADO -> Routes.ADMIN_DASHBOARD
+                composable(Routes.LOGIN) { entry ->
+                    // Lo escriben las pantallas legales al pulsar "Aceptar"
+                    val legalAceptado by entry.savedStateHandle
+                        .getStateFlow(LEGAL_ACEPTADO, false)
+                        .collectAsState()
+                    LoginScreen(
+                        onNavigateToTerms = { navController.navigate(Routes.TERMS) },
+                        onNavigateToPrivacy = { navController.navigate(Routes.PRIVACY) },
+                        legalAceptado = legalAceptado,
+                        onLegalAceptadoConsumido = { entry.savedStateHandle[LEGAL_ACEPTADO] = false },
+                        onLogin = { role ->
+                            SesionActual.iniciar(role)
+                            val target = when (role) {
+                                UserRole.CLIENTE -> Routes.CLIENT_HOME
+                                UserRole.RECEPCION -> Routes.RECEPTION_SCANNER
+                                UserRole.INSTRUCTOR -> Routes.INSTRUCTOR_CLIENTS
+                                UserRole.ENCARGADO -> Routes.ADMIN_DASHBOARD
+                            }
+                            navController.navigate(target) {
+                                popUpTo(Routes.LOGIN) { inclusive = true }
+                            }
                         }
-                        navController.navigate(target) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
-                        }
-                    }
+                    )
+                }
+
+                // "Atrás" regresa sin marcar la casilla; "Aceptar" la marca y regresa
+                composable(Routes.TERMS) {
+                    TermsScreen(
+                        onBack = { navController.popBackStack() },
+                        onAccept = { aceptarLegal(navController) }
+                    )
+                }
+                composable(Routes.PRIVACY) {
+                    PrivacyPolicyScreen(
+                        onBack = { navController.popBackStack() },
+                        onAccept = { aceptarLegal(navController) }
+                    )
                 }
 
                 // Cliente: la barra inferior cambia entre Inicio, Asesorías y Perfil
@@ -81,19 +116,25 @@ fun GymNavGraph() {
                 composable(Routes.CLIENT_ADVISORIES) {
                     AsesoriasScreen(onNavigate = { section -> navigateClient(navController, section) })
                 }
+                composable(Routes.CLIENT_PAYMENTS) {
+                    PagHomeScreen(onNavigate = { section -> navigateClient(navController, section) })
+                }
                 composable(Routes.CLIENT_PROFILE) {
                     ClientePerfilScreen(onNavigate = { section -> navigateClient(navController, section) })
                 }
 
                 // Recepción (con sidebar)
                 composable(Routes.RECEPTION_SCANNER) {
-                    QrScannerScreen(onNavigate = { section -> navigateReception(navController, section) })
+                    AccesoFacialScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
                 composable(Routes.RECEPTION_CLIENTS) {
                     ClientesScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
                 composable(Routes.RECEPTION_REQUESTS) {
                     SolicitudesScreen(onNavigate = { section -> navigateReception(navController, section) })
+                }
+                composable(Routes.RECEPTION_PROFILE) {
+                    RecepcionPerfilScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
 
                 // Instructor: la barra inferior cambia entre Mis clientes y Perfil
@@ -112,16 +153,13 @@ fun GymNavGraph() {
                     ClientesScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
                 composable(Routes.ADMIN_USERS) {
-                    UsuariosScreen(
-                        onNewUser = { navController.navigate(Routes.ADMIN_NEW_USER) },
-                        onNavigate = { section -> navigateAdmin(navController, section) }
-                    )
-                }
-                composable(Routes.ADMIN_NEW_USER) {
-                    NuevoUsuarioScreen { navController.popBackStack() }
+                    UsuariosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
                 composable(Routes.ADMIN_SERVICES) {
                     ServiciosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
+                }
+                composable(Routes.ADMIN_PAYMENTS) {
+                    PagosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
                 composable(Routes.ADMIN_EXPENSES) {
                     GastosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
@@ -150,6 +188,7 @@ private fun navigateClient(navController: NavHostController, section: String) {
     val route = when (section) {
         "Inicio" -> Routes.CLIENT_HOME
         "Asesorías" -> Routes.CLIENT_ADVISORIES
+        "Pagos" -> Routes.CLIENT_PAYMENTS
         "Perfil" -> Routes.CLIENT_PROFILE
         else -> null
     }
@@ -170,6 +209,7 @@ private fun navigateReception(navController: NavHostController, section: String)
         "Home" -> Routes.RECEPTION_SCANNER
         "Clientes" -> Routes.RECEPTION_CLIENTS
         "Solicitudes" -> Routes.RECEPTION_REQUESTS
+        "Perfil" -> Routes.RECEPTION_PROFILE
         else -> null
     }
     if (route != null) {
@@ -208,6 +248,7 @@ private fun navigateAdmin(navController: NavHostController, section: String) {
         "Clientes" -> Routes.ADMIN_CLIENTS
         "Personal", "Usuarios" -> Routes.ADMIN_USERS
         "Servicios" -> Routes.ADMIN_SERVICES
+        "Pagos" -> Routes.ADMIN_PAYMENTS
         "Gastos" -> Routes.ADMIN_EXPENSES
         "Reportes" -> Routes.ADMIN_REPORTS
         else -> null
@@ -254,7 +295,7 @@ private fun RoleDevMenu(navController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_axolotl),
+                painter = painterResource(id = com.example.gymcontrol.R.drawable.logo_final),
                 contentDescription = "Logo Axolotl",
                 modifier = Modifier.size(36.dp)
             )
@@ -281,9 +322,10 @@ private fun RoleDevMenu(navController: NavHostController) {
             Triple("Cliente · Inicio", Routes.CLIENT_HOME, UserRole.CLIENTE),
             Triple("Cliente · Asesorías", Routes.CLIENT_ADVISORIES, UserRole.CLIENTE),
             Triple("Cliente · Perfil", Routes.CLIENT_PROFILE, UserRole.CLIENTE),
-            Triple("Recepción · QR", Routes.RECEPTION_SCANNER, UserRole.RECEPCION),
+            Triple("Recepción · Acceso facial", Routes.RECEPTION_SCANNER, UserRole.RECEPCION),
             Triple("Recepción · Clientes", Routes.RECEPTION_CLIENTS, UserRole.RECEPCION),
             Triple("Recepción · Solicitudes", Routes.RECEPTION_REQUESTS, UserRole.RECEPCION),
+            Triple("Recepción · Perfil", Routes.RECEPTION_PROFILE, UserRole.RECEPCION),
             Triple("Instructor · Clientes", Routes.INSTRUCTOR_CLIENTS, UserRole.INSTRUCTOR),
             Triple("Instructor · Perfil", Routes.INSTRUCTOR_PROFILE, UserRole.INSTRUCTOR),
             Triple("Dueño · Dashboard", Routes.ADMIN_DASHBOARD, UserRole.ENCARGADO),

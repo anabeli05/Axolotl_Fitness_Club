@@ -3,21 +3,36 @@ package com.example.gymcontrol.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gymcontrol.ui.theme.GymColors
+import androidx.compose.ui.zIndex
+import com.example.gymcontrol.R
 
 data class GroupedBarEntry(val label: String, val activos: Float, val inactivos: Float)
+
+// Versiones más llamativas de tu verde y tu rojo, para la barra seleccionada
+private val VerdeBrillante = Color(0xFF3DFF7F)
+private val RojoBrillante = Color(0xFFFF4D4D)
+
+private fun textoValor(v: Float): String =
+    if (v % 1f == 0f) v.toInt().toString() else "%.1f".format(v)
 
 @Composable
 fun GroupedBarChart(
@@ -26,14 +41,17 @@ fun GroupedBarChart(
     modifier: Modifier = Modifier,
     chartHeight: Int = 180
 ) {
-    val borderBrush = Brush.linearGradient(colors = listOf(GymColors.Purple, GymColors.Gold))
-    val maxValue = entries.maxOf { maxOf(it.activos, it.inactivos) }
+    val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
+    val maxValue = entries.maxOfOrNull { maxOf(it.activos, it.inactivos) } ?: 1f
     val niceMax = niceCeil(maxValue)
     val labels = axisLabels(maxValue)
 
+    // (índice del grupo, 0 = activos / 1 = inactivos)
+    var seleccionado by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+
     Column(
         modifier = modifier
-            .background(GymColors.Surface, RoundedCornerShape(16.dp))
+            .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
             .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
@@ -44,26 +62,27 @@ fun GroupedBarChart(
         ) {
             Text(
                 text = title,
-                color = GymColors.TextPrimary,
+                color = ClienteTema.Texto,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(10.dp).background(GymColors.Green, RoundedCornerShape(2.dp)))
+                    Box(Modifier.size(10.dp).background(ClienteTema.Verde, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text("Activos", color = GymColors.TextSecondary, fontSize = 11.sp)
+                    Text(stringResource(R.string.chart_active), color = ClienteTema.TextoSec, fontSize = 11.sp)
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(10.dp).background(GymColors.Red, RoundedCornerShape(2.dp)))
+                    Box(Modifier.size(10.dp).background(ClienteTema.Rojo, RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text("Inactivos", color = GymColors.TextSecondary, fontSize = 11.sp)
+                    Text(stringResource(R.string.chart_inactive), color = ClienteTema.TextoSec, fontSize = 11.sp)
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        // Un poco más de espacio arriba para que el número no tape el título
+        Spacer(Modifier.height(28.dp))
 
         Row {
             Column(
@@ -74,7 +93,7 @@ fun GroupedBarChart(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 labels.forEach { label ->
-                    Text(text = label, color = GymColors.TextSecondary, fontSize = 10.sp)
+                    Text(text = label, color = ClienteTema.TextoSec, fontSize = 10.sp)
                 }
             }
 
@@ -93,28 +112,67 @@ fun GroupedBarChart(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        entries.forEach { entry ->
-                            val fractionA = (entry.activos / niceMax).coerceIn(0.01f, 1f)
-                            val fractionB = (entry.inactivos / niceMax).coerceIn(0.01f, 1f)
+                        entries.forEachIndexed { index, entry ->
+                            // (valor, color normal, color brillante al seleccionar)
+                            val series = listOf(
+                                Triple(entry.activos, ClienteTema.Verde, VerdeBrillante),
+                                Triple(entry.inactivos, ClienteTema.Rojo, RojoBrillante)
+                            )
                             Row(
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    // el grupo seleccionado se dibuja por encima de los demás
+                                    .zIndex(if (seleccionado?.first == index) 1f else 0f),
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.Bottom
                             ) {
-                                Canvas(
-                                    modifier = Modifier
-                                        .width(8.dp)
-                                        .fillMaxHeight(fractionA)
-                                ) {
-                                    drawRoundRect(color = GymColors.Green, cornerRadius = CornerRadius(4f, 4f))
-                                }
-                                Spacer(Modifier.width(3.dp))
-                                Canvas(
-                                    modifier = Modifier
-                                        .width(8.dp)
-                                        .fillMaxHeight(fractionB)
-                                ) {
-                                    drawRoundRect(color = GymColors.Red, cornerRadius = CornerRadius(4f, 4f))
+                                series.forEachIndexed { serie, (valor, color, colorActivo) ->
+                                    val fraction = (valor / niceMax).coerceIn(0.01f, 1f)
+                                    val activa = seleccionado == (index to serie)
+
+                                    if (serie == 1) Spacer(Modifier.width(3.dp))
+
+                                    Box(
+                                        modifier = Modifier
+                                            .width(8.dp)
+                                            .fillMaxHeight(),
+                                        contentAlignment = Alignment.BottomCenter
+                                    ) {
+                                        Canvas(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(fraction)
+                                                .clickable {
+                                                    seleccionado = if (activa) null else (index to serie)
+                                                }
+                                        ) {
+                                            drawRoundRect(
+                                                color = if (activa) colorActivo else color,
+                                                cornerRadius = CornerRadius(4f, 4f)
+                                            )
+                                        }
+
+                                        if (activa) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomCenter)
+                                                    .offset(y = -(chartHeight.dp * fraction) - 3.dp)
+                                                    .wrapContentWidth(unbounded = true)
+                                                    .background(colorActivo, RoundedCornerShape(6.dp))
+                                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = textoValor(valor),
+                                                    color = Color(0xFF1A1A1A),
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    softWrap = false
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -124,14 +182,14 @@ fun GroupedBarChart(
                             .align(Alignment.CenterStart)
                             .fillMaxHeight()
                             .width(2.dp)
-                            .background(GymColors.Purple)
+                            .background(ClienteTema.AzulSel)
                     )
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .fillMaxWidth()
                             .height(2.dp)
-                            .background(GymColors.Purple)
+                            .background(ClienteTema.AzulSel)
                     )
                 }
 
@@ -146,7 +204,7 @@ fun GroupedBarChart(
                     entries.forEach { entry ->
                         Text(
                             text = entry.label,
-                            color = GymColors.TextSecondary,
+                            color = ClienteTema.TextoSec,
                             fontSize = 10.sp,
                             modifier = Modifier.weight(1f),
                             textAlign = TextAlign.Center
