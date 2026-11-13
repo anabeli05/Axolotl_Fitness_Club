@@ -1,5 +1,7 @@
 package com.example.gymcontrol.ui.legal
 
+import android.os.SystemClock
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +28,20 @@ fun LegalDocumentScreen(
     onAccept: () -> Unit = onBack,
     modifier: Modifier = Modifier
 ) {
+    var lastClickTime by remember { mutableLongStateOf(0L) }
+
+    fun ejecutarConDelayCorto(accion: () -> Unit) {
+        val ahora = SystemClock.elapsedRealtime()
+        if (ahora - lastClickTime >= 350L) {
+            lastClickTime = ahora
+            accion()
+        }
+    }
+
+    BackHandler {
+        ejecutarConDelayCorto { onBack() }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = GymColors.Background,
@@ -40,7 +56,9 @@ fun LegalDocumentScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = { ejecutarConDelayCorto { onBack() } }
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.legal_back),
@@ -49,7 +67,9 @@ fun LegalDocumentScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onAccept) {
+                    TextButton(
+                        onClick = { ejecutarConDelayCorto { onAccept() } }
+                    ) {
                         Text(
                             text = stringResource(R.string.btn_accept),
                             color = GymColors.Gold,

@@ -46,9 +46,19 @@ import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
 
 private const val LEGAL_ACEPTADO = "legal_aceptado"
 
-private fun aceptarLegal(navController: NavHostController) {
-    navController.previousBackStackEntry?.savedStateHandle?.set(LEGAL_ACEPTADO, true)
-    navController.popBackStack()
+fun safePopBackStack(navController: NavHostController, expectedRoute: String) {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
+    if (currentRoute == expectedRoute && navController.previousBackStackEntry != null) {
+        navController.popBackStack()
+    }
+}
+
+private fun aceptarLegal(navController: NavHostController, expectedRoute: String) {
+    val currentRoute = navController.currentBackStackEntry?.destination?.route
+    if (currentRoute == expectedRoute && navController.previousBackStackEntry != null) {
+        navController.previousBackStackEntry?.savedStateHandle?.set(LEGAL_ACEPTADO, true)
+        navController.popBackStack()
+    }
 }
 
 @Composable
@@ -99,14 +109,14 @@ fun GymNavGraph() {
                 // "Atrás" regresa sin marcar la casilla; "Aceptar" la marca y regresa
                 composable(Routes.TERMS) {
                     TermsScreen(
-                        onBack = { navController.popBackStack() },
-                        onAccept = { aceptarLegal(navController) }
+                        onBack = { safePopBackStack(navController, Routes.TERMS) },
+                        onAccept = { aceptarLegal(navController, Routes.TERMS) }
                     )
                 }
                 composable(Routes.PRIVACY) {
                     PrivacyPolicyScreen(
-                        onBack = { navController.popBackStack() },
-                        onAccept = { aceptarLegal(navController) }
+                        onBack = { safePopBackStack(navController, Routes.PRIVACY) },
+                        onAccept = { aceptarLegal(navController, Routes.PRIVACY) }
                     )
                 }
 
