@@ -20,6 +20,7 @@ object Routes {
     const val RECEPTION_CLIENTS = "reception_clients"
     const val RECEPTION_NEW_CLIENT = "reception_new_client"
     const val RECEPTION_REQUESTS = "reception_requests"
+    const val RECEPTION_PAYMENTS = "reception_payments"
     const val RECEPTION_PROFILE = "reception_profile"
 
     const val ADMIN_DASHBOARD = "admin_dashboard"

@@ -45,7 +45,7 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
-    UserRole.RECEPCION -> listOf("Home", "Clientes", "Solicitudes", "Perfil")
+    UserRole.RECEPCION -> listOf("Home", "Clientes", "Solicitudes", "Pagos", "Perfil")
     UserRole.ENCARGADO -> listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
     UserRole.CLIENTE, UserRole.INSTRUCTOR -> emptyList()
 }
