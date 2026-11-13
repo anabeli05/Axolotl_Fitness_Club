@@ -60,7 +60,7 @@ fun translatedSection(section: String): String = when (section) {
     "Solicitudes" -> stringResource(R.string.tab_requests)
     "Personal" -> stringResource(R.string.tab_staff)
     "Servicios" -> stringResource(R.string.tab_services)
-    "Pagos" -> "Pagos"
+    "Pagos" -> stringResource(R.string.menu_payments)
     "Gastos" -> stringResource(R.string.tab_expenses)
     "Reportes" -> stringResource(R.string.tab_reports)
     "Perfil" -> stringResource(R.string.tab_profile)
@@ -216,7 +216,7 @@ fun GymSidebar(
                 NavigationDrawerItem(
                     label = {
                         Text(
-                            if (ClienteTema.oscuro) "Tema claro" else "Tema oscuro",
+                            if (ClienteTema.oscuro) stringResource(R.string.light_theme) else stringResource(R.string.dark_theme),
                             color = ClienteTema.TextoSec,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium

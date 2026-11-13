@@ -170,7 +170,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     title = stringResource(R.string.encargado_chart_clients_status),
                     entries = clientesMes.map {
                         GroupedBarEntry(
-                            ResumenRepository.mesCorto(it.periodo),
+                            mesCortoStr(it.periodo),
                             it.activos.toFloat(),
                             it.inactivos.toFloat()
                         )
@@ -188,7 +188,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                         .filter { it.diaSemana != 7 || it.total > 0.0 }
                         .map {
                             BarEntry(
-                                ResumenRepository.diaCorto(it.diaSemana),
+                                diaCortoStr(it.diaSemana),
                                 (it.total / 100.0).toFloat()
                             )
                         },
@@ -204,5 +204,39 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun mesCortoStr(periodo: String): String {
+    val month = periodo.split("-").getOrNull(1)?.toIntOrNull() ?: 1
+    return when (month) {
+        1 -> stringResource(R.string.month_jan)
+        2 -> stringResource(R.string.month_feb)
+        3 -> stringResource(R.string.month_mar)
+        4 -> stringResource(R.string.month_apr)
+        5 -> stringResource(R.string.month_may)
+        6 -> stringResource(R.string.month_jun)
+        7 -> stringResource(R.string.month_jul)
+        8 -> stringResource(R.string.month_aug)
+        9 -> stringResource(R.string.month_sep)
+        10 -> stringResource(R.string.month_oct)
+        11 -> stringResource(R.string.month_nov)
+        12 -> stringResource(R.string.month_dec)
+        else -> periodo
+    }
+}
+
+@Composable
+private fun diaCortoStr(diaSemana: Int): String {
+    return when (diaSemana) {
+        1 -> stringResource(R.string.day_mon)
+        2 -> stringResource(R.string.day_tue)
+        3 -> stringResource(R.string.day_wed)
+        4 -> stringResource(R.string.day_thu)
+        5 -> stringResource(R.string.day_fri)
+        6 -> stringResource(R.string.day_sat)
+        7 -> stringResource(R.string.day_sun)
+        else -> ""
     }
 }

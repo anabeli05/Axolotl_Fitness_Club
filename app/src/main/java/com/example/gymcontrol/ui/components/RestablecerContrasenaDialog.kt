@@ -146,7 +146,7 @@ fun RestablecerContrasenaDialog(
         containerColor = colores.fondo,
         title = {
             Text(
-                if (codigoEnviado) "Revisa tu correo" else "Olvidé mi contraseña",
+                if (codigoEnviado) "Revisa tu correo" else stringResource(R.string.forgot_password_title),
                 color = colores.texto,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -157,7 +157,7 @@ fun RestablecerContrasenaDialog(
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 if (!codigoEnviado) {
                     Text(
-                        "Escribe tu contraseña nueva. Te enviaremos un código a tu correo registrado para confirmar que eres tú.",
+                        stringResource(R.string.forgot_password_desc),
                         color = colores.textoSec,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -241,7 +241,7 @@ fun RestablecerContrasenaDialog(
                     if (cargando) {
                         CircularProgressIndicator(color = colores.textoBoton, strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
                     } else {
-                        Text(if (codigoEnviado) "Confirmar" else "Enviar código")
+                        Text(if (codigoEnviado) "Confirmar" else stringResource(R.string.btn_send_code))
                     }
                 }
             }

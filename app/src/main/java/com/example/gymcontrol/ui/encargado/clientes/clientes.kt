@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,6 +58,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var info by remember { mutableStateOf<String?>(null) }
     var confirmar by remember { mutableStateOf<Pair<String, () -> Unit>?>(null) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val msgRegisterFormat = stringResource(R.string.encargado_confirm_register_client, "%s")
     val msgSaveFormat = stringResource(R.string.encargado_confirm_save_client, "%s")
@@ -142,7 +144,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         name = client.nombre,
                         membershipNum = client.numeroMembresia,
                         fechaFin = client.fechaFin,
-                        registrationDate = ClientesRepository.fechaApp(client.fechaRegistro),
+                        registrationDate = ClientesRepository.fechaApp(context, client.fechaRegistro),
                         isActive = client.estado == "ACTIVO" && client.activa,
                         onEdit = {
                             editing = client
@@ -331,6 +333,7 @@ private fun ClientCard(
     onRenovar: () -> Unit,
     onFoto: (ImageBitmap) -> Unit = {}
 ) {
+    val context = LocalContext.current
     val labelMembership = stringResource(R.string.label_membership)
     val labelRegistration = stringResource(R.string.label_registration)
 
@@ -367,7 +370,7 @@ private fun ClientCard(
             if (fechaFin != null) {
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(fechaFin)),
+                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(context, fechaFin)),
                     color = ClienteTema.TextoSec,
                     fontSize = 17.sp
                 )

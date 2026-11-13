@@ -198,37 +198,35 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         InfoRow(icon = Icons.Filled.Email, label = stringResource(R.string.perfil_label_email), value = email)
                         Spacer(Modifier.height(14.dp))
 
-                        // Capacidad máxima de clientes
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Capacidad máxima de clientes y chip "Cupo libre" / lleno alineados horizontalmente
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Icon(
                                 Icons.Filled.Group,
                                 contentDescription = null,
                                 tint = ClienteTema.CajaAcento,
                                 modifier = Modifier.size(24.dp)
                             )
-                            Spacer(Modifier.width(12.dp))
+                            Spacer(Modifier.width(4.dp))
                             Text(
                                 text = stringResource(R.string.instructor_max_capacity_label),
                                 color = ClienteTema.CajaAcento,
-                                fontSize = 16.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(Modifier.width(8.dp))
                             Text(
                                 text = capacity.toString(),
                                 color = ClienteTema.CajaValor,
-                                fontSize = 16.sp,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                        }
-
-                        // El chip va en su propia línea para que se lea completo en cualquier idioma
-                        Spacer(Modifier.height(8.dp))
-                        Box(modifier = Modifier.padding(start = 36.dp)) {
                             if (activeClients >= capacity) {
-                                Chip(text = stringResource(R.string.instructor_capacity_full), color = ClienteTema.Rojo, fondo = ClienteTema.RojoPastel, height = 28.dp, fontSize = 13.sp, borderWidth = 2.dp)
+                                Chip(text = stringResource(R.string.instructor_capacity_full), color = ClienteTema.Rojo, fondo = ClienteTema.RojoPastel, height = 26.dp, fontSize = 12.sp, borderWidth = 1.5.dp)
                             } else {
-                                Chip(text = stringResource(R.string.instructor_capacity_available), color = ClienteTema.Verde, fondo = ClienteTema.VerdePastel, height = 28.dp, fontSize = 13.sp, borderWidth = 2.dp)
+                                Chip(text = stringResource(R.string.available_spots_label), color = ClienteTema.Verde, fondo = ClienteTema.VerdePastel, height = 26.dp, fontSize = 12.sp, borderWidth = 1.5.dp)
                             }
                         }
                     }
@@ -250,7 +248,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         InstructorRepository.editarPerfil(email, name, newPhone.trim(), email)
                         phone = newPhone.trim()
                         showEditDialog = false
-                        Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.resources.getString(R.string.data_updated_success), Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         val msg = e.message?.substringBefore("\nCode:") ?: ""
                         Toast.makeText(context, "No se pudo guardar: $msg", Toast.LENGTH_LONG).show()

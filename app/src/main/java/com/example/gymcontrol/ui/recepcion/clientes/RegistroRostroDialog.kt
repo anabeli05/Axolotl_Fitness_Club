@@ -63,7 +63,7 @@ fun RegistroRostroDialog(
 
     val promptAskClient = stringResource(R.string.facial_prompt_ask_client)
     val promptSaving = stringResource(R.string.facial_prompt_saving)
-    val registeredSuccess = stringResource(R.string.facial_registered_success, cliente.nombre)
+    val registeredSuccess = stringResource(R.string.face_registered_for_access, cliente.nombre)
 
     var indicacion by remember { mutableStateOf(promptAskClient) }
     var progreso by remember { mutableStateOf(0f) }
@@ -128,7 +128,7 @@ fun RegistroRostroDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                if (yaTieneRostro) "Actualizar rostro" else "Registrar rostro",
+                if (yaTieneRostro) stringResource(R.string.recepcion_face_reg_update_title) else stringResource(R.string.recepcion_face_reg_register_title),
                 color = ClienteTema.Texto,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
@@ -187,7 +187,7 @@ fun RegistroRostroDialog(
                 shape = RoundedCornerShape(10.dp),
                 border = BorderStroke(1.dp, ClienteTema.Borde),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-            ) { Text(if (listo) "Cerrar" else "Cancelar") }
+            ) { Text(if (listo) stringResource(R.string.common_close) else stringResource(R.string.btn_cancel)) }
         }
     }
 }

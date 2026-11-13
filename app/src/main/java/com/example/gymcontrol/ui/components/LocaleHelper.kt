@@ -4,11 +4,17 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
+import androidx.core.os.ConfigurationCompat
 import java.util.Locale
 
 object LocaleHelper {
     private const val PREFS_NAME = "app_lang_prefs"
     private const val KEY_LANG = "selected_language"
+
+    fun getActiveLocale(context: Context): Locale {
+        val locales = ConfigurationCompat.getLocales(context.resources.configuration)
+        return if (!locales.isEmpty) locales[0] ?: Locale.getDefault() else Locale.getDefault()
+    }
 
     fun toggleLanguage(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

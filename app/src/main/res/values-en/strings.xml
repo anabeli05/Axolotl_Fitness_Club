@@ -313,6 +313,8 @@
     <string name="recepcion_solicitudes_status_approved">Approved</string>
     <string name="recepcion_solicitudes_status_rejected">Rejected</string>
     <string name="recepcion_solicitudes_status_pending">Pending</string>
+    <string name="recepcion_solicitudes_instructor_prefix">Instructor: %1$s</string>
+    <string name="recepcion_solicitudes_date_prefix">Date: %1$s</string>
     <string name="cliente_asesorias_cancel">Cancel</string>
 
     <!-- Legal -->
@@ -531,4 +533,67 @@
     <string name="access_denied_inactive">Access denied: inactive membership. Please renew</string>
     <string name="access_denied_unregistered_face">Access denied: face not registered</string>
     <string name="access_error_no_connection">No connection to database</string>
+
+    <!-- Additional i18n Keys -->
+    <string name="forgot_current_password">Forgot your current password?</string>
+    <string name="plan_access_1_day">Access for 1 day</string>
+    <string name="plan_access_days">Access for %d days</string>
+    <string name="plan_access_1_month">Access for 1 month</string>
+    <string name="plan_access_months">Access for %d months</string>
+    <string name="loading_plans">Loading plans…</string>
+    <string name="no_plans_available">No plans available at the moment.</string>
+    <string name="error_loading_plans">Could not load plans: %s</string>
+    <string name="plan_selected_format">Plan: %s</string>
+    <string name="total_to_pay_format">Total to pay: %s</string>
+    <string name="btn_change">Change</string>
+    <string name="label_amount_to_pay">Amount to pay</string>
+    <string name="label_concept">Concept</string>
+    <string name="receipt_selected">Receipt selected</string>
+    <string name="btn_upload_receipt">Upload receipt</string>
+    <string name="btn_change_receipt">Change receipt</string>
+    <string name="btn_send_receipt">Send receipt</string>
+    <string name="receipt_sent_message">Receipt sent. The Manager will review it and, once validated, your membership will be activated.</string>
+    <string name="payment_rejected_title">Payment rejected · %s plan</string>
+    <string name="payment_rejected_reason">Reason: %s</string>
+    <string name="payment_rejected_instruction">Please fix the indicated issue and resubmit your receipt.</string>
+    <string name="receipt_under_review">Your receipt for the %s plan is under review.</string>
+    <string name="payment_validated_on">Your payment for the %1$s plan was validated on %2$s</string>
+    <string name="manager_pending_payments">Pending validation: %d</string>
+    <string name="manager_no_pending_payments">No pending payments to validate.</string>
+    <string name="manager_accept_payment">Accept payment</string>
+    <string name="manager_reject_payment">Reject payment</string>
+    <string name="manager_accept_confirmation">Validate payment of %1$s for %2$s? It will be added to today\'s revenue and their membership will be activated.</string>
+    <string name="manager_reject_confirmation">Reject payment for %s? It will not be added to revenue and the client will see the reason in their Payments tab.</string>
+    <string name="manager_rejection_reason_label">Rejection reason</string>
+    <string name="manager_rejection_reason_placeholder">E.g. Amount does not match plan</string>
+    <string name="manager_payment_validated_msg">Payment for %1$s validated. Now appearing in Reports and membership expires on %2$s.</string>
+    <string name="manager_payment_rejected_msg">Payment for %s rejected.</string>
+    <string name="client_select_plan">Select your plan</string>
+    <string name="forgot_password_title">I forgot my current password</string>
+    <string name="forgot_password_desc">Enter your password. We will send a code to your registered email to confirm it\'s you.</string>
+    <string name="btn_send_code">Send code</string>
+    <string name="data_updated_success">Data updated</string>
+    <string name="available_spots_label">Available spots</string>
+    <string name="payment_cash">Cash</string>
+    <string name="payment_card">Card</string>
+    <string name="payment_transfer">Transfer</string>
+    <string name="register_face_title">Register face</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="face_registered_for_access">Face registered for %s for access</string>
+    <string name="light_theme">Light theme</string>
+    <string name="dark_theme">Dark theme</string>
+    <string name="menu_payments">Payments</string>
+    <string name="error_email_already_registered">That email is already registered</string>
+    <string name="month_jan">Jan</string>
+    <string name="month_feb">Feb</string>
+    <string name="month_mar">Mar</string>
+    <string name="month_apr">Apr</string>
+    <string name="month_may">May</string>
+    <string name="month_jun">Jun</string>
+    <string name="month_jul">Jul</string>
+    <string name="month_aug">Aug</string>
+    <string name="month_sep">Sep</string>
+    <string name="month_oct">Oct</string>
+    <string name="month_nov">Nov</string>
+    <string name="month_dec">Dec</string>
 </resources>
