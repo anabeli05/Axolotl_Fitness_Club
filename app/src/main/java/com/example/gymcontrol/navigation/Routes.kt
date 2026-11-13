@@ -21,6 +21,7 @@ object Routes {
     const val RECEPTION_NEW_CLIENT = "reception_new_client"
     const val RECEPTION_REQUESTS = "reception_requests"
     const val RECEPTION_PAYMENTS = "reception_payments"
+    const val RECEPTION_VISITS = "reception_visits"
     const val RECEPTION_PROFILE = "reception_profile"
 
     const val ADMIN_DASHBOARD = "admin_dashboard"
@@ -28,6 +29,7 @@ object Routes {
     const val ADMIN_USERS = "admin_users"
     const val ADMIN_SERVICES = "admin_services"
     const val ADMIN_PAYMENTS = "admin_payments"
+    const val ADMIN_VISITS = "admin_visits"
     const val ADMIN_EXPENSES = "admin_expenses"
     const val ADMIN_REPORTS = "admin_reports"
 }

@@ -138,8 +138,15 @@ object ClientesRepository {
             .decodeList<ClienteRow>()
             .firstOrNull()
 
+    /** El Encargado siempre ve todos los servicios vigentes (la visita se cobra en "Visitas"). */
+    suspend fun planesEncargado(): List<PlanRow> =
+        SupabaseProvider.client.from("planes_encargado")
+            .select { order("precio", Order.DESCENDING) }
+            .decodeList<PlanRow>()
+
+    /** Recepción: solo los servicios vigentes y visibles para Recepción. */
     suspend fun planes(): List<PlanRow> =
-        SupabaseProvider.client.from("tipos_membresia")
+        SupabaseProvider.client.from("planes_recepcion")
             .select { order("precio", Order.DESCENDING) }
             .decodeList<PlanRow>()
 

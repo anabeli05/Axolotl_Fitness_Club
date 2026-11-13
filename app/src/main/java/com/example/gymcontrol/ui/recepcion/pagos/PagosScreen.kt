@@ -1,7 +1,9 @@
 package com.example.gymcontrol.ui.recepcion.pagos
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,47 +16,67 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.data.biometria.FotoPerfil
+import com.example.gymcontrol.data.remote.ClientesRepository
+import com.example.gymcontrol.data.remote.ComprobantesRepository
+import com.example.gymcontrol.data.remote.PagoPendienteRow
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.dinero
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
+import com.example.gymcontrol.R
+import kotlinx.coroutines.launch
+
+private class Resolucion(val pago: PagoPendienteRow, val aceptar: Boolean)
 
 /**
- * Modelo SOLO de vista para la pantalla de Pagos de Recepción.
- * TODO: reemplazar por PagoPendienteRow cuando se conecte la base de datos.
- */
-private data class PagoUi(
-    val id: Long,
-    val cliente: String,
-    val numeroMembresia: String,
-    val plan: String,
-    val monto: Double,
-    val metodo: String,
-    val fecha: String,
-    val tieneComprobante: Boolean
-)
-
-private class Resolucion(val pago: PagoUi, val aceptar: Boolean)
-
-// Datos de ejemplo para poder ver el diseño. TODO: quitar al conectar la base de datos.
-private val PAGOS_EJEMPLO = listOf(
-    PagoUi(1, "Juan Pérez", "MEM-0001", "Mensual", 450.0, "Transferencia", "12/11/2026", true),
-    PagoUi(2, "María López", "MEM-0002", "Trimestral", 1200.0, "Transferencia", "11/11/2026", false)
-)
-
-/**
- * Pagos pendientes de validar (vista de Recepción, misma que la del Encargado).
- * Por ahora solo UI: aceptar/rechazar no guarda nada.
+ * Pagos pendientes de validar (vista de Recepción, misma que la del Encargado):
+ * los comprobantes que suben los clientes y las transferencias registradas.
+ * Al aceptar, el pago entra en los ingresos y se activa la membresía del cliente.
  */
 @Composable
 fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
-    // TODO: cargar desde la base de datos (ClientesRepository.pagosPendientes())
-    val pagos = remember { mutableStateListOf<PagoUi>().apply { addAll(PAGOS_EJEMPLO) } }
+    val scope = rememberCoroutineScope()
+    val correo = SesionActual.correo.orEmpty()
+
+    var pagos by remember { mutableStateOf<List<PagoPendienteRow>>(emptyList()) }
+    // Comprobantes ya descargados (id del pago -> imagen; null = no tiene o no cargó)
+    val imagenes = remember { mutableStateMapOf<Long, ImageBitmap?>() }
+    var cargando by remember { mutableStateOf(true) }
+    var mensaje by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
     var confirmar by remember { mutableStateOf<Resolucion?>(null) }
+    var procesando by remember { mutableStateOf(false) }
     var motivo by remember { mutableStateOf("") }
+    var imagenAmpliada by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    suspend fun recargar() {
+        try {
+            pagos = ClientesRepository.pagosPendientes()
+            error = null
+        } catch (e: Exception) {
+            error = "No se pudo cargar: ${e.message?.substringBefore("\nCode:")}"
+        }
+        cargando = false
+        pagos.filter { it.tieneComprobante && it.id !in imagenes }.forEach { p ->
+            imagenes[p.id] = try {
+                FotoPerfil.aImagen(ComprobantesRepository.imagen(correo, p.id))
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) { recargar() }
 
     GymScaffold(
         currentSection = "Pagos",
@@ -69,30 +91,37 @@ fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
         ) {
             item {
                 Text(
-                    text = "Pagos de Clientes",
+                    text = stringResource(R.string.tab_payments),
                     color = ClienteTema.Texto,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Pendientes de validar: ${pagos.size}",
+                    text = stringResource(R.string.manager_pending_payments, pagos.size),
                     color = ClienteTema.TextoSec,
                     fontSize = 15.sp
                 )
             }
 
+            mensaje?.let { item { Text(it, color = ClienteTema.Verde, fontSize = 14.sp) } }
+            error?.let { item { Text(it, color = ClienteTema.Rojo, fontSize = 14.sp) } }
+
             items(pagos, key = { it.id }) { pago ->
                 PagoCard(
                     pago = pago,
+                    imagen = imagenes[pago.id],
+                    cargandoImagen = pago.tieneComprobante && pago.id !in imagenes,
+                    habilitado = !procesando,
+                    onAmpliar = { imagenAmpliada = it },
                     onAceptar = { confirmar = Resolucion(pago, true) },
                     onRechazar = { motivo = ""; confirmar = Resolucion(pago, false) }
                 )
             }
 
-            if (pagos.isEmpty()) {
+            if (pagos.isEmpty() && !cargando && error == null) {
                 item {
                     Text(
-                        text = "No hay pagos pendientes por validar.",
+                        text = stringResource(R.string.manager_no_pending_payments),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -106,13 +135,16 @@ fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
     }
 
     confirmar?.let { r ->
+        val ctx = LocalContext.current
+        val strMsgRejected = stringResource(R.string.manager_payment_rejected_msg, r.pago.cliente)
+
         AlertDialog(
-            onDismissRequest = { confirmar = null },
+            onDismissRequest = { if (!procesando) confirmar = null },
             containerColor = ClienteTema.Beige,
             shape = RoundedCornerShape(16.dp),
             title = {
                 Text(
-                    if (r.aceptar) "Aceptar pago" else "Rechazar pago",
+                    if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.manager_reject_payment),
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -123,9 +155,9 @@ fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
                 Column {
                     Text(
                         if (r.aceptar)
-                            "¿Validar el pago de ${dinero(r.pago.monto)} de ${r.pago.cliente}? Se sumará a los ingresos de hoy y se activará su membresía."
+                            stringResource(R.string.manager_accept_confirmation, montoTexto(r.pago.monto), r.pago.cliente)
                         else
-                            "¿Rechazar el pago de ${r.pago.cliente}? No se sumará a los ingresos y el cliente verá el motivo en su pestaña Pagos.",
+                            stringResource(R.string.manager_reject_confirmation, r.pago.cliente),
                         color = ClienteTema.TextoSec,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -135,8 +167,9 @@ fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
                         OutlinedTextField(
                             value = motivo,
                             onValueChange = { if (it.length <= 200) motivo = it },
-                            label = { Text("Motivo del rechazo") },
-                            placeholder = { Text("Ej. El monto no coincide con el plan") },
+                            label = { Text(stringResource(R.string.manager_rejection_reason_label)) },
+                            placeholder = { Text(stringResource(R.string.manager_rejection_reason_placeholder)) },
+                            enabled = !procesando,
                             minLines = 2,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = ClienteTema.Texto,
@@ -154,32 +187,68 @@ fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
             },
             confirmButton = {
                 Button(
-                    enabled = r.aceptar || motivo.trim().length >= 3,
+                    enabled = !procesando && (r.aceptar || motivo.trim().length >= 3),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (r.aceptar) ClienteTema.Verde else ClienteTema.Rojo
                     ),
                     onClick = {
-                        // TODO: conectar a la base de datos
-                        //  aceptar  -> ClientesRepository.confirmarPago(correo, r.pago.id, true)
-                        //  rechazar -> ComprobantesRepository.rechazar(correo, r.pago.id, motivo)
-                        pagos.remove(r.pago)
-                        confirmar = null
+                        scope.launch {
+                            procesando = true
+                            try {
+                                mensaje = if (r.aceptar) {
+                                    val vence = ClientesRepository.confirmarPago(correo, r.pago.id, true)
+                                    ctx.resources.getString(R.string.manager_payment_validated_msg, r.pago.cliente, ClientesRepository.fechaApp(vence).orEmpty())
+                                } else {
+                                    ComprobantesRepository.rechazar(correo, r.pago.id, motivo)
+                                    strMsgRejected
+                                }
+                                error = null
+                                imagenes.remove(r.pago.id)
+                                recargar()
+                            } catch (e: Exception) {
+                                error = "No se pudo guardar: ${e.message?.substringBefore("\nCode:")}"
+                            } finally {
+                                procesando = false
+                                confirmar = null
+                            }
+                        }
                     }
-                ) { Text(if (r.aceptar) "Aceptar" else "Rechazar") }
+                ) { Text(if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.manager_reject_payment)) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmar = null }) {
-                    Text("Cancelar", color = ClienteTema.TextoSec)
+                TextButton(enabled = !procesando, onClick = { confirmar = null }) {
+                    Text(stringResource(R.string.cancel), color = ClienteTema.TextoSec)
                 }
             }
         )
     }
+
+    // Comprobante a pantalla completa
+    imagenAmpliada?.let { img ->
+        Dialog(onDismissRequest = { imagenAmpliada = null }) {
+            Image(
+                bitmap = img,
+                contentDescription = "Comprobante de pago",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 640.dp)
+                    .clickable { imagenAmpliada = null }
+            )
+        }
+    }
 }
+
+private fun montoTexto(m: Double) = dinero(m)
 
 /** Recuadro con: cliente, plan, monto, método, el comprobante y los botones. */
 @Composable
 private fun PagoCard(
-    pago: PagoUi,
+    pago: PagoPendienteRow,
+    imagen: ImageBitmap?,
+    cargandoImagen: Boolean,
+    habilitado: Boolean,
+    onAmpliar: (ImageBitmap) -> Unit,
     onAceptar: () -> Unit,
     onRechazar: () -> Unit
 ) {
@@ -201,20 +270,19 @@ private fun PagoCard(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Plan: ${pago.plan} · ${dinero(pago.monto)}",
+                text = "Plan: ${pago.plan ?: "—"} · ${montoTexto(pago.monto)}",
                 color = ClienteTema.AzulSel,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "${pago.metodo} · enviado el ${pago.fecha}",
+                text = "${pago.metodo} · enviado el ${ClientesRepository.fechaApp(pago.fecha)}",
                 color = ClienteTema.TextoSec,
                 fontSize = 13.sp
             )
 
             Spacer(Modifier.height(12.dp))
 
-            // Espacio del comprobante. TODO: mostrar la imagen real al conectar la base de datos.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -222,20 +290,39 @@ private fun PagoCard(
                     .background(ClienteTema.Fondo, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Filled.Image,
-                        contentDescription = null,
-                        tint = ClienteTema.TextoSec,
-                        modifier = Modifier.size(40.dp)
+                when {
+                    imagen != null -> Image(
+                        bitmap = imagen,
+                        contentDescription = "Comprobante de ${pago.cliente}",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { onAmpliar(imagen) }
                     )
-                    Text(
-                        if (pago.tieneComprobante) "Comprobante de pago"
-                        else "Sin comprobante (registrado en Recepción)",
-                        color = ClienteTema.TextoSec,
-                        fontSize = 12.sp
-                    )
+                    cargandoImagen -> CircularProgressIndicator(color = ClienteTema.AzulSel)
+                    else -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Filled.Image,
+                            contentDescription = null,
+                            tint = ClienteTema.TextoSec,
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Text(
+                            if (pago.tieneComprobante) "No se pudo cargar el comprobante"
+                            else "Sin comprobante (registrado en Recepción)",
+                            color = ClienteTema.TextoSec,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
+            }
+            if (imagen != null) {
+                Text(
+                    "Toca la imagen para ampliarla",
+                    color = ClienteTema.TextoSec,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
 
             Spacer(Modifier.height(12.dp))
@@ -243,6 +330,7 @@ private fun PagoCard(
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
                     onClick = onRechazar,
+                    enabled = habilitado,
                     modifier = Modifier.weight(1f),
                     border = BorderStroke(1.5.dp, ClienteTema.Rojo),
                     shape = RoundedCornerShape(12.dp)
@@ -253,6 +341,7 @@ private fun PagoCard(
                 }
                 Button(
                     onClick = onAceptar,
+                    enabled = habilitado,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Verde),
                     shape = RoundedCornerShape(12.dp)

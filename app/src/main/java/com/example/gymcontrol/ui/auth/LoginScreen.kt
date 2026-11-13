@@ -88,7 +88,6 @@ fun LoginScreen(
     }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    var mostrarCambio by remember { mutableStateOf(false) }
     var mostrarRestablecer by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
     var lastClickTime by remember { mutableLongStateOf(0L) }
@@ -335,30 +334,14 @@ fun LoginScreen(
                     Text(it, color = Dorado, style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { mostrarCambio = true; aviso = null }) {
-                    Text(stringResource(R.string.change_password), color = Dorado)
+                TextButton(onClick = { mostrarRestablecer = true; aviso = null }) {
+                    Text(stringResource(R.string.forgot_current_password), color = Dorado)
                 }
             }
         }
     }
 
-    if (mostrarCambio) {
-        CambiarContrasenaDialog(
-            correoInicial = identifier.trim(),
-            onDismiss = { mostrarCambio = false },
-            onOlvide = {
-                mostrarCambio = false
-                mostrarRestablecer = true
-            },
-            onListo = {
-                mostrarCambio = false
-                password = ""
-                aviso = strPassUpdated
-            }
-        )
-    }
-
-    // No recuerda la actual: contraseña nueva + código por correo
+    // Olvidé mi contraseña: contraseña nueva + código por correo
     if (mostrarRestablecer) {
         RestablecerContrasenaDialog(
             correoInicial = identifier.trim(),
@@ -366,7 +349,8 @@ fun LoginScreen(
             colores = ColoresDialogo(
                 fondo = TarjetaOscura, texto = BlancoTexto, textoSec = BlancoTexto.copy(alpha = 0.7f),
                 acento = Dorado, borde = DoradoBorde, error = RojoError,
-                boton = BotonFondo, textoBoton = BotonTexto
+                boton = BotonFondo, textoBoton = BotonTexto,
+                campo = MoradoCampo
             ),
             onDismiss = { mostrarRestablecer = false },
             onListo = {
@@ -376,134 +360,4 @@ fun LoginScreen(
             }
         )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CambiarContrasenaDialog(
-    correoInicial: String,
-    onDismiss: () -> Unit,
-    onOlvide: () -> Unit,
-    onListo: () -> Unit
-) {
-    var correo by remember { mutableStateOf(correoInicial) }
-    var actual by remember { mutableStateOf("") }
-    var nueva by remember { mutableStateOf("") }
-    var repetir by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
-    var cargando by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
-    val strChangeFailed = stringResource(R.string.error_change_failed)
-
-    val coincide = nueva == repetir
-    val puedeGuardar = !cargando && correo.isNotBlank() && actual.isNotBlank() &&
-            nueva.length >= 8 && coincide
-
-    @Composable
-    fun campo(valor: String, cambio: (String) -> Unit, etiqueta: String, clave: Boolean) {
-        var visible by remember { mutableStateOf(false) }
-        OutlinedTextField(
-            value = valor,
-            onValueChange = cambio,
-            label = { Text(etiqueta) },
-            singleLine = true,
-            visualTransformation = if (clave && !visible) PasswordVisualTransformation()
-            else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = if (clave) KeyboardType.Password else KeyboardType.Email
-            ),
-            trailingIcon = if (clave) {
-                {
-                    IconButton(onClick = { visible = !visible }) {
-                        Icon(
-                            imageVector = if (visible) Icons.Filled.VisibilityOff
-                            else Icons.Filled.Visibility,
-                            contentDescription = if (visible) stringResource(R.string.hide_password)
-                            else stringResource(R.string.show_password)
-                        )
-                    }
-                }
-            } else null,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = BlancoTexto,
-                unfocusedTextColor = BlancoTexto,
-                focusedBorderColor = Dorado,
-                unfocusedBorderColor = DoradoBorde,
-                focusedLabelColor = Dorado,
-                unfocusedLabelColor = BlancoTexto,
-                cursorColor = Dorado,
-                focusedTrailingIconColor = Dorado,
-                unfocusedTrailingIconColor = BlancoTexto
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(8.dp))
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = TarjetaOscura,
-        title = {
-            Text(
-                stringResource(R.string.change_password),
-                color = BlancoTexto,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                campo(correo, { correo = it }, stringResource(R.string.login_email), false)
-                campo(actual, { actual = it }, stringResource(R.string.current_password), true)
-                TextButton(
-                    onClick = onOlvide,
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier.align(Alignment.End)
-                ) { Text(stringResource(R.string.forgot_current_password), color = Dorado) }
-                campo(nueva, { nueva = it }, stringResource(R.string.new_password), true)
-                campo(repetir, { repetir = it }, stringResource(R.string.repeat_new_password), true)
-                Text(
-                    stringResource(R.string.password_requirements),
-                    color = BlancoTexto.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                if (repetir.isNotEmpty() && !coincide) {
-                    Spacer(Modifier.height(6.dp))
-                    Text(stringResource(R.string.passwords_dont_match), color = RojoError,
-                        style = MaterialTheme.typography.bodySmall)
-                }
-                error?.let {
-                    Spacer(Modifier.height(6.dp))
-                    Text(it, color = RojoError, style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-            ) {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = BlancoTexto) }
-
-                Button(
-                    enabled = puedeGuardar,
-                    onClick = {
-                        scope.launch {
-                            cargando = true
-                            error = null
-                            try {
-                                AuthRepository.cambiarContrasena(correo, actual, nueva)
-                                onListo()
-                            } catch (e: Exception) {
-                                error = e.message?.substringBefore("\nCode:") ?: strChangeFailed
-                            }
-                            cargando = false
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = BotonFondo, contentColor = BotonTexto)
-                ) { Text(if (cargando) stringResource(R.string.saving) else stringResource(R.string.save)) }
-            }
-        }
-    )
 }

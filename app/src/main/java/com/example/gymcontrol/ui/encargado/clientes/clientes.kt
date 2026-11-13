@@ -77,7 +77,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
 
     LaunchedEffect(Unit) {
         recargar()
-        try { planes = ClientesRepository.planes() } catch (_: Exception) {}
+        try { planes = ClientesRepository.planesEncargado() } catch (_: Exception) {}
     }
 
     val clients = todos.filter {

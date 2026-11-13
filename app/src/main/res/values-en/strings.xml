@@ -255,6 +255,13 @@
     <string name="encargado_servicios_duration_error">Must be greater than 0</string>
     <string name="encargado_servicios_cost_label">Cost</string>
     <string name="encargado_servicios_create_button">Create Service</string>
+    <string name="encargado_servicios_visible_label">Who can see it?</string>
+    <string name="encargado_servicios_visible_clientes">Clients (in-app payments)</string>
+    <string name="encargado_servicios_visible_recepcion">Reception</string>
+    <string name="encargado_servicios_visible_ambos">Visible to clients and reception</string>
+    <string name="encargado_servicios_visible_solo_clientes">Visible to clients only</string>
+    <string name="encargado_servicios_visible_solo_recepcion">Visible to reception only</string>
+    <string name="encargado_servicios_visible_nadie">Hidden: nobody will see it</string>
 
     <!-- Encargado: Usuarios / Personal -->
     <string name="encargado_usuarios_add_button">Add Staff</string>
@@ -596,4 +603,27 @@
     <string name="month_oct">Oct</string>
     <string name="month_nov">Nov</string>
     <string name="month_dec">Dec</string>
+    <string name="tab_visits">Visits</string>
+    <string name="visits_title">Charge a visit</string>
+    <string name="visits_price">Visit price: %1$s</string>
+    <string name="visits_no_price">There is no visit service. The manager must create one in Services and mark it as the visit.</string>
+    <string name="visits_visitor">Visitor details</string>
+    <string name="visits_name">Full name</string>
+    <string name="visits_phone">Phone (10 digits)</string>
+    <string name="visits_emergency">Emergency contact</string>
+    <string name="visits_method">Payment method</string>
+    <string name="visits_charge">Charge visit · %1$s</string>
+    <string name="visits_today">Today\'s visits: %1$d</string>
+    <string name="visits_none_today">No visits yet today.</string>
+    <string name="visits_confirm_title">Charge visit</string>
+    <string name="visits_confirm_message">Charge %1$s to %2$s by %3$s? It will be added to today\'s income.</string>
+    <string name="visits_confirm_button">Charge</string>
+    <string name="visits_registered">Visit for %1$s charged.</string>
+    <string name="visits_load_error">Could not load: %1$s</string>
+    <string name="visits_save_error">Could not charge: %1$s</string>
+    <string name="encargado_servicios_es_visita">This is the visit (day pass)</string>
+    <string name="encargado_servicios_es_visita_ayuda">Reception charges it in the Visits section; clients pay for it in the app like any plan.</string>
+    <string name="encargado_servicios_es_visita_reemplaza">Another service is already the visit; this one will replace it.</string>
+    <string name="encargado_servicios_es_visita_card">Visit · charged in the Visits section</string>
+    <string name="visits_not_for_reception">The visit is not available to reception. The manager can enable it in Services.</string>
 </resources>

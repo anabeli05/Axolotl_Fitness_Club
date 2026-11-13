@@ -60,7 +60,10 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
     var name by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var paraClientes by remember { mutableStateOf(true) }
+    var paraRecepcion by remember { mutableStateOf(true) }
     var deleting by remember { mutableStateOf<ServicioRow?>(null) }
+    var esVisita by remember { mutableStateOf(false) }
 
     fun recargar() {
         scope.launch {
@@ -83,6 +86,9 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
         name = ""
         duration = ""
         price = ""
+        paraClientes = true
+        paraRecepcion = true
+        esVisita = false
     }
 
     GymScaffold(
@@ -105,6 +111,9 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                             name = ""
                             duration = ""
                             price = ""
+                            paraClientes = true
+                            paraRecepcion = true
+                            esVisita = false
                             showForm = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
@@ -129,11 +138,17 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                         name = service.nombre,
                         duration = service.duracion,
                         price = "$${service.precio}",
+                        visibleClientes = service.visible_clientes,
+                        visibleRecepcion = service.visible_recepcion,
+                        esVisita = service.es_visita,
                         onEdit = {
                             editingIndex = index
                             name = service.nombre
                             duration = service.duracion.filter { it.isDigit() }
                             price = service.precio.toString()
+                            paraClientes = service.visible_clientes
+                            paraRecepcion = service.visible_recepcion
+                            esVisita = service.es_visita
                             showForm = true
                         },
                         onDelete = { deleting = service }
@@ -147,6 +162,13 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                     name = name,
                     duration = duration,
                     price = price,
+                    paraClientes = paraClientes,
+                    paraRecepcion = paraRecepcion,
+                    onParaClientesChange = { paraClientes = it },
+                    onParaRecepcionChange = { paraRecepcion = it },
+                    esVisita = esVisita,
+                    hayOtraVisita = servicios.any { it.es_visita && it.id != editingIndex?.let { i -> servicios[i].id } },
+                    onEsVisitaChange = { esVisita = it },
                     onNameChange = { name = it },
                     onDurationChange = { duration = it },
                     onPriceChange = { price = it },
@@ -155,12 +177,15 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                         val nombre = name.trim()
                         val precio = price.toDoubleOrNull() ?: 0.0
                         val idx = editingIndex
+                        val vc = paraClientes
+                        val vr = paraRecepcion
+                        val ev = esVisita
                         scope.launch {
                             try {
                                 if (idx != null) {
-                                    ServiciosRepository.actualizar(servicios[idx].id, nombre, dur, precio)
+                                    ServiciosRepository.actualizar(servicios[idx].id, nombre, dur, precio, vc, vr, ev)
                                 } else {
-                                    ServiciosRepository.crear(nombre, dur, precio)
+                                    ServiciosRepository.crear(nombre, dur, precio, vc, vr, ev)
                                 }
                                 errorMsg = null
                             } catch (e: Exception) {
@@ -256,6 +281,9 @@ private fun ServiceCard(
     name: String,
     duration: String,
     price: String,
+    visibleClientes: Boolean,
+    visibleRecepcion: Boolean,
+    esVisita: Boolean,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -290,6 +318,27 @@ private fun ServiceCard(
                 color = ClienteTema.AzulSel,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(4.dp))
+            if (esVisita) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.encargado_servicios_es_visita_card),
+                    color = ClienteTema.AzulSel,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            val paraQuien = when {
+                visibleClientes && visibleRecepcion -> stringResource(R.string.encargado_servicios_visible_ambos)
+                visibleClientes -> stringResource(R.string.encargado_servicios_visible_solo_clientes)
+                visibleRecepcion -> stringResource(R.string.encargado_servicios_visible_solo_recepcion)
+                else -> stringResource(R.string.encargado_servicios_visible_nadie)
+            }
+            Text(
+                text = paraQuien,
+                color = if (visibleClientes || visibleRecepcion) ClienteTema.TextoSec else ClienteTema.Rojo,
+                fontSize = 14.sp
             )
         }
 
@@ -336,6 +385,13 @@ private fun ServiceFormDialog(
     name: String,
     duration: String,
     price: String,
+    paraClientes: Boolean,
+    paraRecepcion: Boolean,
+    onParaClientesChange: (Boolean) -> Unit,
+    onParaRecepcionChange: (Boolean) -> Unit,
+    esVisita: Boolean,
+    hayOtraVisita: Boolean,
+    onEsVisitaChange: (Boolean) -> Unit,
     onNameChange: (String) -> Unit,
     onDurationChange: (String) -> Unit,
     onPriceChange: (String) -> Unit,
@@ -418,6 +474,36 @@ private fun ServiceFormDialog(
                 prefix = "$"
             )
 
+            Spacer(Modifier.height(14.dp))
+            VisibilidadCheck(stringResource(R.string.encargado_servicios_es_visita), esVisita, onEsVisitaChange)
+            if (esVisita) {
+                Text(
+                    stringResource(
+                        if (hayOtraVisita) R.string.encargado_servicios_es_visita_reemplaza
+                        else R.string.encargado_servicios_es_visita_ayuda
+                    ),
+                    color = ClienteTema.TextoSec,
+                    fontSize = 13.sp
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.encargado_servicios_visible_label),
+                color = ClienteTema.Texto,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold
+            )
+            VisibilidadCheck(stringResource(R.string.encargado_servicios_visible_clientes), paraClientes, onParaClientesChange)
+            VisibilidadCheck(stringResource(R.string.encargado_servicios_visible_recepcion), paraRecepcion, onParaRecepcionChange)
+            if (!paraClientes && !paraRecepcion) {
+                Text(
+                    stringResource(R.string.encargado_servicios_visible_nadie),
+                    color = ClienteTema.Rojo,
+                    fontSize = 13.sp
+                )
+            }
+
             Spacer(Modifier.height(18.dp))
 
             Button(
@@ -437,6 +523,24 @@ private fun ServiceFormDialog(
                 Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_servicios_create_button), fontWeight = FontWeight.Bold)
             }
         }
+    }
+}
+
+@Composable
+private fun VisibilidadCheck(texto: String, marcado: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Checkbox(
+            checked = marcado,
+            onCheckedChange = onChange,
+            colors = CheckboxDefaults.colors(
+                checkedColor = ClienteTema.AzulSel,
+                uncheckedColor = ClienteTema.Borde
+            )
+        )
+        Text(texto, color = ClienteTema.Texto, fontSize = 15.sp)
     }
 }
 

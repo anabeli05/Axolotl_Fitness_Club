@@ -106,7 +106,7 @@ object ComprobantesRepository {
         )
     }
 
-    /** Imagen (base64) del comprobante de un pago. Solo el Encargado. */
+    /** Imagen (base64) del comprobante de un pago. Encargado y Recepción. */
     suspend fun imagen(actorGmail: String, pagoId: Long): String? =
         SupabaseProvider.client.postgrest
             .rpc("comprobante_pago", ComprobanteParams(actorGmail.trim(), pagoId))
