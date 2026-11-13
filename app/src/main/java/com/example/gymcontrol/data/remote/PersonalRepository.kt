@@ -61,6 +61,16 @@ private data class FotoUsuarioParams(val p_usuario_id: Long)
 private data class FotoPersonalParams(val p_gmail: String)
 
 @Serializable
+private data class SaludPersonalParams(val p_actor_gmail: String, val p_usuario_id: Long)
+
+@Serializable
+private data class GuardarSaludPersonalParams(
+    val p_actor_gmail: String, val p_usuario_id: Long, val p_fecha_nacimiento: String?,
+    val p_tipo_sangre: String?, val p_alergias: String, val p_padecimientos: String,
+    val p_medicamentos: String
+)
+
+@Serializable
 private data class GuardarFotoParams(val p_actor_gmail: String, val p_usuario_id: Long, val p_foto: String)
 object PersonalRepository {
     suspend fun listar(): List<PersonalRow> =
@@ -123,6 +133,23 @@ object PersonalRepository {
             EditarPersonalParams(actorGmail, id, nombre, gmail, rol, estado, telefono, costo, capacidad)
         )
     }
+    /** Fecha de nacimiento y datos de salud. Solo el Encargado (la base lo valida). */
+    suspend fun datosSalud(actorGmail: String, usuarioId: Long): DatosSalud =
+        SupabaseProvider.client.postgrest
+            .rpc("datos_salud_personal", SaludPersonalParams(actorGmail, usuarioId))
+            .decodeList<DatosSalud>()
+            .firstOrNull() ?: DatosSalud()
+
+    suspend fun guardarDatosSalud(actorGmail: String, usuarioId: Long, d: DatosSalud) {
+        SupabaseProvider.client.postgrest.rpc(
+            "guardar_datos_salud_personal",
+            GuardarSaludPersonalParams(
+                actorGmail, usuarioId, d.fechaNacimiento, d.tipoSangre,
+                d.alergias.trim(), d.padecimientos.trim(), d.medicamentos.trim()
+            )
+        )
+    }
+
     suspend fun eliminar(actorGmail: String, id: Long) {
         SupabaseProvider.client.postgrest.rpc(
             "eliminar_personal",

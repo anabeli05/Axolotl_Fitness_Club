@@ -31,7 +31,8 @@ import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.recepcion.scanner.FaceCameraPreview
 import com.example.gymcontrol.ui.recepcion.scanner.CamaraFoto
-import com.example.gymcontrol.ui.recepcion.scanner.ScannerCorners
+import com.example.gymcontrol.ui.recepcion.scanner.MarcoEscaneo
+import com.example.gymcontrol.data.biometria.ZonaEscaneo
 import com.google.mlkit.vision.face.Face
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -56,7 +57,8 @@ fun RegistroRostroDialog(
     val main = remember { Handler(Looper.getMainLooper()) }
 
     val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
-    val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 5) } }
+    val zona = remember { ZonaEscaneo() }
+    val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 5, zona = zona) } }
     val pausa = remember { AtomicBoolean(false) }
     val camaraFoto = remember { CamaraFoto() }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
@@ -103,7 +105,8 @@ fun RegistroRostroDialog(
                 pausa.set(true)
                 c.marcarProcesado()
                 // Foto de respaldo: se recorta aquí, en el hilo de la cámara, mientras el cuadro sigue vivo
-                val foto = CapturaFacial.masCercano(rostros)?.let { cara ->
+                // Solo el rostro dentro del recuadro (el mismo que se registró)
+                val foto = CapturaFacial.masCercano(zona.filtrar(frame, rostros))?.let { cara ->
                     runCatching { FotoPerfil.desdeCuadro(frame, cara.boundingBox) }.getOrNull()
                 }
                 main.post {
@@ -151,7 +154,7 @@ fun RegistroRostroDialog(
                 if (captura != null && !listo) {
                     FaceCameraPreview(modifier = Modifier.fillMaxSize(), camaraFoto = camaraFoto, onFrame = onFrame)
                 }
-                ScannerCorners(Modifier.fillMaxSize())
+                MarcoEscaneo(zona, Modifier.fillMaxSize())
             }
 
             Spacer(Modifier.height(12.dp))

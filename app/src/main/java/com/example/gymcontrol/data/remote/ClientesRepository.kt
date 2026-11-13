@@ -44,6 +44,26 @@ data class ContactoEmergencia(
     @SerialName("r_telefono") val telefono: String = ""
 )
 
+/** Tipos de sangre que acepta la base (null = no especificado). */
+val TIPOS_SANGRE = listOf("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
+
+/** Fecha de nacimiento (yyyy-MM-dd) y datos de salud. Solo Recepción y Encargado. */
+@Serializable
+data class DatosSalud(
+    @SerialName("r_fecha_nacimiento") val fechaNacimiento: String? = null,
+    @SerialName("r_tipo_sangre") val tipoSangre: String? = null,
+    @SerialName("r_alergias") val alergias: String = "",
+    @SerialName("r_padecimientos") val padecimientos: String = "",
+    @SerialName("r_medicamentos") val medicamentos: String = ""
+)
+
+@Serializable
+private data class GuardarSaludParams(
+    val p_actor_gmail: String, val p_cliente_id: Long, val p_fecha_nacimiento: String?,
+    val p_tipo_sangre: String?, val p_alergias: String, val p_padecimientos: String,
+    val p_medicamentos: String
+)
+
 @Serializable
 data class PagoPendienteRow(
     val id: Long,
@@ -184,6 +204,23 @@ object ClientesRepository {
             .rpc("contacto_emergencia_cliente", ContactoParams(actorGmail, clienteId))
             .decodeList<ContactoEmergencia>()
             .firstOrNull() ?: ContactoEmergencia()
+
+    /** Solo Recepción y Encargado (la base lo valida). */
+    suspend fun datosSalud(actorGmail: String, clienteId: Long): DatosSalud =
+        SupabaseProvider.client.postgrest
+            .rpc("datos_salud_cliente", ContactoParams(actorGmail, clienteId))
+            .decodeList<DatosSalud>()
+            .firstOrNull() ?: DatosSalud()
+
+    suspend fun guardarDatosSalud(actorGmail: String, clienteId: Long, d: DatosSalud) {
+        SupabaseProvider.client.postgrest.rpc(
+            "guardar_datos_salud",
+            GuardarSaludParams(
+                actorGmail, clienteId, d.fechaNacimiento, d.tipoSangre,
+                d.alergias.trim(), d.padecimientos.trim(), d.medicamentos.trim()
+            )
+        )
+    }
 
     /** Foto de perfil (JPEG en base64) del cliente con ese correo; null si aún no tiene. */
     suspend fun fotoPerfil(gmail: String): String? =

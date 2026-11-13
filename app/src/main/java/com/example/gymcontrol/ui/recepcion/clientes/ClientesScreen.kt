@@ -31,6 +31,7 @@ import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
 import com.example.gymcontrol.data.remote.ContactoEmergencia
+import com.example.gymcontrol.data.remote.DatosSalud
 import com.example.gymcontrol.data.remote.CorreoRepository
 import com.example.gymcontrol.data.remote.PlanRow
 import com.example.gymcontrol.ui.components.ClienteTema
@@ -219,9 +220,17 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 val partes = c?.nombre?.trim()?.split(" ", limit = 2)
                 // Al editar se carga el contacto de emergencia que ya tiene el cliente
                 var contacto by remember(c?.id) { mutableStateOf<ContactoEmergencia?>(null) }
+                // y también su fecha de nacimiento y datos de salud
+                val msgSaludFallo = stringResource(R.string.client_form_health_save_failed)
+                var salud by remember(c?.id) { mutableStateOf<DatosSalud?>(null) }
                 LaunchedEffect(c?.id) {
                     if (c != null) contacto = try {
                         ClientesRepository.contactoEmergencia(SesionActual.correo ?: "", c.id)
+                    } catch (_: Exception) { null }
+                }
+                LaunchedEffect(c?.id) {
+                    if (c != null) salud = try {
+                        ClientesRepository.datosSalud(SesionActual.correo ?: "", c.id)
                     } catch (_: Exception) { null }
                 }
                 ClientFormDialog(
@@ -234,12 +243,13 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     initialEmail = c?.gmail ?: "",
                     initialContactName = contacto?.nombre ?: "",
                     initialContactPhone = contacto?.telefono ?: "",
+                    initialSalud = salud ?: DatosSalud(),
                     onDismiss = {
                         showForm = false
                         editing = null
                         errorForm = null
                     },
-                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo ->
+                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo, datosSalud ->
                         if (c == null) {
                             confirmar = String.format(Locale.getDefault(), msgRegister, nombre) to {
                                 scope.launch {
@@ -249,12 +259,17 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                             SesionActual.correo ?: "",
                                             contactoNombre, contactoTelefono, metodo
                                         )
+                                        // El cliente ya quedó creado; si esto falla solo se avisa
+                                        val saludGuardada = runCatching {
+                                            ClientesRepository.guardarDatosSalud(SesionActual.correo ?: "", nuevo.id, datosSalud)
+                                        }.isSuccess
                                         showForm = false
                                         errorForm = null
                                         recargar()
                                         val enviado = CorreoRepository.enviarBienvenida(correo)
                                         info = if (enviado) String.format(Locale.getDefault(), successEmailFormat, nuevo.numero)
                                         else String.format(Locale.getDefault(), warningEmailFormat, nuevo.numero)
+                                        if (!saludGuardada) info = "$info\n$msgSaludFallo"
                                         registrandoRostro = todos.firstOrNull { it.id == nuevo.id }
                                     } catch (e: Exception) {
                                         errorForm = mensaje(e, "No se pudo registrar")
@@ -267,6 +282,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 scope.launch {
                                     try {
                                         ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado, contactoNombre, contactoTelefono)
+                                        ClientesRepository.guardarDatosSalud(SesionActual.correo ?: "", c.id, datosSalud)
                                         showForm = false
                                         editing = null
                                         errorForm = null

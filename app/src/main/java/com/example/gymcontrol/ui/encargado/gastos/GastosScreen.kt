@@ -40,6 +40,7 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.GastoRow
 import com.example.gymcontrol.data.remote.GastosRepository
 import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.ui.components.CalendarioDialog
 import com.example.gymcontrol.ui.components.ClienteTema
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -587,23 +588,14 @@ private fun DateField(value: String, onValueChange: (String) -> Unit, label: Str
 
     if (showPicker) {
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = parseDate(value))
-        DatePickerDialog(
-            onDismissRequest = { showPicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pickerState.selectedDateMillis?.let { onValueChange(formatDate(it)) }
-                        showPicker = false
-                    }
-                ) { Text(stringResource(R.string.common_accept), color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPicker = false }) {
-                    Text(stringResource(R.string.cancel), color = ClienteTema.TextoSec)
-                }
+        CalendarioDialog(
+            titulo = label,
+            estado = pickerState,
+            onDismiss = { showPicker = false },
+            onAceptar = {
+                pickerState.selectedDateMillis?.let { onValueChange(formatDate(it)) }
+                showPicker = false
             }
-        ) {
-            DatePicker(state = pickerState)
-        }
+        )
     }
 }

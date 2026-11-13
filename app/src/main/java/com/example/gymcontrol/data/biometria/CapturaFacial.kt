@@ -1,6 +1,7 @@
 package com.example.gymcontrol.data.biometria
 
 import android.graphics.Bitmap
+import android.graphics.RectF
 import androidx.annotation.StringRes
 import com.example.gymcontrol.R
 import com.google.mlkit.vision.face.Face
@@ -12,6 +13,31 @@ sealed interface PasoFacial {
     data class Indicacion(@StringRes val textRes: Int, val progreso: Float = 0f) : PasoFacial
     /** Rostro capturado: vector listo para enviar a la base de datos. */
     class Listo(val vector: FloatArray) : PasoFacial
+}
+
+/**
+ * Recuadro de escaneo, como fracción del área VISIBLE de la cámara (vista cuadrada, centrada).
+ * Solo cuentan los rostros que están dentro; lo de afuera se ignora.
+ */
+data class ZonaEscaneo(val ancho: Float = 0.62f, val alto: Float = 0.78f) {
+    /**
+     * El recuadro en coordenadas del cuadro de la cámara. La vista previa es cuadrada y
+     * recorta al centro (FILL_CENTER), así que lo visible es el cuadrado central del cuadro.
+     */
+    fun enCuadro(anchoCuadro: Int, altoCuadro: Int): RectF {
+        val lado = minOf(anchoCuadro, altoCuadro).toFloat()
+        val cx = anchoCuadro / 2f
+        val cy = altoCuadro / 2f
+        val mw = lado * ancho / 2f
+        val mh = lado * alto / 2f
+        return RectF(cx - mw, cy - mh, cx + mw, cy + mh)
+    }
+
+    /** Solo los rostros cuyo centro está dentro del recuadro. */
+    fun filtrar(frame: Bitmap, rostros: List<Face>): List<Face> {
+        val marco = enCuadro(frame.width, frame.height)
+        return rostros.filter { marco.contains(it.boundingBox.exactCenterX(), it.boundingBox.exactCenterY()) }
+    }
 }
 
 /**
@@ -28,7 +54,8 @@ sealed interface PasoFacial {
 class CapturaFacial(
     private val reconocedor: ReconocedorFacial,
     private val muestrasNecesarias: Int,
-    private val soloElMasCercano: Boolean = false
+    private val soloElMasCercano: Boolean = false,
+    private val zona: ZonaEscaneo? = null
 ) {
     private var rostroActual: Int? = null
     private val muestras = mutableListOf<FloatArray>()
@@ -52,12 +79,20 @@ class CapturaFacial(
         rostroProcesado = null
     }
 
-    fun procesar(frame: Bitmap, rostros: List<Face>): PasoFacial {
+    fun procesar(frame: Bitmap, todos: List<Face>): PasoFacial {
+        // Con recuadro: solo cuentan los rostros cuyo centro está dentro de él
+        val marco = zona?.enCuadro(frame.width, frame.height)
+        val rostros = zona?.filtrar(frame, todos) ?: todos
+
         val cara = if (soloElMasCercano) elegirMasCercano(rostros) else masCercano(rostros)
         if (cara == null) {
             rostroProcesado = null // ya se retiró
             reiniciar()
-            return PasoFacial.Indicacion(R.string.facial_prompt_position_camera)
+            // Hay alguien, pero fuera del recuadro
+            return PasoFacial.Indicacion(
+                if (todos.isNotEmpty()) R.string.facial_prompt_center_face
+                else R.string.facial_prompt_position_camera
+            )
         }
 
         val id = cara.trackingId
@@ -80,7 +115,9 @@ class CapturaFacial(
             reiniciar()
             return PasoFacial.Indicacion(R.string.facial_prompt_come_closer)
         }
-        if (caja.left < 0 || caja.top < 0 || caja.right > frame.width || caja.bottom > frame.height) {
+        if (caja.left < 0 || caja.top < 0 || caja.right > frame.width || caja.bottom > frame.height ||
+            (marco != null && !dentroDelMarco(caja, marco))
+        ) {
             reiniciar()
             return PasoFacial.Indicacion(R.string.facial_prompt_center_face)
         }
@@ -135,6 +172,16 @@ class CapturaFacial(
         private const val GIRO_MAXIMO = 18f
         // FaceNet-512 varía un poco más entre cuadros que MobileFaceNet
         private const val CONSISTENCIA = 0.75f
+
+        /** Margen que se tolera (fracción del rostro) si la cara se sale un poco del recuadro. */
+        private const val TOLERANCIA_MARCO = 0.15f
+
+        private fun dentroDelMarco(caja: android.graphics.Rect, marco: RectF): Boolean {
+            val tx = caja.width() * TOLERANCIA_MARCO
+            val ty = caja.height() * TOLERANCIA_MARCO
+            return caja.left >= marco.left - tx && caja.right <= marco.right + tx &&
+                    caja.top >= marco.top - ty && caja.bottom <= marco.bottom + ty
+        }
 
         private fun area(f: Face) = f.boundingBox.width() * f.boundingBox.height()
 

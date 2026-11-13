@@ -43,6 +43,9 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.Status
 import com.example.gymcontrol.data.model.UserRole
 import com.example.gymcontrol.data.remote.CorreoRepository
+import com.example.gymcontrol.data.remote.DatosSalud
+import com.example.gymcontrol.ui.components.DatosSaludCampos
+import com.example.gymcontrol.ui.components.fechaNacimientoValida
 import com.example.gymcontrol.data.remote.PersonalRepository
 import com.example.gymcontrol.data.remote.PersonalRow
 import com.example.gymcontrol.ui.components.GymScaffold
@@ -194,13 +197,14 @@ fun UsuariosScreen(
         val confirmCreateMsg = stringResource(R.string.confirm_add_staff, "%s", "%s")
         val successMsg = stringResource(R.string.staff_added_success)
         val warningMsg = stringResource(R.string.staff_added_warning)
+        val saludFalloMsg = stringResource(R.string.staff_health_save_failed)
         NewStaffDialog(
             error = errorAlta,
             onDismiss = {
                 showNewForm = false
                 errorAlta = null
             },
-            onSave = { nombre, tel, correo, rol, costo, cap, roleName ->
+            onSave = { nombre, tel, correo, rol, costo, cap, roleName, salud ->
                 val msg = String.format(Locale.getDefault(), confirmCreateMsg, nombre, roleName)
                 pendiente = Pendiente(msg) {
                     scope.launch {
@@ -209,11 +213,16 @@ fun UsuariosScreen(
                                 nombre, tel, correo.trim(),
                                 rol.name, costo.toDoubleOrNull(), cap.toIntOrNull()
                             )
+                            // El usuario ya quedó creado; si esto falla solo se avisa
+                            val saludGuardada = runCatching {
+                                PersonalRepository.guardarDatosSalud(SesionActual.correo ?: "", nuevoId, salud)
+                            }.isSuccess
                             errorAlta = null
                             showNewForm = false
                             personal = PersonalRepository.listar()
                             val enviado = CorreoRepository.enviarBienvenida(correo.trim())
-                            info = if (enviado) successMsg else warningMsg
+                            info = (if (enviado) successMsg else warningMsg) +
+                                    (if (saludGuardada) "" else "\n$saludFalloMsg")
                             // Enseguida se le toma su foto de perfil
                             tomandoFoto = nuevoId to nombre
                         } catch (e: Exception) {
@@ -234,7 +243,7 @@ fun UsuariosScreen(
                 editing = null
                 errorEditar = null
             },
-            onSave = { nombre, correo, rol, estado, tel, costo, cap ->
+            onSave = { nombre, correo, rol, estado, tel, costo, cap, salud ->
                 val msg = String.format(Locale.getDefault(), confirmSaveMsg, target.name)
                 pendiente = Pendiente(msg) {
                     scope.launch {
@@ -244,6 +253,10 @@ fun UsuariosScreen(
                                 nombre, correo, rol.name, estado.name,
                                 tel, costo, cap
                             )
+                            // null = no se pudieron cargar; no se sobrescribe lo que había
+                            salud?.let {
+                                PersonalRepository.guardarDatosSalud(SesionActual.correo ?: "", target.id, it)
+                            }
                             errorEditar = null
                             editing = null
                             personal = PersonalRepository.listar()
@@ -560,7 +573,7 @@ private fun StaffDialog(
 private fun NewStaffDialog(
     error: String?,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, UserRole, String, String, String) -> Unit
+    onSave: (String, String, String, UserRole, String, String, String, DatosSalud) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -568,9 +581,11 @@ private fun NewStaffDialog(
     var role by remember { mutableStateOf(UserRole.RECEPCION) }
     var cost by remember { mutableStateOf("") }
     var capacity by remember { mutableStateOf("") }
+    var salud by remember { mutableStateOf(DatosSalud()) }
 
     val isInstructor = role == UserRole.INSTRUCTOR
     val canSave = nameHasMinLetters(name) && phone.length == 10 &&
+            fechaNacimientoValida(salud.fechaNacimiento) &&
             email.isNotBlank() &&
             (!isInstructor || (cost.isNotBlank() && capacity.isNotBlank()))
 
@@ -653,6 +668,9 @@ private fun NewStaffDialog(
             DigitsField(capacity, { capacity = it }, stringResource(R.string.encargado_usuarios_max_capacity_label), maxLength = 3)
         }
 
+        Spacer(Modifier.height(16.dp))
+        DatosSaludCampos(datos = salud, onChange = { salud = it }, fechaObligatoria = true)
+
         error?.let {
             Spacer(Modifier.height(8.dp))
             Text(it, color = ClienteTema.Rojo, fontSize = 13.sp)
@@ -661,7 +679,7 @@ private fun NewStaffDialog(
         Spacer(Modifier.height(18.dp))
 
         Button(
-            onClick = { onSave(name.trim(), phone, email, role, cost, capacity, roleName) },
+            onClick = { onSave(name.trim(), phone, email, role, cost, capacity, roleName, salud) },
             enabled = canSave,
             colors = ButtonDefaults.buttonColors(
                 containerColor = ClienteTema.Azul,
@@ -683,7 +701,7 @@ private fun EditStaffDialog(
     target: StaffItem,
     error: String?,
     onDismiss: () -> Unit,
-    onSave: (String, String, UserRole, Status, String?, Double?, Int?) -> Unit
+    onSave: (String, String, UserRole, Status, String?, Double?, Int?, DatosSalud?) -> Unit
 ) {
     val context = LocalContext.current
     var name by remember { mutableStateOf(target.name) }
@@ -698,6 +716,13 @@ private fun EditStaffDialog(
     var capacity by remember { mutableStateOf("") }
     var detalleCargado by remember { mutableStateOf(false) }
     var errorDetalle by remember { mutableStateOf<String?>(null) }
+    // Datos de salud: null mientras cargan (o si fallaron); entonces no se muestran ni se guardan
+    var salud by remember { mutableStateOf<DatosSalud?>(null) }
+    LaunchedEffect(target.id) {
+        salud = try {
+            PersonalRepository.datosSalud(SesionActual.correo ?: "", target.id)
+        } catch (_: Exception) { null }
+    }
 
     LaunchedEffect(target.id) {
         try {
@@ -800,6 +825,11 @@ private fun EditStaffDialog(
             DigitsField(capacity, { capacity = it }, stringResource(R.string.encargado_usuarios_max_capacity_label), maxLength = 3)
         }
 
+        salud?.let { actual ->
+            Spacer(Modifier.height(16.dp))
+            DatosSaludCampos(datos = actual, onChange = { salud = it }, fechaObligatoria = false)
+        }
+
         (error ?: errorDetalle)?.let {
             Spacer(Modifier.height(8.dp))
             Text(it, color = ClienteTema.Rojo, fontSize = 13.sp)
@@ -813,10 +843,12 @@ private fun EditStaffDialog(
                     name.trim(), email.trim(), role, status,
                     if (detalleCargado) phone else null,
                     if (detalleCargado && isInstructor) cost.toDoubleOrNull() else null,
-                    if (detalleCargado && isInstructor) capacity.toIntOrNull() else null
+                    if (detalleCargado && isInstructor) capacity.toIntOrNull() else null,
+                    salud
                 )
             },
-            enabled = nameHasMinLetters(name) && email.isNotBlank() && phoneOk && instructorOk,
+            enabled = nameHasMinLetters(name) && email.isNotBlank() && phoneOk && instructorOk &&
+                    (salud?.fechaNacimiento == null || fechaNacimientoValida(salud?.fechaNacimiento)),
             colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth()
