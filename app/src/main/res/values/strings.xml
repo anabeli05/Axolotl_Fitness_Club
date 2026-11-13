@@ -255,6 +255,13 @@
     <string name="encargado_servicios_duration_error">Debe ser mayor a 0</string>
     <string name="encargado_servicios_cost_label">Costo</string>
     <string name="encargado_servicios_create_button">Crear Servicio</string>
+    <string name="encargado_servicios_visible_label">¿Para quién se ve?</string>
+    <string name="encargado_servicios_visible_clientes">Clientes (pagos en la app)</string>
+    <string name="encargado_servicios_visible_recepcion">Recepción</string>
+    <string name="encargado_servicios_visible_ambos">Visible para clientes y recepción</string>
+    <string name="encargado_servicios_visible_solo_clientes">Visible solo para clientes</string>
+    <string name="encargado_servicios_visible_solo_recepcion">Visible solo para recepción</string>
+    <string name="encargado_servicios_visible_nadie">Oculto: nadie lo verá</string>
 
     <!-- Encargado: Usuarios / Personal -->
     <string name="encargado_usuarios_add_button">Agregar personal</string>
@@ -551,7 +558,7 @@
     <string name="access_error_no_connection">Sin conexión con la base de datos</string>
 
     <!-- Additional i18n Keys -->
-    <string name="forgot_current_password">¿No recuerdas tu contraseña actual?</string>
+    <string name="forgot_current_password">¿No recuerdas tu contraseña?</string>
     <string name="plan_access_1_day">Acceso por 1 día</string>
     <string name="plan_access_days">Acceso por %d días</string>
     <string name="plan_access_1_month">Acceso por 1 mes</string>
@@ -612,4 +619,27 @@
     <string name="month_oct">Oct</string>
     <string name="month_nov">Nov</string>
     <string name="month_dec">Dic</string>
+    <string name="tab_visits">Visitas</string>
+    <string name="visits_title">Cobrar visita</string>
+    <string name="visits_price">Precio de la visita: %1$s</string>
+    <string name="visits_no_price">No hay un servicio de visita. El Encargado debe crearlo en Servicios marcando «Es la visita».</string>
+    <string name="visits_visitor">Datos del visitante</string>
+    <string name="visits_name">Nombre completo</string>
+    <string name="visits_phone">Teléfono (10 dígitos)</string>
+    <string name="visits_emergency">Contacto de emergencia</string>
+    <string name="visits_method">Método de pago</string>
+    <string name="visits_charge">Cobrar visita · %1$s</string>
+    <string name="visits_today">Visitas de hoy: %1$d</string>
+    <string name="visits_none_today">Aún no hay visitas hoy.</string>
+    <string name="visits_confirm_title">Cobrar visita</string>
+    <string name="visits_confirm_message">¿Cobrar %1$s a %2$s en %3$s? Se sumará a los ingresos de hoy.</string>
+    <string name="visits_confirm_button">Cobrar</string>
+    <string name="visits_registered">Visita de %1$s cobrada.</string>
+    <string name="visits_load_error">No se pudo cargar: %1$s</string>
+    <string name="visits_save_error">No se pudo cobrar: %1$s</string>
+    <string name="encargado_servicios_es_visita">Es la visita (pase de un día)</string>
+    <string name="encargado_servicios_es_visita_ayuda">Recepción la cobra en la sección Visitas; los clientes la pagan en la app como cualquier plan.</string>
+    <string name="encargado_servicios_es_visita_reemplaza">Ya hay otro servicio de visita; este lo reemplazará.</string>
+    <string name="encargado_servicios_es_visita_card">Visita · se cobra en la sección Visitas</string>
+    <string name="visits_not_for_reception">La visita no está disponible para Recepción. El Encargado puede activarla en Servicios.</string>
 </resources>

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.AuthRepository
 import com.example.gymcontrol.data.remote.CorreoRepository
@@ -34,7 +35,8 @@ data class ColoresDialogo(
     val borde: Color,
     val error: Color,
     val boton: Color,
-    val textoBoton: Color
+    val textoBoton: Color,
+    val campo: Color = Color.Transparent
 )
 
 /**
@@ -108,6 +110,7 @@ fun RestablecerContrasenaDialog(
             onValueChange = cambio,
             label = { Text(etiqueta) },
             singleLine = true,
+            shape = RoundedCornerShape(50),
             enabled = habilitado && !cargando,
             visualTransformation = if (clave && !visible) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = KeyboardOptions(keyboardType = tipo),
@@ -130,11 +133,14 @@ fun RestablecerContrasenaDialog(
                 unfocusedBorderColor = colores.borde,
                 disabledBorderColor = colores.borde.copy(alpha = 0.4f),
                 focusedLabelColor = colores.acento,
-                unfocusedLabelColor = colores.textoSec,
-                disabledLabelColor = colores.textoSec,
+                unfocusedLabelColor = colores.texto,
+                disabledLabelColor = colores.texto,
                 cursorColor = colores.acento,
                 focusedTrailingIconColor = colores.acento,
-                unfocusedTrailingIconColor = colores.textoSec
+                unfocusedTrailingIconColor = colores.texto,
+                focusedContainerColor = colores.campo,
+                unfocusedContainerColor = colores.campo,
+                disabledContainerColor = colores.campo,
             ),
             modifier = Modifier.fillMaxWidth()
         )

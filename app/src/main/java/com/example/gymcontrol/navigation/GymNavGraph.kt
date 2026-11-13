@@ -40,6 +40,7 @@ import com.example.gymcontrol.ui.recepcion.clientes.ClientesScreen
 import com.example.gymcontrol.ui.recepcion.scanner.AccesoFacialScreen
 import com.example.gymcontrol.ui.recepcion.solicitudes.SolicitudesScreen
 import com.example.gymcontrol.ui.recepcion.pagos.RecepcionPagosScreen
+import com.example.gymcontrol.ui.recepcion.visitas.VisitasScreen
 import com.example.gymcontrol.ui.recepcion.perfil.RecepcionPerfilScreen
 import com.example.gymcontrol.ui.theme.GymColors
 import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
@@ -147,6 +148,9 @@ fun GymNavGraph() {
                 composable(Routes.RECEPTION_PAYMENTS) {
                     RecepcionPagosScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
+                composable(Routes.RECEPTION_VISITS) {
+                    VisitasScreen(onNavigate = { section -> navigateReception(navController, section) })
+                }
                 composable(Routes.RECEPTION_PROFILE) {
                     RecepcionPerfilScreen(onNavigate = { section -> navigateReception(navController, section) })
                 }
@@ -174,6 +178,9 @@ fun GymNavGraph() {
                 }
                 composable(Routes.ADMIN_PAYMENTS) {
                     PagosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
+                }
+                composable(Routes.ADMIN_VISITS) {
+                    VisitasScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
                 composable(Routes.ADMIN_EXPENSES) {
                     GastosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
@@ -224,6 +231,7 @@ private fun navigateReception(navController: NavHostController, section: String)
         "Clientes" -> Routes.RECEPTION_CLIENTS
         "Solicitudes" -> Routes.RECEPTION_REQUESTS
         "Pagos" -> Routes.RECEPTION_PAYMENTS
+        "Visitas" -> Routes.RECEPTION_VISITS
         "Perfil" -> Routes.RECEPTION_PROFILE
         else -> null
     }
@@ -264,6 +272,7 @@ private fun navigateAdmin(navController: NavHostController, section: String) {
         "Personal", "Usuarios" -> Routes.ADMIN_USERS
         "Servicios" -> Routes.ADMIN_SERVICES
         "Pagos" -> Routes.ADMIN_PAYMENTS
+        "Visitas" -> Routes.ADMIN_VISITS
         "Gastos" -> Routes.ADMIN_EXPENSES
         "Reportes" -> Routes.ADMIN_REPORTS
         else -> null

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DateRange
@@ -45,8 +46,8 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
-    UserRole.RECEPCION -> listOf("Home", "Clientes", "Solicitudes", "Pagos", "Perfil")
-    UserRole.ENCARGADO -> listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Gastos", "Reportes")
+    UserRole.RECEPCION -> listOf("Home", "Clientes", "Visitas", "Solicitudes", "Pagos", "Perfil")
+    UserRole.ENCARGADO -> listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Visitas", "Gastos", "Reportes")
     UserRole.CLIENTE, UserRole.INSTRUCTOR -> emptyList()
 }
 
@@ -58,6 +59,7 @@ fun translatedSection(section: String): String = when (section) {
     "Dashboard" -> stringResource(R.string.tab_dashboard)
     "Clientes" -> stringResource(R.string.tab_clients)
     "Solicitudes" -> stringResource(R.string.tab_requests)
+    "Visitas" -> stringResource(R.string.tab_visits)
     "Personal" -> stringResource(R.string.tab_staff)
     "Servicios" -> stringResource(R.string.tab_services)
     "Pagos" -> stringResource(R.string.menu_payments)
@@ -79,6 +81,7 @@ private fun iconoPara(seccion: String): ImageVector = when (seccion) {
     "Home", "Dashboard" -> Icons.Filled.Home
     "Clientes" -> Icons.Filled.Face
     "Solicitudes" -> Icons.Filled.Notifications
+    "Visitas" -> Icons.Filled.ConfirmationNumber
     "Personal" -> Icons.Filled.Person
     "Servicios" -> Icons.Filled.Build
     "Pagos" -> Icons.Filled.CreditCard
