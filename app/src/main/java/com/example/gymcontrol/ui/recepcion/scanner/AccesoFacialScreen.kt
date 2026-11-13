@@ -41,6 +41,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import com.example.gymcontrol.data.biometria.PasoFacial
 import com.example.gymcontrol.data.biometria.ReconocedorFacial
+import com.example.gymcontrol.data.biometria.ZonaEscaneo
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.MovimientoRow
 import com.example.gymcontrol.ui.components.ClienteTema
@@ -82,7 +89,10 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
     LaunchedEffect(Unit) { if (indicacion.isEmpty()) indicacion = initialIndicacion }
 
     val reconocedor = remember { runCatching { ReconocedorFacial(context) }.getOrNull() }
-    val captura = remember(reconocedor) { reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 3, soloElMasCercano = true) } }
+    val zona = remember { ZonaEscaneo() }
+    val captura = remember(reconocedor) {
+        reconocedor?.let { CapturaFacial(it, muestrasNecesarias = 3, soloElMasCercano = true, zona = zona) }
+    }
     val pausa = remember { AtomicBoolean(false) }
     DisposableEffect(reconocedor) { onDispose { reconocedor?.close() } }
 
@@ -244,7 +254,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                             onFrame = onFrame
                         )
                     }
-                    ScannerCorners(Modifier.fillMaxSize())
+                    MarcoEscaneo(zona, Modifier.fillMaxSize())
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -430,6 +440,29 @@ private fun GymCard(content: @Composable ColumnScope.() -> Unit) {
             .padding(16.dp),
         content = content
     )
+}
+
+/**
+ * Recuadro donde debe ponerse el cliente: oscurece lo de afuera (lo que el sistema ignora)
+ * y marca el borde. Usa las mismas medidas que [ZonaEscaneo] para que coincida con la detección.
+ */
+@Composable
+internal fun MarcoEscaneo(zona: ZonaEscaneo, modifier: Modifier = Modifier) {
+    Canvas(modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)) {
+        val lado = minOf(size.width, size.height)
+        val w = lado * zona.ancho
+        val h = lado * zona.alto
+        val topLeft = Offset((size.width - w) / 2f, (size.height - h) / 2f)
+        val radio = CornerRadius(24.dp.toPx())
+
+        // Fondo oscuro con un hueco transparente en el recuadro
+        drawRect(Color.Black.copy(alpha = 0.55f))
+        drawRoundRect(Color.Transparent, topLeft, Size(w, h), radio, blendMode = BlendMode.Clear)
+        drawRoundRect(
+            ClienteTema.AzulSel, topLeft, Size(w, h), radio,
+            style = Stroke(width = 3.dp.toPx())
+        )
+    }
 }
 
 @Composable

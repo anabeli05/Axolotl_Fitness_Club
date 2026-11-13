@@ -26,6 +26,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.components.DatosSaludCampos
+import com.example.gymcontrol.ui.components.fechaNacimientoValida
+import com.example.gymcontrol.data.remote.DatosSalud
 import kotlinx.coroutines.delay
 
 // El nombre debe tener al menos `min` letras (espacios y números no cuentan)
@@ -38,7 +41,8 @@ fun ClientFormDialog(
     onDismiss: () -> Unit,
     onSave: (
         nombre: String, telefono: String, correo: String, plan: String?,
-        contactoNombre: String, contactoTelefono: String, metodo: String
+        contactoNombre: String, contactoTelefono: String, metodo: String,
+        salud: DatosSalud
     ) -> Unit,
     plans: List<String> = emptyList(),
     error: String? = null,
@@ -50,7 +54,9 @@ fun ClientFormDialog(
     initialPlan: String? = null,
     // Contacto de emergencia: solo nombre y teléfono (obligatorio)
     initialContactName: String = "",
-    initialContactPhone: String = ""
+    initialContactPhone: String = "",
+    // Fecha de nacimiento y datos de salud (al editar se cargan los del cliente)
+    initialSalud: DatosSalud = DatosSalud()
 ) {
     var name by remember { mutableStateOf(initialName) }
     var lastName by remember { mutableStateOf(initialLastName) }
@@ -60,6 +66,7 @@ fun ClientFormDialog(
     var planMenuExpanded by remember { mutableStateOf(false) }
     var contactName by remember(initialContactName) { mutableStateOf(initialContactName) }
     var contactPhone by remember(initialContactPhone) { mutableStateOf(initialContactPhone) }
+    var salud by remember(initialSalud) { mutableStateOf(initialSalud) }
     var metodo by remember { mutableStateOf(com.example.gymcontrol.data.remote.METODOS_PAGO.first()) }
 
     val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
@@ -70,7 +77,10 @@ fun ClientFormDialog(
     val emailValid = Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
     // El contacto de emergencia es obligatorio: nombre (mínimo 3 letras) y teléfono de 10 dígitos
     val contactValid = nameHasMinLetters(contactName) && contactPhone.length == 10
+    // Fecha de nacimiento obligatoria al registrar; al editar, si ya hay una, debe ser válida
+    val saludValida = if (salud.fechaNacimiento == null) isEditing else fechaNacimientoValida(salud.fechaNacimiento)
     val canSave = nameValid &&
+            saludValida &&
             contactValid &&
             lastNameValid &&
             phone.length == 10 &&
@@ -190,6 +200,12 @@ fun ClientFormDialog(
                     "Deben ser 10 dígitos (${contactPhone.length}/10)"
                 } else null
             )
+            Spacer(Modifier.height(14.dp))
+            DatosSaludCampos(
+                datos = salud,
+                onChange = { salud = it },
+                fechaObligatoria = !isEditing
+            )
             Spacer(Modifier.height(10.dp))
 
             if (!isEditing) ExposedDropdownMenuBox(
@@ -262,7 +278,8 @@ fun ClientFormDialog(
                         selectedPlan,
                         contactName.trim(),
                         contactPhone,
-                        metodo
+                        metodo,
+                        salud
                     )
                 },
                 enabled = canSave,
