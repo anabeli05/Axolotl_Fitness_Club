@@ -13,6 +13,7 @@
     <string name="logging_in">Signing in...</string>
     <string name="error_invalid_credentials">Incorrect username or password</string>
     <string name="error_connection_prefix">Connection error: </string>
+    <string name="account_locked_minutes">Account temporarily locked. Try again in %d min</string>
     <string name="change_password">Change password</string>
     <string name="password_updated_success">Password updated. You can now log in.</string>
     <string name="current_password">Current password</string>
@@ -399,51 +400,9 @@
     <string name="label_status">Status: </string>
     <string name="encargado_clients_renew_title">Renew %1$s</string>
 
-<<<<<<< Updated upstream
     <!-- TERMS AND CONDITIONS -->
     <string name="terms_title">TERMS AND CONDITIONS</string>
     <string name="terms_last_updated">Last updated: November 2026</string>
-=======
-    <!-- Terms and Conditions -->
-    <string name="term_1_title">1. Acceptance of Terms</string>
-    <string name="term_1_content">By accessing and using the Axolotl Fitness Club (GymControl) application, the user declares that they have read, understood, and fully accepted these Terms and Conditions of Responsible Use. If you do not agree, you must refrain from using the platform. Acceptance is made on the login screen by checking a box required to sign in.</string>
-    <string name="term_2_title">2. Purpose of the Service</string>
-    <string name="term_2_content">The application is a mobile service for Android by Axolotl Fitness Club, which has multiple branches. It allows controlling client access, managing memberships, requesting advisories with instructors, recording payments, and generating reports.</string>
-    <string name="term_3_title">3. User Roles</string>
-    <string name="term_3_content">The application has four user types (client, instructor, reception, and owner/manager), and each only accesses the functions corresponding to their role.</string>
-    <string name="term_4_title">4. Eligibility to Use the Application</string>
-    <string name="term_4_content">Only persons aged 18 or older may use the application.</string>
-    <string name="term_5_title">5. Responsible Account Use</string>
-    <string name="term_5_content">Account access credentials are personal and non-transferable. The user is solely responsible for maintaining the confidentiality of their credentials and for all activities performed from their account. Accounts are created by staff; there is no self-registration. Passwords must be at least 8 characters long, including uppercase, lowercase, numbers, and symbols. An inactive account cannot log in. After 5 failed attempts, the account is locked for 15 minutes.</string>
-    <string name="term_6_title">6. Payments, Memberships, and Cancellations</string>
-    <string name="term_6_content">Tariffs, subscription validity, and renewal conditions are governed by the contracted plan. Facility access is subject to being current with the corresponding membership payment.\n\nDay, monthly, and quarterly memberships are available. A membership is active when its status is active and its expiration date is today or later. If expired, entry is not permitted until renewed. Renewals are handled by reception or the manager.\n\nOnly the manager can deactivate a client, leaving the account inactive. An account inactive for a specified time may be manually deleted by reception or the manager.\n\nCash, card, and transfer payments are accepted. Reception confirms cash and card payments; the manager confirms transfers and can also confirm the other two. A payment is pending, accepted, or rejected. Amounts are expressed in Mexican pesos. The application records payments and does not process online charges. Additional services, such as instructor use, are billed separately.\n\nCancellation and refund policy: you are entitled to a full refund if you cancel within the first 48 hours after paying and have not yet entered, or if there was a billing error. In any other case there is no refund and you can use the membership until it expires. Refunds are made by the same payment method within a maximum of 10 business days. Cancellations are requested at reception and only the manager can authorize them; the 48 hours are counted up to the moment of the request. If you enter the gym while your request is pending, the refund no longer applies.</string>
-    <string name="term_7_title">7. Gym Access</string>
-    <string name="term_7_content">The client is identified at reception through facial recognition. The first scan records the entry and the next one the exit, automatically; an active membership is required to enter. Reception reserves the right to deny entry. Attempting to enter by impersonating another person is strictly prohibited.</string>
-    <string name="term_8_title">8. Capacity and Traffic Hours</string>
-    <string name="term_8_content">The application shows an approximate number of people inside the gym, calculated from entry and exit records. It is informative and may not match real-time numbers exactly.</string>
-    <string name="term_9_title">9. Instructor Advisories</string>
-    <string name="term_9_content">The client requests an advisory with an instructor, and the request is approved or rejected. The cost is defined by each instructor, and each instructor has a maximum client capacity. The instructor defines attendance days and goals with each client.</string>
-    <string name="term_10_title">10. Notices and Notifications</string>
-    <string name="term_10_content">Membership expiration notices are sent to the client outside of the application.</string>
-    <string name="term_11_title">11. Facility Rules and Safety</string>
-    <string name="term_11_content">Gym use requires respecting internal rules of hygiene, safety, and proper use of equipment and weights. Offensive behavior or any action threatening the physical integrity of users and staff is strictly prohibited.</string>
-    <string name="term_12_title">12. Health and Physical Condition</string>
-    <string name="term_12_content">The user acknowledges that physical activity involves inherent risks. It is the user\'s responsibility to consult a physician before starting any training program and to notify instructors of any relevant medical condition. The application does not track physical progress or substitute medical advice.</string>
-    <string name="term_13_title">13. Acceptable Use of the Application</string>
-    <string name="term_13_content">Users must not share accounts, attempt to access features of another role, manipulate system data, or use the application for illicit purposes.</string>
-    <string name="term_14_title">14. Intellectual Property</string>
-    <string name="term_14_content">The application, its design, code, name, and Axolotl logo are protected by copyright. © 2026 Axolotl. All rights reserved. Copying, modifying, distributing, or reverse engineering the application without written authorization from Axolotl is prohibited.</string>
-    <string name="term_15_title">15. Service Availability</string>
-    <string name="term_15_content">The application relies on the internet and a cloud service, so uninterrupted operation or availability during maintenance is not guaranteed.</string>
-    <string name="term_16_title">16. Personal Data</string>
-    <string name="term_16_content">The processing of personal data is governed by the Privacy Policy.</string>
-    <string name="term_17_title">17. Suspension and Termination</string>
-    <string name="term_17_content">Client deactivation is performed by the manager and leaves the account inactive.</string>
-    <string name="term_18_title">18. Modifications to Terms</string>
-    <string name="term_18_content">The gym reserves the right to modify these terms at any time. Modifications will take effect upon publication in the application.</string>
-    <string name="term_19_title">19. Contact</string>
-    <string name="term_19_content">Phone: +52 314 139 7633\nEmail: contacto@axolotlgym.com</string>
->>>>>>> Stashed changes
 
     <string name="term_1_title">1. Acceptance of the terms</string>
     <string name="term_1_content">By logging in to GymControl, the Axolotl Fitness Club app, and by using its facilities, you accept these Terms and Conditions. Acceptance is given on the login screen: you must check the box in order to log in, and you are asked each time you log in. If you do not agree, do not use the app.</string>
@@ -743,7 +702,6 @@
     <string name="encargado_servicios_es_visita_reemplaza">Another service is already the visit; this one will replace it.</string>
     <string name="encargado_servicios_es_visita_card">Visit · charged in the Visits section</string>
     <string name="visits_not_for_reception">The visit is not available to reception. The manager can enable it in Services.</string>
-<<<<<<< Updated upstream
     <string name="payment_method_sent_on">%1$s · sent on %2$s</string>
     <string name="tap_image_to_enlarge">Tap the image to enlarge</string>
     <string name="btn_reject">Reject</string>
@@ -755,8 +713,7 @@
     <string name="no_pending_payments">No pending payments to validate</string>
     <string name="receipt_load_error">Could not load receipt</string>
     <string name="receipt_no_receipt">No receipt (registered at reception)</string>
-</resources>
-=======
+
     <!-- Membership cancellation and refunds -->
     <string name="cancel_membership_button">Cancel</string>
     <string name="cancel_membership_title">Cancel %1$s\'s membership</string>
@@ -805,4 +762,3 @@
     <string name="reports_request_rejected">Request for %1$s rejected.</string>
     <string name="reports_request_failed">The request could not be resolved</string>
 </resources>
->>>>>>> Stashed changes

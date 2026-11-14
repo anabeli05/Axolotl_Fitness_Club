@@ -312,7 +312,12 @@ fun LoginScreen(
                                 }
                             } catch (e: Exception) {
                                 val msg = e.message?.substringBefore("\nCode:") ?: ""
-                                error = if ("bloqueada" in msg) msg else "$strConnErrorPrefix$msg"
+                                error = if ("bloqueada" in msg.lowercase() || "locked" in msg.lowercase()) {
+                                    val minutos = Regex("""(\d+)""").find(msg)?.groupValues?.get(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                                    context.applicationContext.getString(R.string.account_locked_minutes, minutos)
+                                } else {
+                                    "$strConnErrorPrefix$msg"
+                                }
                             }
                             loading = false
                         }
