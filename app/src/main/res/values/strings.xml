@@ -374,7 +374,7 @@
     <string name="label_inside">Dentro</string>
     <string name="label_outside">Fuera</string>
     <string name="label_inside_since">Dentro · desde %s</string>
-    <string name="btn_new_client">+ Nuevo cliente</string>
+    <string name="btn_new_client">Nuevo cliente</string>
     <string name="placeholder_search_client">Nombre o membresía</string>
 
     <!-- Planes -->
