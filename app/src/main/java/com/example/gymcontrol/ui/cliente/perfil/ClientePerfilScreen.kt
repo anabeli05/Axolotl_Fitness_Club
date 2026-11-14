@@ -48,8 +48,6 @@ import com.example.gymcontrol.data.remote.ContactoEmergencia
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
-import com.example.gymcontrol.ui.components.ColoresDialogo
-import com.example.gymcontrol.ui.components.RestablecerContrasenaDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -88,7 +86,6 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
-    var showRestablecer by remember { mutableStateOf(false) }
 
     ClienteScaffoldClaro(
         currentSection = "Perfil",
@@ -242,10 +239,6 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
     if (showPasswordDialog) {
         PasswordDialog(
             onDismiss = { showPasswordDialog = false },
-            onOlvide = {
-                showPasswordDialog = false
-                showRestablecer = true
-            },
             onSave = { actual, nueva ->
                 scope.launch {
                     try {
@@ -257,24 +250,6 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
                     }
                 }
-            }
-        )
-    }
-
-    // No recuerda la actual: la nueva se confirma con un código enviado a su correo registrado
-    if (showRestablecer) {
-        RestablecerContrasenaDialog(
-            correoInicial = email,
-            correoEditable = false,
-            colores = ColoresDialogo(
-                fondo = ClienteTema.Beige, texto = ClienteTema.Texto, textoSec = ClienteTema.TextoSec,
-                acento = ClienteTema.Azul, borde = ClienteTema.Borde, error = ClienteTema.Rojo,
-                boton = ClienteTema.Azul, textoBoton = ClienteTema.SobreDorado
-            ),
-            onDismiss = { showRestablecer = false },
-            onListo = {
-                showRestablecer = false
-                Toast.makeText(context, context.getString(R.string.perfil_password_updated), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -473,7 +448,7 @@ private fun DialogButtons(
         OutlinedButton(
             onClick = onDismiss,
             modifier = Modifier.weight(1f).height(44.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(50),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
             border = BorderStroke(1.dp, ClienteTema.Rojo)
         ) { Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
@@ -481,7 +456,7 @@ private fun DialogButtons(
             onClick = onConfirm,
             enabled = confirmEnabled,
             modifier = Modifier.weight(1f).height(44.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(
                 containerColor = ClienteTema.Azul,
                 contentColor = Color.White
@@ -595,7 +570,7 @@ private fun EditContactDialog(
 }
 
 @Composable
-private fun PasswordDialog(onDismiss: () -> Unit, onOlvide: () -> Unit, onSave: (String, String) -> Unit) {
+private fun PasswordDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -612,11 +587,6 @@ private fun PasswordDialog(onDismiss: () -> Unit, onOlvide: () -> Unit, onSave: 
             label = stringResource(R.string.current_password),
             isPassword = true
         )
-        TextButton(
-            onClick = onOlvide,
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.align(Alignment.End)
-        ) { Text(stringResource(R.string.forgot_current_password), color = ClienteTema.Azul) }
         GymTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
@@ -666,7 +636,7 @@ private fun GymTextField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(50),  // píldora, igual que el inicio de sesión
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = ClienteTema.Azul,
             unfocusedBorderColor = ClienteTema.Borde,

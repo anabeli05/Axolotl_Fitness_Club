@@ -109,10 +109,39 @@ private data class MiContactoParams(val p_gmail: String, val p_nombre: String, v
 private data class ConfirmarPagoParams(val p_actor_gmail: String, val p_pago_id: Long, val p_aceptar: Boolean)
 
 @Serializable
-private data class CancelarMembresiaParams(
-    val p_actor_gmail: String, val p_password: String, val p_cliente_id: Long,
-    val p_motivo: String, val p_reembolso: Double
+private data class SolicitarCancelacionParams(
+    val p_actor_gmail: String, val p_cliente_id: Long, val p_tipo: String, val p_motivo: String
 )
+
+@Serializable
+private data class EvaluarCancelacionParams(
+    val p_actor_gmail: String, val p_cliente_id: Long, val p_tipo: String
+)
+
+/** Tipos de cancelación que acepta la base. */
+const val CANCELACION_VOLUNTARIA = "VOLUNTARIA"
+const val CANCELACION_ERROR_COBRO = "ERROR_COBRO"
+
+/**
+ * Lo que le corresponde al cliente según la política de cancelación (lo calcula la base).
+ * regla: DENTRO_48H | ERROR_COBRO (con reembolso) ·
+ * FUERA_48H | YA_INGRESO | INGRESO_TRAS_SOLICITUD | SIN_PAGO (sin reembolso).
+ */
+@Serializable
+data class EvaluacionCancelacion(
+    @SerialName("r_membresia_id") val membresiaId: Long,
+    @SerialName("r_plan") val plan: String? = null,
+    @SerialName("r_fecha_fin") val fechaFin: String? = null,
+    @SerialName("r_fecha_pago") val fechaPago: String? = null,
+    @SerialName("r_horas") val horas: Double? = null,
+    @SerialName("r_ingreso") val ingreso: Boolean = false,
+    @SerialName("r_reembolso") val reembolso: Double = 0.0,
+    @SerialName("r_metodo") val metodo: String? = null,
+    @SerialName("r_regla") val regla: String,
+    @SerialName("r_fecha_limite") val fechaLimite: String? = null
+) {
+    val conReembolso get() = reembolso > 0.0
+}
 
 object ClientesRepository {
     fun fechaApp(f: String?): String {
@@ -252,13 +281,36 @@ object ClientesRepository {
             .rpc("confirmar_pago", ConfirmarPagoParams(actorGmail, pagoId, aceptar))
             .decodeAs<String?>()
 
-    /** Solo el Encargado, con su contraseña. */
-    suspend fun cancelarMembresia(
-        actorGmail: String, password: String, clienteId: Long, motivo: String, reembolso: Double
-    ) {
-        SupabaseProvider.client.postgrest.rpc(
-            "cancelar_membresia",
-            CancelarMembresiaParams(actorGmail, password, clienteId, motivo, reembolso)
-        )
-    }
+    /** Vista previa (Recepción o Encargado): no cambia nada. */
+    suspend fun evaluarCancelacion(actorGmail: String, clienteId: Long, tipo: String): EvaluacionCancelacion =
+        SupabaseProvider.client.postgrest
+            .rpc("evaluar_cancelacion", EvaluarCancelacionParams(actorGmail, clienteId, tipo))
+            .decodeList<EvaluacionCancelacion>()
+            .first()
+
+    /**
+     * Recepción (o el Encargado) registra la solicitud; la membresía sigue activa hasta
+     * que el Encargado la autorice desde su sesión (Reportes).
+     */
+    suspend fun solicitarCancelacion(
+        actorGmail: String, clienteId: Long, tipo: String, motivo: String
+    ): EvaluacionCancelacion =
+        SupabaseProvider.client.postgrest
+            .rpc(
+                "solicitar_cancelacion",
+                SolicitarCancelacionParams(actorGmail, clienteId, tipo, motivo.trim())
+            )
+            .decodeList<EvaluacionCancelacion>()
+            .first()
+
+    /** Clientes con una solicitud de cancelación pendiente de autorizar. */
+    suspend fun clientesConCancelacionPendiente(): Set<Long> =
+        SupabaseProvider.client.from("solicitudes_cancelacion_pendientes")
+            .select(io.github.jan.supabase.postgrest.query.Columns.list("cliente_id"))
+            .decodeList<ClienteIdRow>()
+            .map { it.clienteId }
+            .toSet()
 }
+
+@Serializable
+private data class ClienteIdRow(@SerialName("cliente_id") val clienteId: Long)

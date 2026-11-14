@@ -327,7 +327,7 @@ private fun DialogButtons(confirmText: String, confirmEnabled: Boolean, onConfir
         OutlinedButton(
             onClick = onDismiss,
             modifier = Modifier.weight(1f).height(44.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(50),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
             border = BorderStroke(1.dp, ClienteTema.Rojo)
         ) { Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
@@ -335,7 +335,7 @@ private fun DialogButtons(confirmText: String, confirmEnabled: Boolean, onConfir
             onClick = onConfirm,
             enabled = confirmEnabled,
             modifier = Modifier.weight(1f).height(44.dp),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul, contentColor = Color.White)
         ) { Text(confirmText, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
     }
@@ -411,7 +411,7 @@ private fun PerfilTextField(
         keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else keyboardType),
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(50),  // píldora, igual que el inicio de sesión
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = ClienteTema.Azul,
             unfocusedBorderColor = ClienteTema.Borde,
