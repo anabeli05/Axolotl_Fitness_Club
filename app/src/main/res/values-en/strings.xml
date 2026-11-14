@@ -428,62 +428,59 @@
     <string name="term_8_title">8. Day visits</string>
     <string name="term_8_content">A visit gives access only on the day it is paid and does not create an account. The visitor\'s name, phone number and an emergency contact (name and phone number) are recorded, and the payment, made in cash or by card, is recorded as income. Reception or the manager ask for an official ID (INE) to confirm the visitor is an adult, and nothing from it is kept. The visitor\'s face is not registered. The privacy notice is available at the facility. Each time the visitor comes in, the whole process is repeated.</string>
 
-    <string name="term_9_title">9. Membership freeze</string>
-    <string name="term_9_content">(Pending: it has not been decided whether this will be implemented.) A membership can be frozen once per period, for 7 to 30 days, for health or travel reasons. It is requested at reception before the start date, and the frozen days are added to the expiration date. It does not apply to day visits.</string>
+    <string name="term_9_title">9. Payments</string>
+    <string name="term_9_content">Payments are accepted in cash, by card, by bank transfer and by deposit, in Mexican pesos. Reception confirms cash and card payments; the manager confirms transfers and deposits, and can also confirm the other two. A payment can be pending, accepted or rejected. If you pay by transfer or deposit, the app shows you the details to do so and you send the receipt; the manager reviews it and, if accepted, your membership is activated. If it is rejected, you will see the reason and can send it again. The app does not process charges and does not store card numbers or bank details. Additional services are charged separately.</string>
 
-    <string name="term_10_title">10. Payments</string>
-    <string name="term_10_content">Payments are accepted in cash, by card, by bank transfer and by deposit, in Mexican pesos. Reception confirms cash and card payments; the manager confirms transfers and deposits, and can also confirm the other two. A payment can be pending, accepted or rejected. If you pay by transfer or deposit, the app shows you the details to do so and you send the receipt; the manager reviews it and, if accepted, your membership is activated. If it is rejected, you will see the reason and can send it again. The app does not process charges and does not store card numbers or bank details. Additional services are charged separately.</string>
+    <string name="term_10_title">10. Membership cancellations and refunds</string>
+    <string name="term_10_content">You are entitled to a full refund if you cancel within 48 hours after paying and have not yet entered the gym, or if there was a billing error. In any other case there is no refund and you can use the membership until it expires. Refunds are made through the same payment method within 10 business days at most. Cancellation is requested at reception and only the manager authorizes it.</string>
 
-    <string name="term_11_title">11. Membership cancellations and refunds</string>
-    <string name="term_11_content">You are entitled to a full refund if you cancel within 48 hours after paying and have not yet entered the gym, or if there was a billing error. In any other case there is no refund and you can use the membership until it expires. Refunds are made through the same payment method within 10 business days at most. Cancellation is requested at reception and only the manager authorizes it.</string>
+    <string name="term_11_title">11. Advisory sessions</string>
+    <string name="term_11_content">Advisory sessions are requested through the app and remain pending until reception approves or rejects them. You can cancel them at no cost while they are pending. Each instructor sets their own price and their maximum number of clients, and agrees with you on the attendance days and your goal. The advisory session is paid the same way as the membership, as explained in point 9.</string>
 
-    <string name="term_12_title">12. Advisory sessions</string>
-    <string name="term_12_content">Advisory sessions are requested through the app and remain pending until reception approves or rejects them. You can cancel them at no cost while they are pending. Each instructor sets their own price and their maximum number of clients, and agrees with you on the attendance days and your goal. The advisory session is paid the same way as the membership, as explained in point 10.</string>
+    <string name="term_12_title">12. Advisory session cancellations and refunds</string>
+    <string name="term_12_content">If you cancel at least 24 hours in advance, the refund is full and made through the same payment method. If you cancel with less notice or do not show up, there is no refund. If the instructor cancels, you choose between a refund or rescheduling.</string>
 
-    <string name="term_13_title">13. Advisory session cancellations and refunds</string>
-    <string name="term_13_content">If you cancel at least 24 hours in advance, the refund is full and made through the same payment method. If you cancel with less notice or do not show up, there is no refund. If the instructor cancels, you choose between a refund or rescheduling.</string>
+    <string name="term_13_title">13. Identity and facial recognition</string>
+    <string name="term_13_content">Access to the gym is verified with facial recognition. Reception registers your face and, from then on, your entry and exit are recorded automatically when the system recognizes you. Reception can also record your exit manually without using recognition. Your biometric data is used only to control access. When you register, the person assisting you tells you about this and about your health data, and if you do not agree you can cancel the process before your profile is created and your data is saved. Without accepting facial recognition there is no access; the only alternative is the day visit.</string>
 
-    <string name="term_14_title">14. Identity and facial recognition</string>
-    <string name="term_14_content">Access to the gym is verified with facial recognition. Reception registers your face and, from then on, your entry and exit are recorded automatically when the system recognizes you. Reception can also record your exit manually without using recognition. Your biometric data is used only to control access. When you register, the person assisting you tells you about this and about your health data, and if you do not agree you can cancel the process before your profile is created and your data is saved. Without accepting facial recognition there is no access; the only alternative is the day visit.</string>
+    <string name="term_14_title">14. Registered client not recognized</string>
+    <string name="term_14_content">If the system does not recognize you, reception or the manager verifies your identity with your membership number and an official ID, without keeping anything from it. The manager authorizes the entry and it is recorded manually. If the problem persists, your face registration is updated. If you cannot prove your identity, you do not enter that day.</string>
 
-    <string name="term_15_title">15. Registered client not recognized</string>
-    <string name="term_15_content">If the system does not recognize you, reception or the manager verifies your identity with your membership number and an official ID, without keeping anything from it. The manager authorizes the entry and it is recorded manually. If the problem persists, your face registration is updated. If you cannot prove your identity, you do not enter that day.</string>
+    <string name="term_15_title">15. Impersonation</string>
+    <string name="term_15_content">Entering by pretending to be someone else is prohibited. The account of the person impersonating and of the person who lent theirs is suspended, the membership is cancelled without a refund, and Axolotl may file a complaint. Reception informs the manager and the manager makes the final decision.</string>
 
-    <string name="term_16_title">16. Impersonation</string>
-    <string name="term_16_content">Entering by pretending to be someone else is prohibited. The account of the person impersonating and of the person who lent theirs is suspended, the membership is cancelled without a refund, and Axolotl may file a complaint. Reception informs the manager and the manager makes the final decision.</string>
+    <string name="term_16_title">16. Occupancy and busy hours</string>
+    <string name="term_16_content">The app shows the number of people inside the gym, calculated from the day\'s entries and exits, and it resets every day when the facility closes. There may be a small margin of error if someone does not record their exit. The least busy hours are calculated from actual entries over the last 4 weeks.</string>
 
-    <string name="term_17_title">17. Occupancy and busy hours</string>
-    <string name="term_17_content">The app shows the number of people inside the gym, calculated from the day\'s entries and exits, and it resets every day when the facility closes. There may be a small margin of error if someone does not record their exit. The least busy hours are calculated from actual entries over the last 4 weeks.</string>
+    <string name="term_17_title">17. Obligations of staff and instructors</string>
+    <string name="term_17_content">Staff and instructors use clients\' data only for their role, keep it confidential, do not copy or share it, and do not use it for personal purposes. When they record an entry or exit manually, they verify identity honestly. Failure to comply may lead to suspension of their account.</string>
 
-    <string name="term_18_title">18. Obligations of staff and instructors</string>
-    <string name="term_18_content">Staff and instructors use clients\' data only for their role, keep it confidential, do not copy or share it, and do not use it for personal purposes. When they record an entry or exit manually, they verify identity honestly. Failure to comply may lead to suspension of their account.</string>
+    <string name="term_18_title">18. Rules of conduct and safety</string>
+    <string name="term_18_content">The facility\'s internal rules are written down and visible on its premises. Breaking them may lead to a warning, a temporary suspension or removal.</string>
 
-    <string name="term_19_title">19. Rules of conduct and safety</string>
-    <string name="term_19_content">The facility\'s internal rules are written down and visible on its premises. Breaking them may lead to a warning, a temporary suspension or removal.</string>
+    <string name="term_19_title">19. Prohibited conduct</string>
+    <string name="term_19_content">You may not share your account or password, access the functions of another role, manipulate the system or breach its security, or use the app for unlawful purposes.</string>
 
-    <string name="term_20_title">20. Prohibited conduct</string>
-    <string name="term_20_content">You may not share your account or password, access the functions of another role, manipulate the system or breach its security, or use the app for unlawful purposes.</string>
+    <string name="term_20_title">20. Suspension and removal</string>
+    <string name="term_20_content">An account may be suspended for impersonation, breach of these terms, or violent or offensive conduct. An expired membership does not suspend the account; it only denies access to the gym. The manager removes staff members and their data is deleted.</string>
 
-    <string name="term_21_title">21. Suspension and removal</string>
-    <string name="term_21_content">An account may be suspended for impersonation, breach of these terms, or violent or offensive conduct. An expired membership does not suspend the account; it only denies access to the gym. The manager removes staff members and their data is deleted.</string>
+    <string name="term_21_title">21. Health and physical condition</string>
+    <string name="term_21_content">Physical activity involves risks. See a doctor before training and tell your instructors about any relevant condition. When you are registered, reception or the manager records your date of birth, blood type, allergies, ailments or injuries and the medication you take, only to deal with an emergency; some of this data may be left unspecified. The app does not replace medical advice or track your physical progress.</string>
 
-    <string name="term_22_title">22. Health and physical condition</string>
-    <string name="term_22_content">Physical activity involves risks. See a doctor before training and tell your instructors about any relevant condition. When you are registered, reception or the manager records your date of birth, blood type, allergies, ailments or injuries and the medication you take, only to deal with an emergency; some of this data may be left unspecified. The app does not replace medical advice or track your physical progress.</string>
+    <string name="term_22_title">22. Availability of the service</string>
+    <string name="term_22_content">The app depends on the internet, the device\'s camera and a cloud service, so uninterrupted operation is not guaranteed.</string>
 
-    <string name="term_23_title">23. Availability of the service</string>
-    <string name="term_23_content">The app depends on the internet, the device\'s camera and a cloud service, so uninterrupted operation is not guaranteed.</string>
+    <string name="term_23_title">23. Personal data</string>
+    <string name="term_23_content">The processing of your personal data is governed by the Privacy Policy.</string>
 
-    <string name="term_24_title">24. Personal data</string>
-    <string name="term_24_content">The processing of your personal data is governed by the Privacy Policy.</string>
+    <string name="term_24_title">24. Notices and changes</string>
+    <string name="term_24_content">Notices are sent by email and, where applicable, through the app and at the facility. Changes to these terms, to prices or to policies are announced at least 15 calendar days in advance, and closures or schedule changes at least 3 days in advance. You must keep your email up to date.</string>
 
-    <string name="term_25_title">25. Notices and changes</string>
-    <string name="term_25_content">Notices are sent by email and, where applicable, through the app and at the facility. Changes to these terms, to prices or to policies are announced at least 15 calendar days in advance, and closures or schedule changes at least 3 days in advance. You must keep your email up to date.</string>
+    <string name="term_25_title">25. Governing law</string>
+    <string name="term_25_content">These terms are governed by the laws of the United Mexican States.</string>
 
-    <string name="term_26_title">26. Governing law</string>
-    <string name="term_26_content">These terms are governed by the laws of the United Mexican States.</string>
-
-    <string name="term_27_title">27. Contact</string>
-    <string name="term_27_content">Phone: +52 314 139 7633. Email: xcobian@ucol.mx.</string>
+    <string name="term_26_title">26. Contact</string>
+    <string name="term_26_content">Phone: +52 314 139 7633. Email: xcobian@ucol.mx.</string>
 
     <!-- PRIVACY POLICY -->
     <string name="privacy_title">PRIVACY POLICY</string>

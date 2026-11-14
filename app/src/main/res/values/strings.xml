@@ -444,62 +444,59 @@
     <string name="term_8_title">8. Visitas de un día</string>
     <string name="term_8_content">La visita da acceso solo el día en que se paga y no crea una cuenta. Se registran el nombre, el teléfono y un contacto de emergencia (nombre y teléfono) del visitante, y el pago, que se hace en efectivo o con tarjeta, se registra como ingreso. Recepción o el encargado piden una identificación oficial (INE) para comprobar la mayoría de edad y no se guarda nada de ella. No se registra el rostro del visitante. El aviso de privacidad está disponible en el establecimiento. Cada vez que entra, repite todo el proceso.</string>
 
-    <string name="term_9_title">9. Congelamiento de membresía (PENDIENTE DE ELIMINAR O DEJAR)</string>
-    <string name="term_9_content">La membresía se puede congelar una sola vez por periodo, de 7 a 30 días, por salud o viaje. Se solicita en recepción antes de la fecha de inicio y los días congelados se suman al vencimiento. No aplica a visitas de un día.</string>
+    <string name="term_9_title">9. Pagos</string>
+    <string name="term_9_content">Se aceptan pagos en efectivo, con tarjeta, por transferencia y por depósito, en pesos mexicanos. Recepción confirma los pagos en efectivo y con tarjeta; el encargado confirma las transferencias y los depósitos, y también puede confirmar los otros dos. Un pago puede estar pendiente, aceptado o rechazado. Si pagas por transferencia o depósito, la aplicación te muestra los datos para hacerlo y tú envías el comprobante; el encargado lo revisa y, si lo acepta, se activa tu membresía. Si lo rechaza, verás el motivo y podrás enviarlo de nuevo. La aplicación no procesa cobros ni guarda números de tarjeta ni datos bancarios. Los servicios adicionales se cobran aparte.</string>
 
-    <string name="term_10_title">10. Pagos</string>
-    <string name="term_10_content">Se aceptan pagos en efectivo, con tarjeta, por transferencia y por depósito, en pesos mexicanos. Recepción confirma los pagos en efectivo y con tarjeta; el encargado confirma las transferencias y los depósitos, y también puede confirmar los otros dos. Un pago puede estar pendiente, aceptado o rechazado. Si pagas por transferencia o depósito, la aplicación te muestra los datos para hacerlo y tú envías el comprobante; el encargado lo revisa y, si lo acepta, se activa tu membresía. Si lo rechaza, verás el motivo y podrás enviarlo de nuevo. La aplicación no procesa cobros ni guarda números de tarjeta ni datos bancarios. Los servicios adicionales se cobran aparte.</string>
+    <string name="term_10_title">10. Cancelaciones y reembolsos de membresías</string>
+    <string name="term_10_content">Tienes derecho a reembolso completo si cancelas dentro de las primeras 48 horas después de pagar y aún no has ingresado, o si hubo un error de cobro. En cualquier otro caso no hay reembolso y puedes usar la membresía hasta su vencimiento. El reembolso se hace por el mismo medio de pago en máximo 10 días hábiles. La cancelación se solicita en recepción y solo el encargado la autoriza.</string>
 
-    <string name="term_11_title">11. Cancelaciones y reembolsos de membresías</string>
-    <string name="term_11_content">Tienes derecho a reembolso completo si cancelas dentro de las primeras 48 horas después de pagar y aún no has ingresado, o si hubo un error de cobro. En cualquier otro caso no hay reembolso y puedes usar la membresía hasta su vencimiento. El reembolso se hace por el mismo medio de pago en máximo 10 días hábiles. La cancelación se solicita en recepción y solo el encargado la autoriza.</string>
+    <string name="term_11_title">11. Asesorías</string>
+    <string name="term_11_content">Las asesorías se solicitan desde la aplicación y quedan pendientes hasta que recepción las aprueba o las rechaza. Puedes cancelarlas sin costo mientras estén pendientes. Cada instructor fija su costo y su máximo de clientes, y define contigo los días de asistencia y tu objetivo. La asesoría se paga del mismo modo que la membresía, como se explica en el punto 9.</string>
 
-    <string name="term_12_title">12. Asesorías</string>
-    <string name="term_12_content">Las asesorías se solicitan desde la aplicación y quedan pendientes hasta que recepción las aprueba o las rechaza. Puedes cancelarlas sin costo mientras estén pendientes. Cada instructor fija su costo y su máximo de clientes, y define contigo los días de asistencia y tu objetivo. La asesoría se paga del mismo modo que la membresía, como se explica en el punto 10.</string>
+    <string name="term_12_title">12. Cancelación y reembolso de asesorías</string>
+    <string name="term_12_content">Si cancelas con al menos 24 horas de anticipación, el reembolso es completo y por el mismo medio de pago. Si cancelas con menos tiempo o no te presentas, no hay reembolso. Si el instructor cancela, tú eliges entre el reembolso o reprogramar.</string>
 
-    <string name="term_13_title">13. Cancelación y reembolso de asesorías</string>
-    <string name="term_13_content">Si cancelas con al menos 24 horas de anticipación, el reembolso es completo y por el mismo medio de pago. Si cancelas con menos tiempo o no te presentas, no hay reembolso. Si el instructor cancela, tú eliges entre el reembolso o reprogramar.</string>
+    <string name="term_13_title">13. Identidad y reconocimiento facial</string>
+    <string name="term_13_content">El acceso al gimnasio se verifica con reconocimiento facial. Recepción registra tu rostro y, a partir de entonces, tu entrada y tu salida se registran de forma automática cuando el sistema te reconoce. Recepción también puede registrar tu salida de forma manual sin usar el reconocimiento. Tus datos biométricos se usan solo para controlar el acceso. Al registrarte, la persona que te atiende te informa de esto y de tus datos de salud, y si no estás de acuerdo puedes cancelar el proceso antes de que se cree tu perfil y se guarden tus datos. Sin aceptar el reconocimiento facial no hay acceso; la única alternativa es la visita de un día.</string>
 
-    <string name="term_14_title">14. Identidad y reconocimiento facial</string>
-    <string name="term_14_content">El acceso al gimnasio se verifica con reconocimiento facial. Recepción registra tu rostro y, a partir de entonces, tu entrada y tu salida se registran de forma automática cuando el sistema te reconoce. Recepción también puede registrar tu salida de forma manual sin usar el reconocimiento. Tus datos biométricos se usan solo para controlar el acceso. Al registrarte, la persona que te atiende te informa de esto y de tus datos de salud, y si no estás de acuerdo puedes cancelar el proceso antes de que se cree tu perfil y se guarden tus datos. Sin aceptar el reconocimiento facial no hay acceso; la única alternativa es la visita de un día.</string>
+    <string name="term_14_title">14. Cliente registrado no reconocido</string>
+    <string name="term_14_content">Si el sistema no te reconoce, recepción o el encargado verifican tu identidad con tu número de membresía y una identificación oficial, sin guardar nada de ella. El encargado autoriza el ingreso y este se registra manualmente. Si el problema persiste, se actualiza tu registro facial. Si no acreditas tu identidad, no entras ese día.</string>
 
-    <string name="term_15_title">15. Cliente registrado no reconocido</string>
-    <string name="term_15_content">Si el sistema no te reconoce, recepción o el encargado verifican tu identidad con tu número de membresía y una identificación oficial, sin guardar nada de ella. El encargado autoriza el ingreso y este se registra manualmente. Si el problema persiste, se actualiza tu registro facial. Si no acreditas tu identidad, no entras ese día.</string>
+    <string name="term_15_title">15. Suplantación</string>
+    <string name="term_15_content">Está prohibido entrar haciéndose pasar por otra persona. Se suspende la cuenta de quien suplanta y de quien presta la suya, se cancela la membresía sin reembolso y Axolotl puede presentar una denuncia. Recepción informa al encargado y él toma la decisión final.</string>
 
-    <string name="term_16_title">16. Suplantación</string>
-    <string name="term_16_content">Está prohibido entrar haciéndose pasar por otra persona. Se suspende la cuenta de quien suplanta y de quien presta la suya, se cancela la membresía sin reembolso y Axolotl puede presentar una denuncia. Recepción informa al encargado y él toma la decisión final.</string>
+    <string name="term_16_title">16. Aforo y horarios de afluencia</string>
+    <string name="term_16_content">La aplicación muestra la cantidad de personas dentro del gimnasio, calculada con las entradas y salidas del día, y se reinicia cada día al cerrar el establecimiento. Puede haber un pequeño margen de error si alguien no marca su salida. Los horarios de menor afluencia se calculan con las entradas reales de las últimas 4 semanas.</string>
 
-    <string name="term_17_title">17. Aforo y horarios de afluencia</string>
-    <string name="term_17_content">La aplicación muestra la cantidad de personas dentro del gimnasio, calculada con las entradas y salidas del día, y se reinicia cada día al cerrar el establecimiento. Puede haber un pequeño margen de error si alguien no marca su salida. Los horarios de menor afluencia se calculan con las entradas reales de las últimas 4 semanas.</string>
+    <string name="term_17_title">17. Obligaciones del personal e instructores</string>
+    <string name="term_17_content">El personal y los instructores usan los datos de los clientes solo para su función, los mantienen confidenciales, no los copian ni los comparten, y no los usan con fines personales. Cuando registran una entrada o una salida de forma manual, verifican la identidad con honestidad. El incumplimiento puede llevar a la suspensión de su cuenta.</string>
 
-    <string name="term_18_title">18. Obligaciones del personal e instructores</string>
-    <string name="term_18_content">El personal y los instructores usan los datos de los clientes solo para su función, los mantienen confidenciales, no los copian ni los comparten, y no los usan con fines personales. Cuando registran una entrada o una salida de forma manual, verifican la identidad con honestidad. El incumplimiento puede llevar a la suspensión de su cuenta.</string>
+    <string name="term_18_title">18. Normas de convivencia y seguridad</string>
+    <string name="term_18_content">Las normas internas del establecimiento están escritas y visibles en sus instalaciones. Incumplirlas puede llevar a una amonestación, a una suspensión temporal o a la baja.</string>
 
-    <string name="term_19_title">19. Normas de convivencia y seguridad</string>
-    <string name="term_19_content">Las normas internas del establecimiento están escritas y visibles en sus instalaciones. Incumplirlas puede llevar a una amonestación, a una suspensión temporal o a la baja.</string>
+    <string name="term_19_title">19. Prohibiciones</string>
+    <string name="term_19_content">No se permite compartir la cuenta o la contraseña, entrar a funciones de otro rol, manipular el sistema o vulnerar su seguridad, ni usar la aplicación con fines ilícitos.</string>
 
-    <string name="term_20_title">20. Prohibiciones</string>
-    <string name="term_20_content">No se permite compartir la cuenta o la contraseña, entrar a funciones de otro rol, manipular el sistema o vulnerar su seguridad, ni usar la aplicación con fines ilícitos.</string>
+    <string name="term_20_title">20. Suspensión y baja</string>
+    <string name="term_20_content">La cuenta puede suspenderse por suplantación, incumplimiento de estos términos o conducta violenta u ofensiva. Una membresía vencida no suspende la cuenta; solo niega el acceso al gimnasio. El encargado da de baja al personal y sus datos se eliminan.</string>
 
-    <string name="term_21_title">21. Suspensión y baja</string>
-    <string name="term_21_content">La cuenta puede suspenderse por suplantación, incumplimiento de estos términos o conducta violenta u ofensiva. Una membresía vencida no suspende la cuenta; solo niega el acceso al gimnasio. El encargado da de baja al personal y sus datos se eliminan.</string>
+    <string name="term_21_title">21. Salud y condición física</string>
+    <string name="term_21_content">La actividad física implica riesgos. Consulta a un médico antes de entrenar y avisa a tus instructores de cualquier condición relevante. Al darte de alta, recepción o el encargado registran tu fecha de nacimiento, tu tipo de sangre, tus alergias, padecimientos o lesiones y los medicamentos que tomas, solo para atender una emergencia; algunos de estos datos pueden quedar sin especificar. La aplicación no sustituye la opinión médica ni da seguimiento a tu progreso físico.</string>
 
-    <string name="term_22_title">22. Salud y condición física</string>
-    <string name="term_22_content">La actividad física implica riesgos. Consulta a un médico antes de entrenar y avisa a tus instructores de cualquier condición relevante. Al darte de alta, recepción o el encargado registran tu fecha de nacimiento, tu tipo de sangre, tus alergias, padecimientos o lesiones y los medicamentos que tomas, solo para atender una emergencia; algunos de estos datos pueden quedar sin especificar. La aplicación no sustituye la opinión médica ni da seguimiento a tu progreso físico.</string>
+    <string name="term_22_title">22. Disponibilidad del servicio</string>
+    <string name="term_22_content">La aplicación depende de internet, de la cámara del dispositivo y de un servicio en la nube, por lo que no se garantiza que funcione sin interrupciones.</string>
 
-    <string name="term_23_title">23. Disponibilidad del servicio</string>
-    <string name="term_23_content">La aplicación depende de internet, de la cámara del dispositivo y de un servicio en la nube, por lo que no se garantiza que funcione sin interrupciones.</string>
+    <string name="term_23_title">23. Datos personales</string>
+    <string name="term_23_content">El tratamiento de tus datos personales se rige por la Política de Privacidad.</string>
 
-    <string name="term_24_title">24. Datos personales</string>
-    <string name="term_24_content">El tratamiento de tus datos personales se rige por la Política de Privacidad.</string>
+    <string name="term_24_title">24. Avisos y modificaciones</string>
+    <string name="term_24_content">Los avisos se envían por correo y, cuando aplique, por la aplicación y en el establecimiento. Los cambios a estos términos, a los precios o a las políticas se avisan con al menos 15 días naturales de anticipación, y los cierres o cambios de horario con al menos 3 días. Debes mantener tu correo actualizado.</string>
 
-    <string name="term_25_title">25. Avisos y modificaciones</string>
-    <string name="term_25_content">Los avisos se envían por correo y, cuando aplique, por la aplicación y en el establecimiento. Los cambios a estos términos, a los precios o a las políticas se avisan con al menos 15 días naturales de anticipación, y los cierres o cambios de horario con al menos 3 días. Debes mantener tu correo actualizado.</string>
+    <string name="term_25_title">25. Ley aplicable</string>
+    <string name="term_25_content">Estos términos se rigen por las leyes de los Estados Unidos Mexicanos.</string>
 
-    <string name="term_26_title">26. Ley aplicable</string>
-    <string name="term_26_content">Estos términos se rigen por las leyes de los Estados Unidos Mexicanos.</string>
-
-    <string name="term_27_title">27. Contacto</string>
-    <string name="term_27_content">Teléfono: +52 314 139 7633. Correo: xcobian@ucol.mx.</string>
+    <string name="term_26_title">26. Contacto</string>
+    <string name="term_26_content">Teléfono: +52 314 139 7633. Correo: xcobian@ucol.mx.</string>
 
     <!-- POLÍTICA DE PRIVACIDAD -->
     <string name="privacy_title">POLÍTICA DE PRIVACIDAD</string>
