@@ -66,6 +66,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     var errorMsg by remember { mutableStateOf<String?>(null) }
     var errorForm by remember { mutableStateOf<String?>(null) }
     var renovando by remember { mutableStateOf<ClienteRow?>(null) }
+    var cancelando by remember { mutableStateOf<ClienteRow?>(null) }
+    var cancelacionPendiente by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var info by remember { mutableStateOf<String?>(null) }
     var conRostro by remember { mutableStateOf<Set<Long>>(emptySet()) }
     var registrandoRostro by remember { mutableStateOf<ClienteRow?>(null) }
@@ -91,6 +93,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             errorMsg = "No se pudo cargar: ${e.message}"
         }
         try { conRostro = AccesoFacialRepository.clientesConRostro() } catch (_: Exception) {}
+        try { cancelacionPendiente = ClientesRepository.clientesConCancelacionPendiente() } catch (_: Exception) {}
     }
 
     fun mensaje(e: Exception, def: String) = e.message?.substringBefore("\nCode:") ?: def
@@ -196,7 +199,9 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             errorForm = null
                             showForm = true
                         },
-                        onRenovar = { renovando = client }
+                        onRenovar = { renovando = client },
+                        cancelacionPendiente = client.id in cancelacionPendiente,
+                        onCancelar = { cancelando = client }
                     )
                 }
 
@@ -331,6 +336,19 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
+            cancelando?.let { cl ->
+                CancelarMembresiaDialog(
+                    cliente = cl,
+                    onDismiss = { cancelando = null },
+                    onListo = { msg ->
+                        cancelando = null
+                        errorMsg = null
+                        info = msg
+                        scope.launch { recargar() }
+                    }
+                )
+            }
+
             viendoFoto?.let { (cl, foto) ->
                 FotoClienteDialog(
                     nombre = cl.nombre,
@@ -420,7 +438,9 @@ private fun ClientCard(
     dentroDesde: String? = null,
     onRostro: (ImageBitmap?) -> Unit = {},
     onEdit: () -> Unit,
-    onRenovar: () -> Unit
+    onRenovar: () -> Unit,
+    cancelacionPendiente: Boolean = false,
+    onCancelar: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val labelMembership = stringResource(R.string.label_membership)
@@ -497,6 +517,36 @@ private fun ClientCard(
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(stringResource(R.string.encargado_clients_renew_button), fontSize = 17.sp)
+                }
+            } else if (cancelacionPendiente) {
+                // Ya hay una solicitud: espera a que el Encargado la autorice o rechace
+                Spacer(Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(ActionButtonWidth, ActionButtonHeight)
+                        .border(1.dp, ClienteTema.Rojo, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        stringResource(R.string.cancel_membership_pending_badge),
+                        color = ClienteTema.Rojo,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 14.sp
+                    )
+                }
+            } else {
+                // Política de cancelación: Recepción solicita, el Encargado autoriza después
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = onCancelar,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
+                    border = BorderStroke(1.dp, ClienteTema.Rojo),
+                    modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(stringResource(R.string.cancel_membership_button), fontSize = 17.sp)
                 }
             }
         }

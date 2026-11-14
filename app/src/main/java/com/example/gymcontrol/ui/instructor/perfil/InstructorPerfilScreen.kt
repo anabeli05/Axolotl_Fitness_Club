@@ -506,7 +506,7 @@ private fun EditDataDialog(
                 modifier = Modifier
                     .weight(1f)
                     .height(44.dp),
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
                 border = BorderStroke(1.dp, ClienteTema.Rojo)
             ) {
@@ -518,7 +518,7 @@ private fun EditDataDialog(
                 modifier = Modifier
                     .weight(1f)
                     .height(44.dp),
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ClienteTema.Azul,
                     contentColor = Color.White
@@ -552,7 +552,7 @@ private fun GymTextField(
         } else null,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(50),  // píldora, igual que el inicio de sesión
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = ClienteTema.AzulSel,
             unfocusedBorderColor = ClienteTema.Borde,
