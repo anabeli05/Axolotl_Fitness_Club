@@ -13,6 +13,7 @@
     <string name="logging_in">Entrando...</string>
     <string name="error_invalid_credentials">Usuario o contraseña incorrectos</string>
     <string name="error_connection_prefix">Error de conexión: </string>
+    <string name="account_locked_minutes">Cuenta bloqueada temporalmente. Intenta de nuevo en %d min</string>
     <string name="change_password">Cambiar contraseña</string>
     <string name="password_updated_success">Contraseña actualizada. Ya puedes iniciar sesión.</string>
     <string name="current_password">Contraseña actual</string>
@@ -415,51 +416,9 @@
     <string name="label_status">Estado: </string>
     <string name="encargado_clients_renew_title">Renovar a %1$s</string>
 
-<<<<<<< Updated upstream
     <!-- TÉRMINOS Y CONDICIONES -->
     <string name="terms_title">TÉRMINOS Y CONDICIONES</string>
     <string name="terms_last_updated">Última actualización: noviembre de 2026</string>
-=======
-    <!-- Terms and Conditions -->
-    <string name="term_1_title">1. Aceptación de los Términos</string>
-    <string name="term_1_content">Al acceder y utilizar la aplicación Axolotl Fitness Club (GymControl), el usuario declara haber leído, entendido y aceptado en su totalidad los presentes Términos y Condiciones de Uso Responsable. En caso de no estar de acuerdo, deberá abstenerse de utilizar la plataforma. La aceptación se hace en la pantalla de inicio de sesión, mediante una casilla que debe marcarse para poder iniciar sesión.</string>
-    <string name="term_2_title">2. Objeto del Servicio</string>
-    <string name="term_2_content">La aplicación es un servicio móvil para Android de Axolotl Fitness Club, que cuenta con sucursales. Permite controlar el acceso de los clientes, administrar membresías, solicitar asesorías con instructores, registrar pagos y generar reportes.</string>
-    <string name="term_3_title">3. Roles de Usuario</string>
-    <string name="term_3_content">La aplicación tiene cuatro tipos de usuario (cliente, instructor, recepción y dueño o encargado), y cada uno solo accede a las funciones de su rol.</string>
-    <string name="term_4_title">4. Capacidad para Usar la Aplicación</string>
-    <string name="term_4_content">Solo pueden usar la aplicación personas de 18 años o más.</string>
-    <string name="term_5_title">5. Uso Responsable de la Cuenta</string>
-    <string name="term_5_content">La cuenta y credenciales de acceso son de carácter personal e intransferible. El usuario es el único responsable de mantener la confidencialidad de sus credenciales y de toda actividad realizada desde su cuenta. Las cuentas las da de alta el personal; no hay autorregistro. La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo. Una cuenta inactiva no puede iniciar sesión. Tras 5 intentos fallidos, la cuenta se bloquea durante 15 minutos.</string>
-    <string name="term_6_title">6. Pagos, Membresías y Cancelaciones</string>
-    <string name="term_6_content">Las tarifas, vigencias de suscripciones y condiciones de renovación se rigen según el plan contratado. El acceso a las instalaciones está sujeto a encontrarse al corriente con el pago de la membresía correspondiente.\n\nExisten membresías de un día, mensual y trimestral. Una membresía está activa cuando su estado es activa y su fecha de vencimiento es la del día o posterior. Si está vencida, no se permite el ingreso hasta que se renueve. La renovación la hacen recepción o el encargado.\n\nSolo el encargado da de baja a un cliente, y la cuenta queda inactiva. Una cuenta inactiva por un tiempo determinado puede ser eliminada de forma manual por recepción o por el encargado.\n\nSe aceptan pagos en efectivo, con tarjeta y por transferencia. Recepción confirma los pagos en efectivo y con tarjeta; el encargado confirma las transferencias y también puede confirmar los otros dos. Un pago queda pendiente, aceptado o rechazado. Los montos se expresan en pesos mexicanos. La aplicación registra los pagos y no procesa cobros en línea. Los servicios adicionales, como el uso del instructor, se cobran aparte.\n\nPolítica de cancelación y reembolsos: tienes derecho a reembolso completo si cancelas dentro de las primeras 48 horas después de pagar y aún no has ingresado, o si hubo un error de cobro. En cualquier otro caso no hay reembolso y puedes usar la membresía hasta su vencimiento. El reembolso se hace por el mismo medio de pago en máximo 10 días hábiles. La cancelación se solicita en recepción y solo el encargado la autoriza; las 48 horas se cuentan hasta el momento de la solicitud. Si ingresas al gimnasio mientras tu solicitud está pendiente, ya no aplica el reembolso.</string>
-    <string name="term_7_title">7. Acceso al Gimnasio</string>
-    <string name="term_7_content">El cliente es identificado en recepción mediante reconocimiento facial. El primer escaneo registra la entrada y el siguiente, la salida, de forma automática; para entrar se necesita una membresía activa. Recepción se reserva el derecho de negar el ingreso. Está prohibido intentar entrar suplantando a otra persona.</string>
-    <string name="term_8_title">8. Aforo y Horarios de Afluencia</string>
-    <string name="term_8_content">La aplicación muestra una cantidad aproximada de personas dentro del gimnasio, calculada con los registros de entrada y salida. Es informativa y puede no coincidir exactamente con la real.</string>
-    <string name="term_9_title">9. Asesorías con Instructores</string>
-    <string name="term_9_content">El cliente solicita una asesoría con un instructor y la solicitud se aprueba o se rechaza. El costo lo define cada instructor y cada instructor tiene un máximo de clientes. El instructor define con cada cliente los días de asistencia y su objetivo.</string>
-    <string name="term_10_title">10. Avisos y Notificaciones</string>
-    <string name="term_10_content">El aviso de vencimiento de la membresía se envía al cliente fuera de la aplicación.</string>
-    <string name="term_11_title">11. Normas de Convivencia y Seguridad en las Instalaciones</string>
-    <string name="term_11_content">El uso del gimnasio exige respetar las normas internas de higiene, seguridad y uso adecuado de los equipos y pesas. Queda estrictamente prohibido el comportamiento ofensivo o que atente contra la integridad física de los usuarios y el personal.</string>
-    <string name="term_12_title">12. Salud y Condición Física</string>
-    <string name="term_12_content">El usuario reconoce que la actividad física implica riesgos inherentes. Es responsabilidad del usuario consultar con un médico antes de iniciar cualquier programa de entrenamiento y notificar cualquier condición médica relevante a los instructores. La aplicación no incluye seguimiento de progreso físico ni sustituye la opinión médica.</string>
-    <string name="term_13_title">13. Uso Aceptable de la Aplicación</string>
-    <string name="term_13_content">No se debe compartir la cuenta, intentar entrar a funciones de otro rol, manipular los datos del sistema ni usar la aplicación con fines ilícitos.</string>
-    <string name="term_14_title">14. Propiedad Intelectual</string>
-    <string name="term_14_content">La aplicación, su diseño, su código, el nombre y el logotipo Axolotl están protegidos por derechos de autor. © 2026 Axolotl. Todos los derechos reservados. Queda prohibido copiar, modificar, distribuir o hacer ingeniería inversa de la aplicación sin autorización por escrito de Axolotl.</string>
-    <string name="term_15_title">15. Disponibilidad del Servicio</string>
-    <string name="term_15_content">La aplicación depende de internet y de un servicio en la nube, por lo que no se garantiza que funcione sin interrupciones ni que esté disponible durante el mantenimiento.</string>
-    <string name="term_16_title">16. Datos Personales</string>
-    <string name="term_16_content">El tratamiento de los datos personales se rige por la Política de Privacidad.</string>
-    <string name="term_17_title">17. Suspensión y Terminación</string>
-    <string name="term_17_content">La baja de un cliente la hace el encargado y deja la cuenta inactiva.</string>
-    <string name="term_18_title">18. Modificaciones a los Términos</string>
-    <string name="term_18_content">El gimnasio se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor a partir de su publicación en la aplicación.</string>
-    <string name="term_19_title">19. Contacto</string>
-    <string name="term_19_content">Teléfono: +52 314 139 7633\nCorreo: contacto@axolotlgym.com</string>
->>>>>>> Stashed changes
 
     <string name="term_1_title">1. Aceptación de los términos</string>
     <string name="term_1_content">Al iniciar sesión en GymControl, la aplicación de Axolotl Fitness Club, y al usar sus instalaciones, aceptas estos Términos y Condiciones. La aceptación se hace en la pantalla de inicio de sesión: debes marcar la casilla para poder entrar, y se te pide cada vez que inicias sesión. Si no estás de acuerdo, no uses la aplicación.</string>
@@ -759,7 +718,6 @@
     <string name="encargado_servicios_es_visita_reemplaza">Ya hay otro servicio de visita; este lo reemplazará.</string>
     <string name="encargado_servicios_es_visita_card">Visita · se cobra en la sección Visitas</string>
     <string name="visits_not_for_reception">La visita no está disponible para Recepción. El Encargado puede activarla en Servicios.</string>
-<<<<<<< Updated upstream
     <string name="payment_method_sent_on">%1$s · enviado el %2$s</string>
     <string name="tap_image_to_enlarge">Toca la imagen para ampliarla</string>
     <string name="btn_reject">Rechazar</string>
@@ -771,8 +729,7 @@
     <string name="no_pending_payments">No hay pagos pendientes por validar</string>
     <string name="receipt_load_error">No se pudo cargar el comprobante</string>
     <string name="receipt_no_receipt">Sin comprobante (registrado en Recepción)</string>
-</resources>
-=======
+
     <!-- Cancelación de membresía y reembolsos -->
     <string name="cancel_membership_button">Cancelar</string>
     <string name="cancel_membership_title">Cancelar membresía de %1$s</string>
@@ -821,4 +778,3 @@
     <string name="reports_request_rejected">Solicitud de %1$s rechazada.</string>
     <string name="reports_request_failed">No se pudo resolver la solicitud</string>
 </resources>
->>>>>>> Stashed changes

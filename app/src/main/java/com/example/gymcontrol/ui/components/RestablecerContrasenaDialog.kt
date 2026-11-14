@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,6 +55,7 @@ fun RestablecerContrasenaDialog(
     onDismiss: () -> Unit,
     onListo: () -> Unit
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var correo by remember { mutableStateOf(correoInicial) }
     var nueva by remember { mutableStateOf("") }
@@ -92,8 +94,15 @@ fun RestablecerContrasenaDialog(
                     error = falla
                 }
             } catch (e: Exception) {
-                error = e.message?.substringBefore("\nCode:") ?: "No se pudo enviar el código"
-            } finally {
+                val msg = e.message?.substringBefore("\nCode:") ?: ""
+                error = if ("bloqueada" in msg.lowercase() || "locked" in msg.lowercase()) {
+                    val minutos = Regex("""(\d+)""").find(msg)?.groupValues?.get(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                    context.applicationContext.getString(R.string.account_locked_minutes, minutos)
+                } else {
+                    msg.ifBlank { "No se pudo enviar el código" }
+                }
+            }
+            finally {
                 cargando = false
             }
         }
@@ -237,7 +246,13 @@ fun RestablecerContrasenaDialog(
                                 AuthRepository.restablecerContrasena(correo, codigo, nueva)
                                 onListo()
                             } catch (e: Exception) {
-                                error = e.message?.substringBefore("\nCode:") ?: "No se pudo cambiar la contraseña"
+                                val msg = e.message?.substringBefore("\nCode:") ?: ""
+                                error = if ("bloqueada" in msg.lowercase() || "locked" in msg.lowercase()) {
+                                    val minutos = Regex("""(\d+)""").find(msg)?.groupValues?.get(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                                    context.applicationContext.getString(R.string.account_locked_minutes, minutos)
+                                } else {
+                                    msg.ifBlank { "No se pudo cambiar la contraseña" }
+                                }
                             } finally {
                                 cargando = false
                             }

@@ -173,7 +173,13 @@ fun RecepcionPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         Toast.makeText(context, context.getString(R.string.perfil_password_updated), Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         val msg = e.message?.substringBefore("\nCode:") ?: ""
-                        Toast.makeText(context, "${context.getString(R.string.error_change_failed)}: $msg", Toast.LENGTH_LONG).show()
+                        val errorTexto = if ("bloqueada" in msg.lowercase() || "locked" in msg.lowercase()) {
+                            val minutos = Regex("""(\d+)""").find(msg)?.groupValues?.get(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                            context.applicationContext.getString(R.string.account_locked_minutes, minutos)
+                        } else {
+                            "${context.getString(R.string.error_change_failed)}: $msg"
+                        }
+                        Toast.makeText(context, errorTexto, Toast.LENGTH_LONG).show()
                     }
                 }
             }
