@@ -31,7 +31,15 @@ object LegalContent {
         LegalSection(stringResource(R.string.term_16_title), stringResource(R.string.term_16_content)),
         LegalSection(stringResource(R.string.term_17_title), stringResource(R.string.term_17_content)),
         LegalSection(stringResource(R.string.term_18_title), stringResource(R.string.term_18_content)),
-        LegalSection(stringResource(R.string.term_19_title), stringResource(R.string.term_19_content))
+        LegalSection(stringResource(R.string.term_19_title), stringResource(R.string.term_19_content)),
+        LegalSection(stringResource(R.string.term_20_title), stringResource(R.string.term_20_content)),
+        LegalSection(stringResource(R.string.term_21_title), stringResource(R.string.term_21_content)),
+        LegalSection(stringResource(R.string.term_22_title), stringResource(R.string.term_22_content)),
+        LegalSection(stringResource(R.string.term_23_title), stringResource(R.string.term_23_content)),
+        LegalSection(stringResource(R.string.term_24_title), stringResource(R.string.term_24_content)),
+        LegalSection(stringResource(R.string.term_25_title), stringResource(R.string.term_25_content)),
+        LegalSection(stringResource(R.string.term_26_title), stringResource(R.string.term_26_content)),
+        LegalSection(stringResource(R.string.term_27_title), stringResource(R.string.term_27_content))
     )
 
     @Composable

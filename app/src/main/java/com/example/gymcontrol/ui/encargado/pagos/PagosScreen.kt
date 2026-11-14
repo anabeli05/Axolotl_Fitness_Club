@@ -31,6 +31,7 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.dinero
+import com.example.gymcontrol.ui.components.metodoPagoLocalizado
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import com.example.gymcontrol.R
@@ -61,12 +62,14 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
     var motivo by remember { mutableStateOf("") }
     var imagenAmpliada by remember { mutableStateOf<ImageBitmap?>(null) }
 
+    val ctx = LocalContext.current
+
     suspend fun recargar() {
         try {
             pagos = ClientesRepository.pagosPendientes()
             error = null
         } catch (e: Exception) {
-            error = "No se pudo cargar: ${e.message?.substringBefore("\nCode:")}"
+            error = ctx.applicationContext.getString(R.string.visits_load_error, e.message?.substringBefore("\nCode:").orEmpty())
         }
         cargando = false
         pagos.filter { it.tieneComprobante && it.id !in imagenes }.forEach { p ->
@@ -124,7 +127,7 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
             if (pagos.isEmpty() && !cargando && error == null) {
                 item {
                     Text(
-                        text = stringResource(R.string.manager_no_pending_payments),
+                        text = stringResource(R.string.no_pending_payments),
                         color = ClienteTema.TextoSec,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -147,7 +150,7 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
             shape = RoundedCornerShape(16.dp),
             title = {
                 Text(
-                    if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.manager_reject_payment),
+                    if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.reject_payment_title),
                     color = ClienteTema.Texto,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -170,7 +173,7 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
                         OutlinedTextField(
                             value = motivo,
                             onValueChange = { if (it.length <= 200) motivo = it },
-                            label = { Text(stringResource(R.string.manager_rejection_reason_label)) },
+                            label = { Text(stringResource(R.string.reject_reason_label)) },
                             placeholder = { Text(stringResource(R.string.manager_rejection_reason_placeholder)) },
                             enabled = !procesando,
                             minLines = 2,
@@ -209,14 +212,14 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
                                 imagenes.remove(r.pago.id)
                                 recargar()
                             } catch (e: Exception) {
-                                error = "No se pudo guardar: ${e.message?.substringBefore("\nCode:")}"
+                                error = ctx.getString(R.string.visits_save_error, e.message?.substringBefore("\nCode:").orEmpty())
                             } finally {
                                 procesando = false
                                 confirmar = null
                             }
                         }
                     }
-                ) { Text(if (r.aceptar) stringResource(R.string.manager_accept_payment) else stringResource(R.string.manager_reject_payment)) }
+                ) { Text(if (r.aceptar) stringResource(R.string.btn_accept) else stringResource(R.string.btn_reject)) }
             },
             dismissButton = {
                 TextButton(enabled = !procesando, onClick = { confirmar = null }) {
@@ -231,7 +234,7 @@ fun PagosScreen(onNavigate: (String) -> Unit = {}) {
         Dialog(onDismissRequest = { imagenAmpliada = null }) {
             Image(
                 bitmap = img,
-                contentDescription = "Comprobante de pago",
+                contentDescription = stringResource(R.string.receipt_selected),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -273,13 +276,14 @@ private fun PagoCard(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Plan: ${pago.plan ?: "—"} · ${montoTexto(pago.monto)}",
+                text = "${stringResource(R.string.label_plan_prefix, pago.plan ?: "—")} · ${montoTexto(pago.monto)}",
                 color = ClienteTema.AzulSel,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )
+            val metodoTraducido = metodoPagoLocalizado(pago.metodo)
             Text(
-                text = "${pago.metodo} · enviado el ${ClientesRepository.fechaApp(pago.fecha)}",
+                text = stringResource(R.string.payment_method_sent_on, metodoTraducido, ClientesRepository.fechaApp(pago.fecha).orEmpty()),
                 color = ClienteTema.TextoSec,
                 fontSize = 13.sp
             )
@@ -296,7 +300,7 @@ private fun PagoCard(
                 when {
                     imagen != null -> Image(
                         bitmap = imagen,
-                        contentDescription = "Comprobante de ${pago.cliente}",
+                        contentDescription = stringResource(R.string.receipt_selected),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxSize()
@@ -311,8 +315,8 @@ private fun PagoCard(
                             modifier = Modifier.size(40.dp)
                         )
                         Text(
-                            if (pago.tieneComprobante) "No se pudo cargar el comprobante"
-                            else "Sin comprobante (registrado en Recepción)",
+                            if (pago.tieneComprobante) stringResource(R.string.receipt_load_error)
+                            else stringResource(R.string.receipt_no_receipt),
                             color = ClienteTema.TextoSec,
                             fontSize = 12.sp
                         )
@@ -321,7 +325,7 @@ private fun PagoCard(
             }
             if (imagen != null) {
                 Text(
-                    "Toca la imagen para ampliarla",
+                    stringResource(R.string.tap_image_to_enlarge),
                     color = ClienteTema.TextoSec,
                     fontSize = 11.sp,
                     modifier = Modifier.padding(top = 4.dp)
@@ -340,7 +344,7 @@ private fun PagoCard(
                 ) {
                     Icon(Icons.Filled.Close, contentDescription = null, tint = ClienteTema.Rojo)
                     Spacer(Modifier.width(6.dp))
-                    Text("Rechazar", color = ClienteTema.Rojo, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_reject), color = ClienteTema.Rojo, fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = onAceptar,
@@ -351,7 +355,7 @@ private fun PagoCard(
                 ) {
                     Icon(Icons.Filled.Check, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
-                    Text("Aceptar", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.btn_accept), fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -7,7 +7,8 @@ import com.example.gymcontrol.R
 @Composable
 fun PrivacyPolicyScreen(onBack: () -> Unit, onAccept: () -> Unit = onBack) {
     LegalDocumentScreen(
-        title = stringResource(R.string.privacy_policy),
+        title = stringResource(R.string.privacy_title),
+        lastUpdated = stringResource(R.string.privacy_last_updated),
         sections = LegalContent.getPoliticaDePrivacidad(),
         onBack = onBack,
         onAccept = onAccept

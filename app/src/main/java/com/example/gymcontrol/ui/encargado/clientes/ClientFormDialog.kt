@@ -28,6 +28,7 @@ import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.DatosSaludCampos
 import com.example.gymcontrol.ui.components.fechaNacimientoValida
+import com.example.gymcontrol.ui.components.metodoPagoLocalizado
 import com.example.gymcontrol.data.remote.DatosSalud
 import kotlinx.coroutines.delay
 
@@ -254,7 +255,7 @@ fun ClientFormDialog(
                             onClick = { metodo = m },
                             colors = RadioButtonDefaults.colors(selectedColor = ClienteTema.AzulSel)
                         )
-                        Text(m, color = ClienteTema.Texto, fontSize = 13.sp)
+                        Text(metodoPagoLocalizado(m), color = ClienteTema.Texto, fontSize = 13.sp)
                     }
                 }
                 if (metodo == "Transferencia") {

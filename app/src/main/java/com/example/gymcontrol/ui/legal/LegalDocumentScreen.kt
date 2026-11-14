@@ -23,6 +23,7 @@ import com.example.gymcontrol.ui.theme.GymColors
 @Composable
 fun LegalDocumentScreen(
     title: String,
+    lastUpdated: String? = null,
     sections: List<LegalSection>,
     onBack: () -> Unit,
     onAccept: () -> Unit = onBack,
@@ -90,6 +91,17 @@ fun LegalDocumentScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (lastUpdated != null) {
+                item {
+                    Text(
+                        text = lastUpdated,
+                        color = GymColors.TextSecondary,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
+            }
+
             items(sections) { section ->
                 Card(
                     modifier = Modifier
@@ -124,16 +136,6 @@ fun LegalDocumentScreen(
                         )
                     }
                 }
-            }
-
-            item {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.legal_last_updated),
-                    color = GymColors.TextSecondary,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                )
             }
         }
     }
