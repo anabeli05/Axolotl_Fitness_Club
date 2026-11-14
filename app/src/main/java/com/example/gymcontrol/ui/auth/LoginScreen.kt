@@ -241,8 +241,13 @@ fun LoginScreen(
                             checkmarkColor = TarjetaOscura
                         )
                     )
+                    val prefix = stringResource(R.string.accept_terms_prefix).trim()
+                    val terms = stringResource(R.string.terms_and_conditions).trim()
+                    val connector = stringResource(R.string.accept_terms_and).trim()
+                    val privacy = stringResource(R.string.privacy_policy).trim()
+
                     val textoTerminos = buildAnnotatedString {
-                        append(stringResource(R.string.accept_terms_prefix))
+                        append("$prefix ")
                         withLink(
                             LinkAnnotation.Clickable(
                                 tag = "terminos",
@@ -258,9 +263,9 @@ fun LoginScreen(
                                 }
                             )
                         ) {
-                            append(stringResource(R.string.terms_and_conditions))
+                            append(terms)
                         }
-                        append(stringResource(R.string.accept_terms_and))
+                        append(" $connector ")
                         withLink(
                             LinkAnnotation.Clickable(
                                 tag = "politica",
@@ -276,7 +281,7 @@ fun LoginScreen(
                                 }
                             )
                         ) {
-                            append(stringResource(R.string.privacy_policy))
+                            append(privacy)
                         }
                     }
                     Text(

@@ -4,8 +4,21 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Configuration
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.core.os.ConfigurationCompat
+import com.example.gymcontrol.R
 import java.util.Locale
+
+@Composable
+fun metodoPagoLocalizado(metodo: String): String {
+    return when (metodo.trim().lowercase(Locale.ROOT)) {
+        "efectivo", "cash" -> stringResource(R.string.payment_cash)
+        "tarjeta", "card" -> stringResource(R.string.payment_card)
+        "transferencia", "transfer" -> stringResource(R.string.payment_transfer)
+        else -> metodo
+    }
+}
 
 object LocaleHelper {
     private const val PREFS_NAME = "app_lang_prefs"

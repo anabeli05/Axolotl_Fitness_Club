@@ -26,6 +26,7 @@ import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.dinero
+import com.example.gymcontrol.ui.components.metodoPagoLocalizado
 import kotlinx.coroutines.launch
 
 private val METODOS = listOf("Efectivo", "Tarjeta")
@@ -67,7 +68,7 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
             visitas = VisitasRepository.hoy()
             error = null
         } catch (e: Exception) {
-            error = ctx.getString(R.string.visits_load_error, e.message?.substringBefore("\nCode:").orEmpty())
+            error = ctx.applicationContext.getString(R.string.visits_load_error, e.message?.substringBefore("\nCode:").orEmpty())
         }
         cargando = false
     }
@@ -138,7 +139,7 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
                                     onClick = { metodo = m },
                                     enabled = !procesando,
                                     label = {
-                                        Text(stringResource(if (m == "Efectivo") R.string.payment_cash else R.string.payment_card))
+                                        Text(metodoPagoLocalizado(m))
                                     },
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = ClienteTema.AzulSel.copy(alpha = 0.2f),
@@ -209,7 +210,7 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
                 Text(
                     stringResource(
                         R.string.visits_confirm_message, dinero(precio ?: 0.0), nombre.trim(),
-                        stringResource(if (metodo == "Efectivo") R.string.payment_cash else R.string.payment_card)
+                        metodoPagoLocalizado(metodo)
                     ),
                     color = ClienteTema.TextoSec,
                     textAlign = TextAlign.Center,
@@ -294,7 +295,7 @@ private fun VisitaCard(v: VisitaRow) {
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(dinero(v.monto), color = ClienteTema.AzulSel, fontWeight = FontWeight.Bold)
-                Text(v.metodo, color = ClienteTema.TextoSec, fontSize = 12.sp)
+                Text(metodoPagoLocalizado(v.metodo), color = ClienteTema.TextoSec, fontSize = 12.sp)
             }
         }
     }
