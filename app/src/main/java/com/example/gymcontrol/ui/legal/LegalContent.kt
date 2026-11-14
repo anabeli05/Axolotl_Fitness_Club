@@ -38,8 +38,7 @@ object LegalContent {
         LegalSection(stringResource(R.string.term_23_title), stringResource(R.string.term_23_content)),
         LegalSection(stringResource(R.string.term_24_title), stringResource(R.string.term_24_content)),
         LegalSection(stringResource(R.string.term_25_title), stringResource(R.string.term_25_content)),
-        LegalSection(stringResource(R.string.term_26_title), stringResource(R.string.term_26_content)),
-        LegalSection(stringResource(R.string.term_27_title), stringResource(R.string.term_27_content))
+        LegalSection(stringResource(R.string.term_26_title), stringResource(R.string.term_26_content))
     )
 
     @Composable
