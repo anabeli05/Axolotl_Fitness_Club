@@ -209,6 +209,14 @@
     <string name="manual_encargado_42_d">Each card shows the title, message, effective date, and email sending progress.</string>
     <string name="manual_encargado_43_t">Re-send pending</string>
     <string name="manual_encargado_43_d">If there are pending recipients left to receive the notice email, use this button to send them.</string>
+    <string name="manual_encargado_44_t">Your profile photo</string>
+    <string name="manual_encargado_44_d">Take or update your own photo with the camera. It will also show in the Staff list.</string>
+    <string name="manual_encargado_45_t">Edit phone</string>
+    <string name="manual_encargado_45_d">Update your phone number.</string>
+    <string name="manual_encargado_46_t">Change password</string>
+    <string name="manual_encargado_46_d">Enter your current password and the new one. It must have at least 8 characters, with upper case, lower case, a number and a symbol.</string>
+    <string name="manual_encargado_47_t">Personal data</string>
+    <string name="manual_encargado_47_d">Your name, phone, email and registration date.</string>
     <string name="manual_open">User manual</string>
     <string name="manual_step_counter">Step %1$d of %2$d</string>
     <string name="manual_prev">Back</string>

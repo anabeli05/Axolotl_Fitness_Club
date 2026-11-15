@@ -49,7 +49,7 @@ import com.example.gymcontrol.ui.manual.manualTarget
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
     UserRole.RECEPCION -> listOf("Home", "Clientes", "Visitas", "Solicitudes", "Pagos", "Perfil")
-    UserRole.ENCARGADO -> listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Visitas", "Gastos", "Reportes", "Avisos")
+    UserRole.ENCARGADO -> listOf("Dashboard", "Clientes", "Personal", "Servicios", "Pagos", "Visitas", "Gastos", "Reportes", "Avisos", "Perfil")
     UserRole.CLIENTE, UserRole.INSTRUCTOR -> emptyList()
 }
 
