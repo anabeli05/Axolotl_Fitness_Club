@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
@@ -178,7 +179,7 @@ private fun MenorAfluencia(datos: List<AfluenciaRow>) {
         Text(
             text = stringResource(R.string.cliente_least_busy_title),
             color = ClienteTema.Texto,
-            fontSize = 20.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -268,7 +269,7 @@ private fun WelcomeMessage(name: String) {
         Text(
             text = "$greeting, $firstName",
             color = ClienteTema.Texto,
-            fontSize = 26.sp,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -278,7 +279,7 @@ private fun WelcomeMessage(name: String) {
         Text(
             text = stringResource(R.string.cliente_welcome_subtitle),
             color = ClienteTema.TextoSec,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
     }
@@ -296,7 +297,7 @@ private fun BarrasClaro(titulo: String, datos: List<Pair<String, Float>>) {
         Text(
             text = titulo,
             color = ClienteTema.Texto,
-            fontSize = 20.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -430,7 +431,7 @@ private fun AccesoFacialCard(personasDentro: Int?) {
     Box(
         modifier = Modifier
             .size(250.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(com.example.gymcontrol.ui.components.GymCardShape)
             .background(ClienteTema.Beige)
             .drawBehind { drawCornerBrackets() },
         contentAlignment = Alignment.Center
@@ -446,13 +447,13 @@ private fun AccesoFacialCard(personasDentro: Int?) {
             Text(
                 text = personasDentro?.toString() ?: "—",
                 color = ClienteTema.Texto,
-                fontSize = 34.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = if (personasDentro == 1) stringResource(R.string.cliente_person_inside_now) else stringResource(R.string.cliente_people_inside_now),
                 color = ClienteTema.TextoSec,
-                fontSize = 13.sp
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

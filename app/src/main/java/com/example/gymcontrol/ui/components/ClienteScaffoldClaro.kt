@@ -351,8 +351,8 @@ private fun DialogoCerrarSesion(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(ClienteTema.Beige, RoundedCornerShape(20.dp))
-                .border(1.5.dp, LogoutBorderClaro, RoundedCornerShape(20.dp))
+                .background(ClienteTema.Beige, GymCardShape)
+                .border(1.dp, LogoutBorderClaro, GymCardShape)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -365,7 +365,7 @@ private fun DialogoCerrarSesion(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             Text(
                 stringResource(R.string.logout),
                 color = ClienteTema.Texto,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -374,6 +374,7 @@ private fun DialogoCerrarSesion(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             Text(
                 stringResource(R.string.logout_confirmation),
                 color = ClienteTema.TextoSec,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -381,31 +382,33 @@ private fun DialogoCerrarSesion(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
             ) {
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp),
-                    shape = RoundedCornerShape(10.dp),
+                        .defaultMinSize(minHeight = GymButtonMinHeight),
+                    shape = GymButtonShape,
+                    contentPadding = GymButtonPadding,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ClienteTema.Rojo,
                         contentColor = Color.White
                     )
-                ) { Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold) }
+                ) { GymButtonText(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = onConfirm,
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp),
-                    shape = RoundedCornerShape(10.dp),
+                        .defaultMinSize(minHeight = GymButtonMinHeight),
+                    shape = GymButtonShape,
+                    contentPadding = GymButtonPadding,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ClienteTema.Verde,
                         contentColor = Color.White
                     )
-                ) { Text(stringResource(R.string.exit), fontWeight = FontWeight.Bold) }
+                ) { GymButtonText(stringResource(R.string.exit)) }
             }
         }
     }

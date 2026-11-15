@@ -339,7 +339,7 @@ private fun InfoCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ClienteTema.Caja, RoundedCornerShape(10.dp))
+            .background(ClienteTema.Caja, com.example.gymcontrol.ui.components.GymCardShape)
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -355,7 +355,7 @@ private fun InfoCard(
             Text(
                 title,
                 color = ClienteTema.CajaAcento,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -395,14 +395,14 @@ private fun StatusBadge(isActive: Boolean) {
     val color = if (isActive) ClienteTema.Verde else ClienteTema.Rojo
     Box(
         modifier = Modifier
-            .size(64.dp, 24.dp)
-            .background(color, RoundedCornerShape(12.dp)),
+            .background(color, com.example.gymcontrol.ui.components.GymButtonShape)
+            .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             if (isActive) stringResource(R.string.status_active) else stringResource(R.string.status_inactive),
             color = Color.White,
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold
         )
     }
@@ -420,15 +420,15 @@ private fun GymDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
-                .border(1.5.dp, ClienteTema.Borde, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+                .border(1.dp, ClienteTema.Borde, com.example.gymcontrol.ui.components.GymCardShape)
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 title,
                 color = ClienteTema.Texto,
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -453,21 +453,27 @@ private fun DialogButtons(
     ) {
         OutlinedButton(
             onClick = onDismiss,
-            modifier = Modifier.weight(1f).height(44.dp),
-            shape = RoundedCornerShape(50),
+            modifier = Modifier
+                .weight(1f)
+                .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+            shape = com.example.gymcontrol.ui.components.GymButtonShape,
+            contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
             border = BorderStroke(1.dp, ClienteTema.Rojo)
-        ) { Text(stringResource(R.string.cancel), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+        ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cancel)) }
         Button(
             onClick = onConfirm,
             enabled = confirmEnabled,
-            modifier = Modifier.weight(1f).height(44.dp),
-            shape = RoundedCornerShape(50),
+            modifier = Modifier
+                .weight(1f)
+                .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+            shape = com.example.gymcontrol.ui.components.GymButtonShape,
+            contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding,
             colors = ButtonDefaults.buttonColors(
                 containerColor = ClienteTema.Azul,
                 contentColor = Color.White
             )
-        ) { Text(confirmText, fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+        ) { com.example.gymcontrol.ui.components.GymButtonText(confirmText) }
     }
 }
 
@@ -644,6 +650,8 @@ private fun GymTextField(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(50),  // píldora, igual que el inicio de sesión
         colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = ClienteTema.CampoFondo,
+            unfocusedContainerColor = ClienteTema.CampoFondo,
             focusedBorderColor = ClienteTema.Azul,
             unfocusedBorderColor = ClienteTema.Borde,
             focusedTextColor = ClienteTema.Texto,

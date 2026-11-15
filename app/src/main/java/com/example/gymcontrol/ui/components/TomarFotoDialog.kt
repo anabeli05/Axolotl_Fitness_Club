@@ -91,20 +91,20 @@ fun TomarFotoDialog(
     }
 
     Dialog(onDismissRequest = { if (!trabajando) onDismiss() }) {
-        val forma = RoundedCornerShape(16.dp)
+        val forma = GymCardShape
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(forma)
                 .background(ClienteTema.Beige)
-                .border(1.5.dp, ClienteTema.Borde, forma)
+                .border(1.dp, ClienteTema.Borde, forma)
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 stringResource(R.string.perfil_photo_dialog_title),
                 color = ClienteTema.Texto,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
@@ -142,27 +142,34 @@ fun TomarFotoDialog(
                     else -> stringResource(R.string.foto_face_hint)
                 },
                 color = if (error != null) ClienteTema.Rojo else ClienteTema.TextoSec,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(Modifier.height(16.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 val lista = foto
                 OutlinedButton(
                     onClick = { if (lista != null) foto = null else onDismiss() },
                     enabled = !trabajando,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = GymButtonShape,
                     border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text(stringResource(if (lista != null) R.string.foto_retake else R.string.cancel)) }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding
+                ) { GymButtonText(stringResource(if (lista != null) R.string.foto_retake else R.string.cancel)) }
                 Button(
                     onClick = { if (lista != null) guardar(lista) else tomar() },
                     enabled = !trabajando && (lista != null || hayRostro),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul, contentColor = Color.White)
-                ) { Text(stringResource(if (lista != null) R.string.save else R.string.perfil_photo_take)) }
+                    shape = GymButtonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul, contentColor = Color.White),
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding
+                ) { GymButtonText(stringResource(if (lista != null) R.string.save else R.string.perfil_photo_take)) }
             }
         }
     }
