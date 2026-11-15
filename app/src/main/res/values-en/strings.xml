@@ -80,8 +80,8 @@
     <string name="cliente_greeting_afternoon">Good afternoon</string>
     <string name="cliente_greeting_evening">Good evening</string>
     <string name="cliente_welcome_subtitle">Great to see you here. Let\'s give it all today!</string>
-    <string name="cliente_person_inside_now">person inside now</string>
-    <string name="cliente_people_inside_now">people inside now</string>
+    <string name="cliente_person_inside_now">Person inside now</string>
+    <string name="cliente_people_inside_now">People inside now</string>
 
     <!-- Cliente: Pagos -->
     <string name="cliente_pagos_title">Payment Methods</string>
@@ -322,7 +322,7 @@
     <string name="recepcion_scanner_denied_unregistered">Access denied: face not registered</string>
     <string name="recepcion_scanner_entry_success">%1$s entered · %2$s</string>
     <string name="recepcion_scanner_exit_success">%1$s exited</string>
-    <string name="recepcion_scanner_duration_less_min">less than 1 min</string>
+    <string name="recepcion_scanner_duration_less_min">Less than 1 min</string>
 
     <!-- Recepción: Solicitudes -->
     <string name="recepcion_solicitudes_pending_badge">%1$d pending</string>
@@ -385,7 +385,7 @@
 
     <!-- Encargado: Servicios -->
     <string name="label_duration">Duration</string>
-    <string name="label_days">days</string>
+    <string name="label_days">Days</string>
     <string name="label_price">Price</string>
     <string name="delete_service_confirm">The service %s will be deleted. This action cannot be undone.</string>
 
@@ -537,8 +537,8 @@
     <string name="label_category_format">Category: %s</string>
     <string name="label_amount_format">Amount: %s</string>
     <string name="label_date_format">Date: %s</string>
-    <string name="unit_day">day</string>
-    <string name="unit_days">days</string>
+    <string name="unit_day">Day</string>
+    <string name="unit_days">Days</string>
     <string name="corresponsales_formatted">OXXO, 7-Eleven\nFarmacias del Ahorro</string>
     <string name="title_monthly_report">Monthly report</string>
     <string name="label_services">Services</string>

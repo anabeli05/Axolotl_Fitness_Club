@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,8 +39,8 @@ fun StatCard(
     // Icono a la izquierda y texto en el espacio que sobra: así nunca se encima
     Row(
         modifier = modifier
-            .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
-            .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
+            .background(ClienteTema.Beige, GymCardShape)
+            .border(1.dp, borderBrush, GymCardShape)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -70,7 +71,7 @@ fun StatCard(
             Text(
                 text = title,
                 color = ClienteTema.TextoSec,
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
             )
@@ -78,7 +79,7 @@ fun StatCard(
             Text(
                 text = value,
                 color = valueColor,
-                fontSize = 25.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )

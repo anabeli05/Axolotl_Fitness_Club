@@ -117,12 +117,15 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                             showForm = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                        contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.encargado_servicios_new_button), fontWeight = FontWeight.Bold)
+                        com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.encargado_servicios_new_button))
                     }
                 }
 
@@ -230,14 +233,15 @@ private fun DeleteConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
+        modifier = Modifier.border(1.5.dp, DeleteBorder, com.example.gymcontrol.ui.components.GymCardShape),
         containerColor = ClienteTema.Beige,
-        shape = RoundedCornerShape(16.dp),
+        shape = com.example.gymcontrol.ui.components.GymCardShape,
         icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
         title = {
             Text(
                 title,
                 color = ClienteTema.Texto,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -247,6 +251,7 @@ private fun DeleteConfirmDialog(
             Text(
                 message,
                 color = ClienteTema.TextoSec,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -258,19 +263,23 @@ private fun DeleteConfirmDialog(
             ) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
                     border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text(stringResource(R.string.cancel)) }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = onConfirm,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ClienteTema.Rojo,
                         contentColor = Color.White
-                    )
-                ) { Text(stringResource(R.string.common_delete), fontWeight = FontWeight.Bold) }
+                    ),
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.common_delete)) }
             }
         }
     )
@@ -292,8 +301,8 @@ private fun ServiceCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
-            .border(1.5.dp, borderBrush, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+            .border(1.5.dp, borderBrush, com.example.gymcontrol.ui.components.GymCardShape)
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -301,7 +310,7 @@ private fun ServiceCard(
             Text(
                 text = name,
                 color = ClienteTema.Texto,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(10.dp))
@@ -310,13 +319,13 @@ private fun ServiceCard(
             Text(
                 text = stringResource(R.string.label_duration_format, durationText),
                 color = ClienteTema.TextoSec,
-                fontSize = 16.sp
+                style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.label_price_format, price),
                 color = ClienteTema.AzulSel,
-                fontSize = 17.sp,
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(4.dp))
@@ -416,8 +425,8 @@ private fun ServiceFormDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
-                .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+                .border(1.5.dp, borderBrush, com.example.gymcontrol.ui.components.GymCardShape)
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -428,7 +437,7 @@ private fun ServiceFormDialog(
                 Text(
                     text = if (isEditing) stringResource(R.string.encargado_servicios_edit_title) else stringResource(R.string.encargado_servicios_new_title),
                     color = ClienteTema.Texto,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
@@ -517,10 +526,13 @@ private fun ServiceFormDialog(
                     disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
                     disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                 ),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth()
+                shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
             ) {
-                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_servicios_create_button), fontWeight = FontWeight.Bold)
+                com.example.gymcontrol.ui.components.GymButtonText(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_servicios_create_button))
             }
         }
     }
@@ -603,7 +615,7 @@ private fun RestrictedField(
         } else null,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = com.example.gymcontrol.ui.components.GymButtonShape,
         colors = fieldColors()
     )
 }

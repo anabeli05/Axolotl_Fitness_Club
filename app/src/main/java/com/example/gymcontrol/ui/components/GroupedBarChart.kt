@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -39,12 +40,15 @@ fun GroupedBarChart(
     title: String,
     entries: List<GroupedBarEntry>,
     modifier: Modifier = Modifier,
-    chartHeight: Int = 180
+    chartHeight: Int = 200
 ) {
     val borderBrush = Brush.linearGradient(colors = listOf(ClienteTema.Borde, ClienteTema.AzulSel))
-    val maxValue = entries.maxOfOrNull { maxOf(it.activos, it.inactivos) } ?: 1f
-    val niceMax = niceCeil(maxValue)
-    val labels = axisLabels(maxValue)
+    val maxValue = entries.maxOfOrNull { maxOf(it.activos, it.inactivos) } ?: 0f
+
+    // Escala uniforme de 10 divisiones proporcionales
+    val (techoEjeY, marcas) = calcularEscalaEjeY(maxValue, 10)
+    // 11 etiquetas desde el techoEjeY hasta el 0 (de arriba a abajo)
+    val marcasDescendentes = marcas.reversed() + listOf(0f)
 
     // (índice del grupo, 0 = activos / 1 = inactivos)
     var seleccionado by remember { mutableStateOf<Pair<Int, Int>?>(null) }
@@ -81,19 +85,36 @@ fun GroupedBarChart(
             }
         }
 
-        // Un poco más de espacio arriba para que el número no tape el título
         Spacer(Modifier.height(28.dp))
 
         Row {
-            Column(
+            // Eje Y: 10 divisiones proporcionales alineadas a la altura correspondiente
+            Box(
                 modifier = Modifier
-                    .width(30.dp)
-                    .height(chartHeight.dp),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.SpaceBetween
+                    .width(36.dp)
+                    .height(chartHeight.dp)
             ) {
-                labels.forEach { label ->
-                    Text(text = label, color = ClienteTema.TextoSec, fontSize = 10.sp)
+                marcasDescendentes.forEachIndexed { i, valorMarca ->
+                    val labelText = if (i == 10) "0" else textoValor(valorMarca)
+                    val yOffset = chartHeight.dp * (i / 10f)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(y = yOffset)
+                            .height(0.dp)
+                    ) {
+                        Text(
+                            text = labelText,
+                            color = ClienteTema.TextoSec,
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier.wrapContentHeight(
+                                align = Alignment.CenterVertically,
+                                unbounded = true
+                            )
+                        )
+                    }
                 }
             }
 
@@ -105,15 +126,29 @@ fun GroupedBarChart(
                         .fillMaxWidth()
                         .height(chartHeight.dp)
                 ) {
+                    // Líneas guía horizontales sutiles (alpha = 0.12f) para cada una de las 10 divisiones
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        for (i in 0..10) {
+                            val yPos = size.height * (i / 10f)
+                            val lineAlpha = if (i == 10) 0.5f else 0.12f
+                            val strokeW = if (i == 10) 1.5.dp.toPx() else 1.dp.toPx()
+                            drawLine(
+                                color = ClienteTema.TextoSec.copy(alpha = lineAlpha),
+                                start = Offset(0f, yPos),
+                                end = Offset(size.width, yPos),
+                                strokeWidth = strokeW
+                            )
+                        }
+                    }
+
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(start = 8.dp),
+                            .padding(horizontal = 4.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.Bottom
                     ) {
                         entries.forEachIndexed { index, entry ->
-                            // (valor, color normal, color brillante al seleccionar)
                             val series = listOf(
                                 Triple(entry.activos, ClienteTema.Verde, VerdeBrillante),
                                 Triple(entry.inactivos, ClienteTema.Rojo, RojoBrillante)
@@ -122,13 +157,12 @@ fun GroupedBarChart(
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight()
-                                    // el grupo seleccionado se dibuja por encima de los demás
                                     .zIndex(if (seleccionado?.first == index) 1f else 0f),
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.Bottom
                             ) {
                                 series.forEachIndexed { serie, (valor, color, colorActivo) ->
-                                    val fraction = (valor / niceMax).coerceIn(0.01f, 1f)
+                                    val fraction = (valor / techoEjeY).coerceIn(0f, 1f)
                                     val activa = seleccionado == (index to serie)
 
                                     if (serie == 1) Spacer(Modifier.width(3.dp))
@@ -157,7 +191,7 @@ fun GroupedBarChart(
                                             Box(
                                                 modifier = Modifier
                                                     .align(Alignment.BottomCenter)
-                                                    .offset(y = -(chartHeight.dp * fraction) - 3.dp)
+                                                    .offset(y = -(chartHeight.dp * fraction) - 4.dp)
                                                     .wrapContentWidth(unbounded = true)
                                                     .background(colorActivo, RoundedCornerShape(6.dp))
                                                     .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -177,18 +211,13 @@ fun GroupedBarChart(
                             }
                         }
                     }
+
+                    // Eje vertical a la izquierda
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterStart)
                             .fillMaxHeight()
                             .width(2.dp)
-                            .background(ClienteTema.AzulSel)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .fillMaxWidth()
-                            .height(2.dp)
                             .background(ClienteTema.AzulSel)
                     )
                 }
@@ -198,7 +227,7 @@ fun GroupedBarChart(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 8.dp),
+                        .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     entries.forEach { entry ->

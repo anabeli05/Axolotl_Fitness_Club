@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 fun GymTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = lightColorScheme(),
+        typography = Typography,
         content = content
     )
 }

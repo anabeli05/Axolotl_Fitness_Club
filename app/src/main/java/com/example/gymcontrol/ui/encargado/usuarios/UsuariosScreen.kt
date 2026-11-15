@@ -312,14 +312,15 @@ fun UsuariosScreen(
                 deleting = null
                 errorBaja = null
             },
-            modifier = Modifier.border(1.5.dp, DeleteBorder, RoundedCornerShape(16.dp)),
+            modifier = Modifier.border(1.5.dp, DeleteBorder, com.example.gymcontrol.ui.components.GymCardShape),
             containerColor = ClienteTema.Beige,
-            shape = RoundedCornerShape(16.dp),
+            shape = com.example.gymcontrol.ui.components.GymCardShape,
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
             title = {
                 Text(
                     stringResource(R.string.title_delete_staff),
                     color = ClienteTema.Texto,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -330,12 +331,13 @@ fun UsuariosScreen(
                     Text(
                         deleteMsg,
                         color = ClienteTema.TextoSec,
+                        style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     errorBaja?.let {
                         Spacer(Modifier.height(8.dp))
-                        Text(it, color = ClienteTema.Rojo, fontSize = 13.sp)
+                        Text(it, color = ClienteTema.Rojo, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             },
@@ -349,10 +351,12 @@ fun UsuariosScreen(
                             deleting = null
                             errorBaja = null
                         },
-                        shape = RoundedCornerShape(10.dp),
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
                         border = BorderStroke(1.dp, ClienteTema.Borde),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                    ) { Text(stringResource(R.string.cancel)) }
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                        modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                        contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                    ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cancel)) }
 
                     Button(
                         onClick = {
@@ -367,12 +371,14 @@ fun UsuariosScreen(
                                 }
                             }
                         },
-                        shape = RoundedCornerShape(10.dp),
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
-                        )
-                    ) { Text(stringResource(R.string.common_delete), fontWeight = FontWeight.Bold) }
+                        ),
+                        modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                        contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                    ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.common_delete)) }
                 }
             }
         )
@@ -384,11 +390,12 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
     AlertDialog(
         onDismissRequest = onCancelar,
         containerColor = ClienteTema.Beige,
-        shape = RoundedCornerShape(16.dp),
+        shape = com.example.gymcontrol.ui.components.GymCardShape,
         title = {
             Text(
                 stringResource(R.string.common_confirm),
                 color = ClienteTema.Texto,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -398,6 +405,7 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
             Text(
                 pendiente.mensaje,
                 color = ClienteTema.TextoSec,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -409,16 +417,20 @@ private fun ConfirmarDialog(pendiente: Pendiente, onCancelar: () -> Unit, onAcep
             ) {
                 OutlinedButton(
                     onClick = onCancelar,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
                     border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text(stringResource(R.string.cancel)) }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = onAceptar,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-                ) { Text(stringResource(R.string.common_yes_continue), fontWeight = FontWeight.Bold) }
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.common_yes_continue)) }
             }
         }
     )
@@ -439,8 +451,8 @@ private fun StaffCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
-            .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+            .border(1.5.dp, CardBorder, com.example.gymcontrol.ui.components.GymCardShape)
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -461,7 +473,7 @@ private fun StaffCard(
             Text(
                 text = item.name,
                 color = ClienteTema.Texto,
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -470,14 +482,14 @@ private fun StaffCard(
             Text(
                 text = roleText,
                 color = ClienteTema.AzulSel,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(2.dp))
             Text(
                 text = item.email,
                 color = ClienteTema.TextoSec,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -491,7 +503,7 @@ private fun StaffCard(
                 Text(
                     text = statusText,
                     color = statusColor,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -540,8 +552,8 @@ private fun StaffDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
-                .border(1.5.dp, CardBorder, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+                .border(1.5.dp, CardBorder, com.example.gymcontrol.ui.components.GymCardShape)
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -552,7 +564,7 @@ private fun StaffDialog(
                 Text(
                     text = title,
                     color = ClienteTema.Texto,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
@@ -687,10 +699,13 @@ private fun NewStaffDialog(
                 disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
                 disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
             ),
-            shape = RoundedCornerShape(10.dp),
-            modifier = Modifier.fillMaxWidth()
+            shape = com.example.gymcontrol.ui.components.GymButtonShape,
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+            contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
         ) {
-            Text(stringResource(R.string.encargado_usuarios_create_staff_button), fontWeight = FontWeight.Bold)
+            com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.encargado_usuarios_create_staff_button))
         }
     }
 }
@@ -850,10 +865,13 @@ private fun EditStaffDialog(
             enabled = nameHasMinLetters(name) && email.isNotBlank() && phoneOk && instructorOk &&
                     (salud?.fechaNacimiento == null || fechaNacimientoValida(salud?.fechaNacimiento)),
             colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
-            shape = RoundedCornerShape(10.dp),
-            modifier = Modifier.fillMaxWidth()
+            shape = com.example.gymcontrol.ui.components.GymButtonShape,
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+            contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
         ) {
-            Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
+            com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.save))
         }
     }
 }
@@ -992,7 +1010,7 @@ private fun GymTextField(
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = com.example.gymcontrol.ui.components.GymButtonShape,
         colors = fieldColors()
     )
 }

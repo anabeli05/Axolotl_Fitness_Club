@@ -363,9 +363,9 @@ private fun PlanCard(
             .fillMaxWidth()
             .alpha(if (habilitado) 1f else 0.45f)
             .clickable(enabled = habilitado) { onClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = com.example.gymcontrol.ui.components.GymCardShape,
         colors = CardDefaults.cardColors(containerColor = ClienteTema.Beige),
-        border = BorderStroke(1.5.dp, ClienteTema.Borde)
+        border = BorderStroke(1.dp, ClienteTema.Borde)
     ) {
         Row(
             modifier = Modifier
@@ -383,7 +383,7 @@ private fun PlanCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = plan.nombre,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = ClienteTema.Texto
                 )
@@ -396,13 +396,13 @@ private fun PlanCard(
                 }
                 Text(
                     text = descripcion,
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = ClienteTema.TextoSec
                 )
             }
             Text(
                 text = dinero(plan.precio),
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = ClienteTema.AzulSel
             )
@@ -418,7 +418,7 @@ private fun MetodoPagoCard(
     subtitle: String,
     onClick: () -> Unit
 ) {
-    val forma = RoundedCornerShape(16.dp)
+    val forma = com.example.gymcontrol.ui.components.GymCardShape
 
     Card(
         modifier = Modifier
@@ -426,7 +426,7 @@ private fun MetodoPagoCard(
             .clickable { onClick() },
         shape = forma,
         colors = CardDefaults.cardColors(containerColor = ClienteTema.Beige),
-        border = BorderStroke(1.5.dp, ClienteTema.Borde)
+        border = BorderStroke(1.dp, ClienteTema.Borde)
     ) {
         Column(
             modifier = Modifier.padding(18.dp)
@@ -447,7 +447,7 @@ private fun MetodoPagoCard(
                 Column {
                     Text(
                         text = title,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = ClienteTema.Texto,
                         lineHeight = 24.sp
@@ -456,7 +456,7 @@ private fun MetodoPagoCard(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = description,
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = ClienteTema.TextoSec,
                             lineHeight = 16.sp
                         )
@@ -582,8 +582,8 @@ private fun PaymentDetailDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 680.dp)
-                .background(ClienteTema.Beige, RoundedCornerShape(20.dp))
-                .border(1.5.dp, ClienteTema.Borde, RoundedCornerShape(20.dp))
+                .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+                .border(1.dp, ClienteTema.Borde, com.example.gymcontrol.ui.components.GymCardShape)
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -594,7 +594,7 @@ private fun PaymentDetailDialog(
             ) {
                 Text(
                     text = info.title,
-                    fontSize = 22.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = ClienteTema.Texto,
                     modifier = Modifier.weight(1f)
@@ -707,8 +707,9 @@ private fun PaymentDetailDialog(
                 enabled = !enviando,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp),
+                    .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ClienteTema.Azul,
                     contentColor = Color.White
@@ -716,10 +717,8 @@ private fun PaymentDetailDialog(
             ) {
                 Icon(Icons.Filled.UploadFile, contentDescription = null, modifier = Modifier.size(22.dp))
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    if (comprobanteUri == null) stringResource(R.string.btn_upload_receipt) else stringResource(R.string.btn_change_receipt),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                com.example.gymcontrol.ui.components.GymButtonText(
+                    if (comprobanteUri == null) stringResource(R.string.btn_upload_receipt) else stringResource(R.string.btn_change_receipt)
                 )
             }
 
@@ -731,9 +730,10 @@ private fun PaymentDetailDialog(
                     enabled = !enviando,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.5.dp, ClienteTema.Azul)
+                        .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding,
+                    border = BorderStroke(1.dp, ClienteTema.Azul)
                 ) {
                     if (enviando) {
                         CircularProgressIndicator(
@@ -742,11 +742,9 @@ private fun PaymentDetailDialog(
                             modifier = Modifier.size(22.dp)
                         )
                     } else {
-                        Text(
+                        com.example.gymcontrol.ui.components.GymButtonText(
                             stringResource(R.string.btn_send_receipt),
-                            fontSize = 16.sp,
-                            color = ClienteTema.Azul,
-                            fontWeight = FontWeight.Bold
+                            color = ClienteTema.Azul
                         )
                     }
                 }

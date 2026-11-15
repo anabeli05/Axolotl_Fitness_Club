@@ -100,8 +100,8 @@ fun ClientFormDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(ClienteTema.Beige, RoundedCornerShape(16.dp))
-                .border(1.5.dp, borderBrush, RoundedCornerShape(16.dp))
+                .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+                .border(1.dp, borderBrush, com.example.gymcontrol.ui.components.GymCardShape)
                 .padding(20.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -112,7 +112,7 @@ fun ClientFormDialog(
                 Text(
                     text = if (isEditing) stringResource(R.string.encargado_client_form_edit_title) else stringResource(R.string.encargado_client_form_new_title),
                     color = ClienteTema.Texto,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
@@ -225,7 +225,7 @@ fun ClientFormDialog(
                     modifier = Modifier
                         .menuAnchor()
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
                     colors = fieldColors()
                 )
                 ExposedDropdownMenu(
@@ -290,10 +290,15 @@ fun ClientFormDialog(
                     disabledContainerColor = ClienteTema.Azul.copy(alpha = 0.45f),
                     disabledContentColor = ClienteTema.Texto.copy(alpha = 0.7f)
                 ),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth()
+                shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
             ) {
-                Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_client_form_create_button), fontWeight = FontWeight.Bold)
+                com.example.gymcontrol.ui.components.GymButtonText(
+                    if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_client_form_create_button)
+                )
             }
         }
     }
@@ -301,11 +306,14 @@ fun ClientFormDialog(
 
 @Composable
 private fun fieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedContainerColor = ClienteTema.CampoFondo,
+    unfocusedContainerColor = ClienteTema.CampoFondo,
     focusedBorderColor = ClienteTema.AzulSel,
     unfocusedBorderColor = ClienteTema.Borde,
     focusedTextColor = ClienteTema.Texto,
     unfocusedTextColor = ClienteTema.Texto,
     focusedLabelColor = ClienteTema.AzulSel,
+    unfocusedLabelColor = ClienteTema.TextoSec,
     cursorColor = ClienteTema.AzulSel,
     errorBorderColor = ClienteTema.Rojo,
     errorTextColor = ClienteTema.Texto,
@@ -356,7 +364,7 @@ private fun RestrictedField(
         } else null,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = com.example.gymcontrol.ui.components.GymButtonShape,
         colors = fieldColors()
     )
 }

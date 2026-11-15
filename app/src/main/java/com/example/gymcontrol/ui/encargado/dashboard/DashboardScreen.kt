@@ -2,6 +2,7 @@ package com.example.gymcontrol.ui.encargado.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -160,7 +161,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                             datos.sumOf { it.second }
                         ),
                         color = ClienteTema.TextoSec,
-                        fontSize = 13.sp
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
@@ -180,25 +181,19 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
             }
 
             item {
+                val mapaIngresos = ingresosDia.associate { it.diaSemana to (it.total / 100.0) }
+                val entradasIngresos = (1..7).map { d ->
+                    val monto = mapaIngresos[d] ?: 0.0
+                    BarEntry(
+                        diaCortoStr(d),
+                        monto.toFloat()
+                    )
+                }
                 SimpleBarChart(
                     title = stringResource(R.string.encargado_chart_income_per_day),
-                    // El domingo solo aparece si ese día hubo cobros.
-                    // El total llega 100 veces más grande, por eso se divide entre 100.
-                    entries = ingresosDia
-                        .filter { it.diaSemana != 7 || it.total > 0.0 }
-                        .map {
-                            BarEntry(
-                                diaCortoStr(it.diaSemana),
-                                (it.total / 100.0).toFloat()
-                            )
-                        },
+                    entries = entradasIngresos,
                     barColor = ClienteTema.AzulSel,
-                    // Eje fijo de 5 en 5: 0, 5, 10... hasta 30 (solo crece si un dato lo supera)
-                    yStep = 5f,
-                    yMax = 30f,
-                    // Más alto para que las etiquetas del eje no queden apretadas
-                    chartHeight = 240,
-                    // Burbuja al tocar una barra: sin decimales (redondea al entero más cercano)
+                    chartHeight = 200,
                     valueFormatter = { it.roundToInt().toString() },
                     modifier = Modifier.fillMaxWidth()
                 )
