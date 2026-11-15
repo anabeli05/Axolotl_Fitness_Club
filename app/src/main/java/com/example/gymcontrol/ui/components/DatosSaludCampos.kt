@@ -113,7 +113,7 @@ fun DatosSaludCampos(
                 modifier = Modifier
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth(),
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(50),
                 colors = coloresCampo()
             )
             ExposedDropdownMenu(
@@ -178,7 +178,7 @@ private fun CampoFechaNacimiento(valor: String?, obligatoria: Boolean, onChange:
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(50),
             colors = coloresCampo()
         )
         // Tocar cualquier parte del campo abre el calendario
@@ -228,7 +228,7 @@ private fun CampoTextoSalud(valor: String, label: String, onChange: (String) -> 
         placeholder = { Text(stringResource(R.string.client_form_none_placeholder), color = ClienteTema.TextoSec) },
         maxLines = 3,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
+        shape = GymMultilineFieldShape,
         colors = coloresCampo()
     )
 }
@@ -240,6 +240,8 @@ private fun deMillis(ms: Long): LocalDate = Instant.ofEpochMilli(ms).atZone(Zone
 /** Colores de los campos de texto de los formularios (también los usa el calendario). */
 @Composable
 internal fun coloresCampo() = OutlinedTextFieldDefaults.colors(
+    focusedContainerColor = ClienteTema.CampoFondo,
+    unfocusedContainerColor = ClienteTema.CampoFondo,
     focusedBorderColor = ClienteTema.AzulSel,
     unfocusedBorderColor = ClienteTema.Borde,
     focusedTextColor = ClienteTema.Texto,

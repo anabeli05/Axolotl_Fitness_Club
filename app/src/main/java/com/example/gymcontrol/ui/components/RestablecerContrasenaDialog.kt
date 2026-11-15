@@ -1,5 +1,6 @@
 package com.example.gymcontrol.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -159,6 +160,7 @@ fun RestablecerContrasenaDialog(
     AlertDialog(
         onDismissRequest = { if (!cargando) onDismiss() },
         containerColor = colores.fondo,
+        shape = RoundedCornerShape(20.dp),
         title = {
             Text(
                 if (codigoEnviado) "Revisa tu correo" else stringResource(R.string.forgot_password_title),
@@ -230,11 +232,22 @@ fun RestablecerContrasenaDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
             ) {
-                TextButton(enabled = !cargando, onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel), color = colores.textoSec)
+                OutlinedButton(
+                    enabled = !cargando,
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(50),
+                    border = BorderStroke(1.dp, colores.borde),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colores.textoSec),
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding
+                ) {
+                    GymButtonText(stringResource(R.string.cancel), color = colores.textoSec)
                 }
                 Button(
                     enabled = !cargando && if (codigoEnviado) codigo.length == 6 else datosListos,
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding,
                     colors = ButtonDefaults.buttonColors(containerColor = colores.boton, contentColor = colores.textoBoton),
                     onClick = {
                         if (!codigoEnviado) {
@@ -262,7 +275,7 @@ fun RestablecerContrasenaDialog(
                     if (cargando) {
                         CircularProgressIndicator(color = colores.textoBoton, strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
                     } else {
-                        Text(if (codigoEnviado) "Confirmar" else stringResource(R.string.btn_send_code))
+                        GymButtonText(if (codigoEnviado) stringResource(R.string.common_confirm) else stringResource(R.string.btn_send_code))
                     }
                 }
             }

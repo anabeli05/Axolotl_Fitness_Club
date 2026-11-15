@@ -108,14 +108,8 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ClienteTema.AzulSel,
-                            unfocusedBorderColor = ClienteTema.Borde,
-                            focusedTextColor = ClienteTema.Texto,
-                            unfocusedTextColor = ClienteTema.Texto,
-                            cursorColor = ClienteTema.AzulSel
-                        )
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                        colors = com.example.gymcontrol.ui.components.gymFieldColors()
                     )
                 }
 
@@ -127,12 +121,15 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             showForm = true
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                        contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.btn_new_client), fontWeight = FontWeight.Bold)
+                        com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.btn_new_client))
                     }
                 }
 
@@ -295,11 +292,12 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                 AlertDialog(
                     onDismissRequest = { confirmar = null },
                     containerColor = ClienteTema.Beige,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = com.example.gymcontrol.ui.components.GymCardShape,
                     title = {
                         Text(
                             stringResource(R.string.common_confirm),
                             color = ClienteTema.Texto,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
@@ -309,27 +307,36 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         Text(
                             texto,
                             color = ClienteTema.TextoSec,
+                            style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
                     },
                     confirmButton = {
-                        Button(
-                            onClick = {
-                                confirmar = null
-                                accion()
-                            },
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-                        ) { Text(stringResource(R.string.common_yes_continue), fontWeight = FontWeight.Bold) }
-                    },
-                    dismissButton = {
-                        OutlinedButton(
-                            onClick = { confirmar = null },
-                            shape = RoundedCornerShape(10.dp),
-                            border = BorderStroke(1.dp, ClienteTema.Borde),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                        ) { Text(stringResource(R.string.cancel)) }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                        ) {
+                            OutlinedButton(
+                                onClick = { confirmar = null },
+                                shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                                border = BorderStroke(1.dp, ClienteTema.Borde),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                                modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                                contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                            ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cancel)) }
+
+                            Button(
+                                onClick = {
+                                    confirmar = null
+                                    accion()
+                                },
+                                shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                                colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
+                                modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                                contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                            ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.common_yes_continue)) }
+                        }
                     }
                 )
             }
@@ -356,8 +363,8 @@ private fun ClientCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
-            .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
+            .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
+            .border(1.dp, CardBorder, com.example.gymcontrol.ui.components.GymCardShape)
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -374,25 +381,25 @@ private fun ClientCard(
             Text(
                 text = name,
                 color = ClienteTema.Texto,
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = "$labelMembership: " + membershipNum.ifBlank { "—" },
                 color = ClienteTema.TextoSec,
-                fontSize = 17.sp
+                style = MaterialTheme.typography.bodySmall
             )
             if (fechaFin != null) {
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(context, fechaFin)),
                     color = ClienteTema.TextoSec,
-                    fontSize = 17.sp
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
             Spacer(Modifier.height(2.dp))
-            Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
+            Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(Modifier.width(12.dp))
@@ -412,13 +419,16 @@ private fun ClientCard(
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = onRenovar,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.AzulSel),
                     border = BorderStroke(1.dp, ClienteTema.AzulSel),
                     modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(stringResource(R.string.encargado_clients_renew_button), fontSize = 17.sp)
+                    com.example.gymcontrol.ui.components.GymButtonText(
+                        stringResource(R.string.encargado_clients_renew_button),
+                        color = ClienteTema.AzulSel
+                    )
                 }
             }
         }
@@ -434,8 +444,8 @@ private fun IconSquareButton(
 ) {
     Box(
         modifier = modifier
-            .background(color.copy(alpha = 0.1f), RoundedCornerShape(10.dp))
-            .border(1.dp, color, RoundedCornerShape(10.dp)),
+            .background(color.copy(alpha = 0.1f), com.example.gymcontrol.ui.components.GymButtonShape)
+            .border(1.dp, color, com.example.gymcontrol.ui.components.GymButtonShape),
         contentAlignment = Alignment.Center
     ) {
         IconButton(onClick = onClick, modifier = Modifier.fillMaxSize()) {
@@ -452,13 +462,13 @@ private fun StatusBadge(isActive: Boolean) {
     Box(
         modifier = Modifier
             .size(ActionButtonWidth, ActionButtonHeight)
-            .background(color.copy(alpha = 0.15f), RoundedCornerShape(10.dp)),
+            .background(color.copy(alpha = 0.15f), com.example.gymcontrol.ui.components.GymButtonShape),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
             color = color,
-            fontSize = 17.sp,
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold
         )
     }
@@ -475,11 +485,18 @@ private fun RenovarDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = ClienteTema.Beige,
-        shape = RoundedCornerShape(16.dp),
-        title = { Text(stringResource(R.string.encargado_clients_renew_title, cliente.nombre), color = ClienteTema.Texto, fontWeight = FontWeight.Bold) },
+        shape = com.example.gymcontrol.ui.components.GymCardShape,
+        title = {
+            Text(
+                stringResource(R.string.encargado_clients_renew_title, cliente.nombre),
+                color = ClienteTema.Texto,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
             Column {
-                Text(stringResource(R.string.encargado_clients_choose_plan), color = ClienteTema.TextoSec)
+                Text(stringResource(R.string.encargado_clients_choose_plan), color = ClienteTema.TextoSec, style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(8.dp))
                 planes.forEach { p ->
                     Row(
@@ -491,7 +508,7 @@ private fun RenovarDialog(
                             onClick = { plan = p.nombre },
                             colors = RadioButtonDefaults.colors(selectedColor = ClienteTema.AzulSel)
                         )
-                        Text("${p.nombre} · $${p.precio.toInt()}", color = ClienteTema.Texto)
+                        Text("${p.nombre} · $${p.precio.toInt()}", color = ClienteTema.Texto, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -503,17 +520,21 @@ private fun RenovarDialog(
             ) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
                     border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text(stringResource(R.string.cancel)) }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cancel)) }
 
                 Button(
                     onClick = { onRenovar(plan) },
                     enabled = plan.isNotBlank(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul)
-                ) { Text(stringResource(R.string.encargado_clients_renew_button), fontWeight = FontWeight.Bold) }
+                    shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                    contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.encargado_clients_renew_button)) }
             }
         }
     )

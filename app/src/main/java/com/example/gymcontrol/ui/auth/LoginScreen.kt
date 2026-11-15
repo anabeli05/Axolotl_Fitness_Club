@@ -331,9 +331,13 @@ fun LoginScreen(
                         disabledContentColor = BotonTexto.copy(alpha = 0.7f)
                     ),
                     border = BorderStroke(1.dp, DoradoBorde),
-                    modifier = Modifier.fillMaxWidth(0.6f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight)
                 ) {
-                    Text(if (loading) stringResource(R.string.logging_in) else stringResource(R.string.login_button))
+                    com.example.gymcontrol.ui.components.GymButtonText(
+                        if (loading) stringResource(R.string.logging_in) else stringResource(R.string.login_button)
+                    )
                 }
                 error?.let {
                     Spacer(Modifier.height(12.dp))
@@ -344,8 +348,16 @@ fun LoginScreen(
                     Text(it, color = Dorado, style = MaterialTheme.typography.bodySmall)
                 }
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { mostrarRestablecer = true; aviso = null }) {
-                    Text(stringResource(R.string.forgot_current_password), color = Dorado)
+                TextButton(
+                    onClick = { mostrarRestablecer = true; aviso = null },
+                    modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight)
+                ) {
+                    Text(
+                        stringResource(R.string.forgot_current_password),
+                        color = Dorado,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }

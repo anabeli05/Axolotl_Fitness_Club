@@ -110,21 +110,21 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 val isPending = estado == "PENDIENTE"
                 val isApproved = estado == "APROBADA"
                 val sinCupo = instructor.activos >= instructor.maxClientes
-                val forma = RoundedCornerShape(14.dp)
+                val forma = com.example.gymcontrol.ui.components.GymCardShape
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(ClienteTema.Beige, forma)
-                        .border(1.5.dp, ClienteTema.Borde, forma)
-                        .padding(14.dp),
+                        .border(1.dp, ClienteTema.Borde, forma)
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
                             .size(56.dp)
                             .background(Color(0xFFB9B5A6), CircleShape)
-                            .border(1.5.dp, ClienteTema.Borde, CircleShape),
+                            .border(1.dp, ClienteTema.Borde, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -141,7 +141,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         Text(
                             instructor.nombre,
                             color = ClienteTema.Texto,
-                            fontSize = 17.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -149,12 +149,12 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         Text(
                             stringResource(R.string.cliente_asesorias_quota, instructor.activos, instructor.maxClientes),
                             color = ClienteTema.TextoSec,
-                            fontSize = 13.sp
+                            style = MaterialTheme.typography.bodySmall
                         )
                         Text(
                             stringResource(R.string.cliente_asesorias_per_month, formatPrice(instructor.costo)),
                             color = ClienteTema.Texto,
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -172,7 +172,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                 Text(
                                     stringResource(R.string.cliente_asesorias_cancel),
                                     color = ClienteTema.Rojo,
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier
                                         .clickableSinRipple {
@@ -195,9 +195,9 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                     }
                                 },
                                 enabled = !sinCupo,
-                                modifier = Modifier.size(width = 100.dp, height = 36.dp),
-                                shape = RoundedCornerShape(6.dp),
-                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                                shape = com.example.gymcontrol.ui.components.GymButtonShape,
+                                contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = ClienteTema.Azul,
                                     contentColor = Color.White,
@@ -205,10 +205,8 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                     disabledContentColor = Color.White
                                 )
                             ) {
-                                Text(
-                                    if (sinCupo) stringResource(R.string.cliente_asesorias_no_quota) else stringResource(R.string.cliente_asesorias_request),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
+                                com.example.gymcontrol.ui.components.GymButtonText(
+                                    if (sinCupo) stringResource(R.string.cliente_asesorias_no_quota) else stringResource(R.string.cliente_asesorias_request)
                                 )
                             }
                         }
@@ -221,14 +219,15 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
     cancelling?.let { target ->
         AlertDialog(
             onDismissRequest = { cancelling = null },
-            modifier = Modifier.border(1.5.dp, ClienteTema.Borde, RoundedCornerShape(16.dp)),
+            modifier = Modifier.border(1.dp, ClienteTema.Borde, com.example.gymcontrol.ui.components.GymCardShape),
             containerColor = ClienteTema.Beige,
-            shape = RoundedCornerShape(16.dp),
+            shape = com.example.gymcontrol.ui.components.GymCardShape,
             icon = { Icon(Icons.Filled.Warning, contentDescription = null, tint = ClienteTema.Rojo) },
             title = {
                 Text(
                     stringResource(R.string.cliente_asesorias_cancel_dialog_title),
                     color = ClienteTema.Texto,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -238,6 +237,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 Text(
                     stringResource(R.string.cliente_asesorias_cancel_dialog_desc, target.instructorName),
                     color = ClienteTema.TextoSec,
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -249,10 +249,12 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                 ) {
                     OutlinedButton(
                         onClick = { cancelling = null },
-                        shape = RoundedCornerShape(10.dp),
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
                         border = BorderStroke(1.dp, ClienteTema.Borde),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                    ) { Text(stringResource(R.string.common_back)) }
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                        modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                        contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                    ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.common_back)) }
 
                     Button(
                         onClick = {
@@ -267,12 +269,14 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                 }
                             }
                         },
-                        shape = RoundedCornerShape(10.dp),
+                        shape = com.example.gymcontrol.ui.components.GymButtonShape,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = ClienteTema.Rojo,
                             contentColor = Color.White
-                        )
-                    ) { Text(stringResource(R.string.cliente_asesorias_cancel), fontWeight = FontWeight.Bold) }
+                        ),
+                        modifier = Modifier.defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                        contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
+                    ) { com.example.gymcontrol.ui.components.GymButtonText(stringResource(R.string.cliente_asesorias_cancel)) }
                 }
             }
         )
@@ -283,12 +287,17 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
 private fun EstadoChip(etiqueta: String, fondo: Color, texto: Color) {
     Box(
         modifier = Modifier
-            .size(width = 100.dp, height = 36.dp)
-            .background(fondo, RoundedCornerShape(6.dp))
-            .border(1.dp, ClienteTema.Borde, RoundedCornerShape(6.dp)),
+            .background(fondo, com.example.gymcontrol.ui.components.GymButtonShape)
+            .border(1.dp, ClienteTema.Borde, com.example.gymcontrol.ui.components.GymButtonShape)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(etiqueta, color = texto, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Text(
+            etiqueta,
+            color = texto,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 

@@ -80,8 +80,8 @@
     <string name="cliente_greeting_afternoon">Buenas tardes</string>
     <string name="cliente_greeting_evening">Buenas noches</string>
     <string name="cliente_welcome_subtitle">Qué bueno verte por aquí. ¡A darle con todo hoy!</string>
-    <string name="cliente_person_inside_now">persona dentro ahora</string>
-    <string name="cliente_people_inside_now">personas dentro ahora</string>
+    <string name="cliente_person_inside_now">Persona dentro ahora</string>
+    <string name="cliente_people_inside_now">Personas dentro ahora</string>
 
     <!-- Cliente: Pagos -->
     <string name="cliente_pagos_title">Métodos de Pago</string>
@@ -322,7 +322,7 @@
     <string name="recepcion_scanner_denied_unregistered">Acceso denegado: rostro no registrado</string>
     <string name="recepcion_scanner_entry_success">%1$s ha ingresado · %2$s</string>
     <string name="recepcion_scanner_exit_success">%1$s ha salido</string>
-    <string name="recepcion_scanner_duration_less_min">menos de 1 min</string>
+    <string name="recepcion_scanner_duration_less_min">Menos de 1 min</string>
 
     <!-- Recepción: Solicitudes -->
     <string name="recepcion_solicitudes_pending_badge">%1$d pendientes</string>
@@ -401,7 +401,7 @@
 
     <!-- Encargado: Servicios -->
     <string name="label_duration">Duración</string>
-    <string name="label_days">días</string>
+    <string name="label_days">Días</string>
     <string name="label_price">Precio</string>
     <string name="delete_service_confirm">Se eliminará el servicio %s. Esta acción no se puede deshacer.</string>
 
@@ -553,8 +553,8 @@
     <string name="label_category_format">Categoría: %s</string>
     <string name="label_amount_format">Monto: %s</string>
     <string name="label_date_format">Fecha: %s</string>
-    <string name="unit_day">día</string>
-    <string name="unit_days">días</string>
+    <string name="unit_day">Día</string>
+    <string name="unit_days">Días</string>
     <string name="corresponsales_formatted">OXXO, 7-Eleven\nFarmacias del Ahorro</string>
     <string name="title_monthly_report">Reporte mensual</string>
     <string name="label_services">Servicios</string>

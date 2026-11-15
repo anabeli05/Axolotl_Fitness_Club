@@ -34,8 +34,8 @@ fun LogoutDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(ClienteTema.Beige, RoundedCornerShape(20.dp))
-                .border(1.5.dp, LogoutBorder, RoundedCornerShape(20.dp))
+                .background(ClienteTema.Beige, GymCardShape)
+                .border(1.dp, LogoutBorder, GymCardShape)
                 .padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -49,7 +49,7 @@ fun LogoutDialog(
             Text(
                 stringResource(R.string.logout),
                 color = ClienteTema.Texto,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -57,7 +57,7 @@ fun LogoutDialog(
             Text(
                 stringResource(R.string.logout_confirmation),
                 color = ClienteTema.TextoSec,
-                fontSize = 15.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -68,20 +68,24 @@ fun LogoutDialog(
             ) {
                 Button(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = GymButtonShape,
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ClienteTema.Rojo,
                         contentColor = Color.White
                     )
-                ) { Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold) }
+                ) { GymButtonText(stringResource(R.string.cancel)) }
                 Button(
                     onClick = onConfirm,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = GymButtonShape,
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ClienteTema.Verde,
                         contentColor = Color.White
                     )
-                ) { Text(stringResource(R.string.exit), fontWeight = FontWeight.Bold) }
+                ) { GymButtonText(stringResource(R.string.exit)) }
             }
         }
     }

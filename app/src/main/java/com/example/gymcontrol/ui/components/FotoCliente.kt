@@ -119,20 +119,20 @@ fun FotoClienteDialog(
     accion: Pair<String, () -> Unit>? = null
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        val forma = RoundedCornerShape(16.dp)
+        val forma = GymCardShape
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(forma)
                 .background(ClienteTema.Beige)
-                .border(1.5.dp, ClienteTema.Borde, forma)
+                .border(1.dp, ClienteTema.Borde, forma)
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 nombre,
                 color = ClienteTema.Texto,
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -147,19 +147,26 @@ fun FotoClienteDialog(
                     .clip(RoundedCornerShape(12.dp))
             )
             Spacer(Modifier.height(16.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            ) {
                 OutlinedButton(
                     onClick = onDismiss,
-                    shape = RoundedCornerShape(10.dp),
+                    shape = GymButtonShape,
                     border = BorderStroke(1.dp, ClienteTema.Borde),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto)
-                ) { Text(stringResource(R.string.foto_cliente_close)) }
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Texto),
+                    modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                    contentPadding = GymButtonPadding
+                ) { GymButtonText(stringResource(R.string.foto_cliente_close)) }
                 accion?.let { (texto, alPulsar) ->
                     Button(
                         onClick = alPulsar,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul, contentColor = Color.White)
-                    ) { Text(texto) }
+                        shape = GymButtonShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul, contentColor = Color.White),
+                        modifier = Modifier.defaultMinSize(minHeight = GymButtonMinHeight),
+                        contentPadding = GymButtonPadding
+                    ) { GymButtonText(texto) }
                 }
             }
         }
