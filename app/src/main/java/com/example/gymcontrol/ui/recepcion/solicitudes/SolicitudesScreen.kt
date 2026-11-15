@@ -28,6 +28,7 @@ import com.example.gymcontrol.data.remote.SolicitudAdminRow
 import com.example.gymcontrol.data.remote.SolicitudesRepository
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.launch
 
 // Getter: se recalcula al cambiar entre modo claro y oscuro
@@ -75,7 +76,8 @@ fun SolicitudesScreen(onNavigate: (String) -> Unit = {}) {
                     text = stringResource(R.string.recepcion_solicitudes_pending_badge, pendientes),
                     color = ClienteTema.TextoSec,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.manualTarget("sol_contador")
                 )
             }
 
@@ -194,7 +196,8 @@ private fun SolicitudCard(
             .fillMaxWidth()
             .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
-            .padding(20.dp),
+            .padding(20.dp)
+            .manualTarget("sol_card"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -221,7 +224,10 @@ private fun SolicitudCard(
 
             if (status == "PENDIENTE") {
                 Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.manualTarget("sol_acciones")
+                ) {
                     IconSquareButton(
                         icon = Icons.Filled.Check,
                         color = ClienteTema.Verde,

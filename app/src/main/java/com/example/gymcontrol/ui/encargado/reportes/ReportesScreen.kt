@@ -34,6 +34,7 @@ import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.dinero
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.OffsetDateTime
@@ -123,7 +124,9 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                     item {
                         Text(
                             text = stringResource(R.string.reports_requests_title, solicitudes.size),
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .manualTarget("rep_solicitudes"),
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Bold,
                             color = ClienteTema.Rojo,
@@ -153,15 +156,17 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
 
                 items(reportes) { r ->
                     val total = r.servicios + r.asesorias - r.gastos
-                    MonthlyReportCard(
-                        item = ReporteMensualItem(
-                            periodo = ReportesRepository.nombrePeriodo(r.periodo),
-                            servicios = r.servicios,
-                            asesorias = r.asesorias,
-                            gastos = r.gastos,
-                            total = total
+                    Box(modifier = Modifier.manualTarget("rep_mensual")) {
+                        MonthlyReportCard(
+                            item = ReporteMensualItem(
+                                periodo = ReportesRepository.nombrePeriodo(r.periodo),
+                                servicios = r.servicios,
+                                asesorias = r.asesorias,
+                                gastos = r.gastos,
+                                total = total
+                            )
                         )
-                    )
+                    }
                 }
 
                 // Cancelaciones y reembolsos: los pendientes se marcan como entregados aquí
@@ -169,7 +174,9 @@ fun ReportesScreen(onNavigate: (String) -> Unit = {}) {
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.reports_cancellations_title),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .manualTarget("rep_cancel"),
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         color = ClienteTema.Texto,

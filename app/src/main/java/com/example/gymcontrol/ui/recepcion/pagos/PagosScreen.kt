@@ -35,6 +35,7 @@ import com.example.gymcontrol.ui.components.metodoPagoLocalizado
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import com.example.gymcontrol.R
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.launch
 
 private class Resolucion(val pago: PagoPendienteRow, val aceptar: Boolean)
@@ -93,17 +94,19 @@ fun RecepcionPagosScreen(onNavigate: (String) -> Unit = {}) {
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             item {
-                Text(
-                    text = stringResource(R.string.tab_payments),
-                    color = ClienteTema.Texto,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.manager_pending_payments, pagos.size),
-                    color = ClienteTema.TextoSec,
-                    fontSize = 15.sp
-                )
+                Column(modifier = Modifier.manualTarget("pay_titulo")) {
+                    Text(
+                        text = stringResource(R.string.tab_payments),
+                        color = ClienteTema.Texto,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = stringResource(R.string.manager_pending_payments, pagos.size),
+                        color = ClienteTema.TextoSec,
+                        fontSize = 15.sp
+                    )
+                }
             }
 
             mensaje?.let { item { Text(it, color = ClienteTema.Verde, fontSize = 14.sp) } }
@@ -291,7 +294,8 @@ private fun PagoCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 160.dp, max = 260.dp)
-                    .background(ClienteTema.Fondo, RoundedCornerShape(10.dp)),
+                    .background(ClienteTema.Fondo, RoundedCornerShape(10.dp))
+                    .manualTarget("pay_comprobante"),
                 contentAlignment = Alignment.Center
             ) {
                 when {
@@ -331,7 +335,10 @@ private fun PagoCard(
 
             Spacer(Modifier.height(12.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.manualTarget("pay_botones")
+            ) {
                 OutlinedButton(
                     onClick = onRechazar,
                     enabled = habilitado,

@@ -37,6 +37,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.example.gymcontrol.ui.manual.manualTarget
+import com.example.gymcontrol.ui.manual.rememberManualLista
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -147,6 +149,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
         if (plan == null) {
             // ---------- PASO 1: selección de plan ----------
             LazyColumn(
+                state = rememberManualLista(),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
@@ -166,14 +169,18 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                     )
                 }
                 item {
-                    EstadoComprobante(ultimo = ultimo, mensaje = mensaje)
+                    Box(modifier = Modifier.manualTarget("pag_estado")) {
+                        EstadoComprobante(ultimo = ultimo, mensaje = mensaje)
+                    }
                 }
                 items(planes, key = { it.nombre }) { p ->
-                    PlanCard(
-                        plan = p,
-                        habilitado = !enRevision,
-                        onClick = { mensaje = null; error = null; selectedPlan = p }
-                    )
+                    Box(modifier = Modifier.manualTarget("pag_plan")) {
+                        PlanCard(
+                            plan = p,
+                            habilitado = !enRevision,
+                            onClick = { mensaje = null; error = null; selectedPlan = p }
+                        )
+                    }
                 }
                 if (planes.isEmpty()) {
                     item {

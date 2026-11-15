@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
+import com.example.gymcontrol.ui.manual.BotonManual
+import com.example.gymcontrol.ui.manual.ManualTutorial
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.launch
 
 // Borde del cuadro "¿Seguro que quieres salir?": degradado solo en tonos dorados.
@@ -50,6 +53,14 @@ fun GymScaffold(
 
     val rolConSidebar = rol?.takeIf { it.tieneSidebar() }
 
+    LaunchedEffect(ManualTutorial.menuLateralAbierto) {
+        if (ManualTutorial.menuLateralAbierto) {
+            drawerState.open()
+        } else {
+            drawerState.close()
+        }
+    }
+
     val scaffold: @Composable () -> Unit = {
         Scaffold(
             containerColor = ClienteTema.Fondo,
@@ -69,8 +80,12 @@ fun GymScaffold(
                         }
                     },
                     actions = {
+                        BotonManual()
                         if (rolConSidebar != null) {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            IconButton(
+                                onClick = { scope.launch { drawerState.open() } },
+                                modifier = Modifier.manualTarget("barra_menu")
+                            ) {
                                 // Color del tema: oscuro en modo claro, blanco en modo oscuro
                                 Icon(Icons.Default.Menu, "Menú", tint = ClienteTema.IconoBarra)
                             }

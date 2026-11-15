@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import com.example.gymcontrol.ui.components.ClienteScaffold
 import com.example.gymcontrol.ui.components.ScaffoldTab
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.manual.manualTarget
 
 private val CardBorder = Brush.linearGradient(listOf(ClienteTema.Borde, ClienteTema.AzulSel))
 
@@ -162,7 +163,8 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
             .fillMaxWidth()
             .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
-            .padding(20.dp),
+            .padding(20.dp)
+            .manualTarget("inst_card"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -207,7 +209,9 @@ private fun ClienteCard(cliente: ClienteAsignado, onEditar: () -> Unit) {
 
         Button(
             onClick = onEditar,
-            modifier = Modifier.size(width = 88.dp, height = 40.dp),
+            modifier = Modifier
+                .size(width = 88.dp, height = 40.dp)
+                .manualTarget("inst_editar"),
             colors = ButtonDefaults.buttonColors(
                 containerColor = ClienteTema.Azul,
                 contentColor = ClienteTema.Texto

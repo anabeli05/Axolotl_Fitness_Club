@@ -25,6 +25,8 @@ import com.example.gymcontrol.ui.components.SimpleBarChart
 import com.example.gymcontrol.ui.components.StatCard
 import com.example.gymcontrol.ui.components.StatIconType
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.manual.manualTarget
+import com.example.gymcontrol.ui.manual.rememberManualLista
 import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -92,6 +94,7 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
         onNavigate = onNavigate
     ) {
         LazyColumn(
+            state = rememberManualLista(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
@@ -105,7 +108,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     valueColor = ClienteTema.AzulSel,
                     iconType = StatIconType.PERSON,
                     iconColor = ClienteTema.AzulSel,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_dentro")
                 )
             }
 
@@ -116,7 +121,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     valueColor = ClienteTema.Verde,
                     iconType = StatIconType.PERSON,
                     iconColor = ClienteTema.Verde,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_activos")
                 )
             }
 
@@ -127,7 +134,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     valueColor = ClienteTema.Rojo,
                     iconType = StatIconType.PERSON,
                     iconColor = ClienteTema.Rojo,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_inactivos")
                 )
             }
 
@@ -138,7 +147,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     valueColor = ClienteTema.AzulSel,
                     iconType = StatIconType.MONEY,
                     iconColor = ClienteTema.AzulSel,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_ingresos")
                 )
             }
 
@@ -147,7 +158,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     title = stringResource(R.string.encargado_chart_hourly_occupancy),
                     entries = datos.map { BarEntry(it.first.take(2), it.second.toFloat()) },
                     barColor = ClienteTema.AzulSel,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_ocupacion")
                 )
             }
 
@@ -176,7 +189,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                             it.inactivos.toFloat()
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_clientes")
                 )
             }
 
@@ -195,7 +210,9 @@ fun DashboardScreen(onNavigate: (String) -> Unit = {}) {
                     barColor = ClienteTema.AzulSel,
                     chartHeight = 200,
                     valueFormatter = { it.roundToInt().toString() },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("dash_semana")
                 )
             }
         }

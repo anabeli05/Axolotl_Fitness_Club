@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -149,7 +150,9 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             Icon(Icons.Filled.Search, contentDescription = null, tint = ClienteTema.TextoSec)
                         },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .manualTarget("cli_buscar"),
                         shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = ClienteTema.AzulSel,
@@ -175,7 +178,9 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                             contentColor = ClienteTema.SobreDorado
                         ),
                         shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .manualTarget("cli_nuevo")
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
@@ -515,14 +520,16 @@ private fun ClientCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Borde verde = rostro registrado. Al tocarla: foto en grande o registrar el rostro
-            FotoClienteAvatar(
-                clienteId = clienteId,
-                size = 52.dp,
-                borderWidth = if (tieneRostro) 2.dp else 1.dp,
-                borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
-                recarga = recargaFoto,
-                onClick = onRostro
-            )
+            Box(modifier = Modifier.manualTarget("cli_foto")) {
+                FotoClienteAvatar(
+                    clienteId = clienteId,
+                    size = 52.dp,
+                    borderWidth = if (tieneRostro) 2.dp else 1.dp,
+                    borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
+                    recarga = recargaFoto,
+                    onClick = onRostro
+                )
+            }
 
             Spacer(Modifier.width(12.dp))
 
@@ -555,17 +562,24 @@ private fun ClientCard(
 
             Spacer(Modifier.width(12.dp))
 
-            Column(horizontalAlignment = Alignment.End) {
-                StatusBadge(isActive = isActive)
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.manualTarget("cli_accion")
+            ) {
+                Box(modifier = Modifier.manualTarget("cli_estado")) {
+                    StatusBadge(isActive = isActive)
+                }
                 Spacer(Modifier.height(10.dp))
 
                 // Editar siempre está disponible, aunque el plan no esté vigente
-                IconSquareButton(
-                    icon = Icons.Filled.Edit,
-                    color = ClienteTema.AzulSel,
-                    onClick = onEdit,
-                    modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
-                )
+                Box(modifier = Modifier.manualTarget("cli_editar")) {
+                    IconSquareButton(
+                        icon = Icons.Filled.Edit,
+                        color = ClienteTema.AzulSel,
+                        onClick = onEdit,
+                        modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
+                    )
+                }
                 if (!isActive) {
                     Spacer(Modifier.height(8.dp))
                     OutlinedButton(

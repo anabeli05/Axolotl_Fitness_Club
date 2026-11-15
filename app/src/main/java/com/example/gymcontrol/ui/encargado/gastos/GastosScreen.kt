@@ -38,6 +38,7 @@ import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.GastoRow
+import com.example.gymcontrol.ui.manual.manualTarget
 import com.example.gymcontrol.data.remote.GastosRepository
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.CalendarioDialog
@@ -121,7 +122,8 @@ fun GastosScreen(onNavigate: (String) -> Unit = {}) {
                         shape = com.example.gymcontrol.ui.components.GymButtonShape,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                            .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight)
+                            .manualTarget("gas_nuevo"),
                         contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -288,7 +290,8 @@ private fun ExpenseCard(
             .fillMaxWidth()
             .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
             .border(1.5.dp, borderBrush, com.example.gymcontrol.ui.components.GymCardShape)
-            .padding(20.dp),
+            .padding(20.dp)
+            .manualTarget("gas_card"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -321,7 +324,10 @@ private fun ExpenseCard(
 
         Spacer(Modifier.width(12.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.manualTarget("gas_acciones")
+        ) {
             IconCircleButton(
                 icon = Icons.Filled.Edit,
                 color = ClienteTema.AzulSel,
