@@ -1,9 +1,9 @@
 -- =====================================================================
---  AXOLOTL FITNESS CLUB · Perfil de Recepción
+--  AXOLOTL FITNESS CLUB · Perfil de Recepción y del Encargado
 --  Requiere sql/fotos_perfil_personal.sql (foto del personal)
 --  Supabase → SQL Editor → pegar → Run (se puede correr varias veces)
 --
---  Recepción ve sus datos y su foto, y puede cambiar su teléfono.
+--  Recepción y el Encargado ven sus datos y su foto, y pueden cambiar su teléfono.
 --  Nombre, correo, rol y estado los sigue administrando el Encargado.
 -- =====================================================================
 
@@ -20,7 +20,7 @@ language sql stable security definer set search_path = public as $$
                     and r.nombre in ('RECEPCION', 'INSTRUCTOR', 'ENCARGADO'))
 $$;
 
--- Recepción cambia su propio teléfono (10 dígitos)
+-- Recepción o el Encargado cambia su propio teléfono (10 dígitos)
 create or replace function editar_mi_telefono(p_gmail text, p_telefono text)
 returns void language plpgsql security definer set search_path = public as $$
 declare v_id bigint;
@@ -29,9 +29,10 @@ begin
     from usuarios u
     join usuario_roles ur on ur.usuario_id = u.id
     join roles r on r.id = ur.rol_id
-   where lower(u.gmail) = lower(trim(p_gmail)) and r.nombre = 'RECEPCION' and u.estado = 'ACTIVO';
+   where lower(u.gmail) = lower(trim(p_gmail)) and r.nombre in ('RECEPCION', 'ENCARGADO') and u.estado = 'ACTIVO'
+   limit 1;
   if v_id is null then
-    raise exception 'Solo Recepción puede cambiar su teléfono desde aquí';
+    raise exception 'Solo Recepción o el Encargado pueden cambiar su teléfono desde aquí';
   end if;
   if coalesce(p_telefono, '') !~ '^[0-9]{10}$' then
     raise exception 'El teléfono debe tener 10 dígitos';

@@ -133,7 +133,11 @@ object ManualPasos {
             ManualPaso("rep_cancel", R.string.manual_encargado_40_t, R.string.manual_encargado_40_d, "Reportes"),
             ManualPaso("avi_nuevo", R.string.manual_encargado_41_t, R.string.manual_encargado_41_d, "Avisos", tocar = true),
             ManualPaso("avi_card", R.string.manual_encargado_42_t, R.string.manual_encargado_42_d, "Avisos"),
-            ManualPaso("avi_enviar", R.string.manual_encargado_43_t, R.string.manual_encargado_43_d, "Avisos", tocar = true)
+            ManualPaso("avi_enviar", R.string.manual_encargado_43_t, R.string.manual_encargado_43_d, "Avisos", tocar = true),
+            ManualPaso("perf_foto", R.string.manual_encargado_44_t, R.string.manual_encargado_44_d, "Perfil", tocar = true),
+            ManualPaso("perf_editar", R.string.manual_encargado_45_t, R.string.manual_encargado_45_d, "Perfil", tocar = true),
+            ManualPaso("perf_pass", R.string.manual_encargado_46_t, R.string.manual_encargado_46_d, "Perfil", tocar = true),
+            ManualPaso("perf_datos", R.string.manual_encargado_47_t, R.string.manual_encargado_47_d, "Perfil")
         )
     }
 

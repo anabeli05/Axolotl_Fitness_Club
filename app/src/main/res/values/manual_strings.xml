@@ -209,6 +209,14 @@
     <string name="manual_encargado_42_d">Cada tarjeta muestra el título, mensaje, fecha de vigor y el progreso del envío de correos.</string>
     <string name="manual_encargado_43_t">Reenviar pendientes</string>
     <string name="manual_encargado_43_d">Si quedan destinatarios pendientes por recibir el correo del aviso, usa este botón para enviarlos.</string>
+    <string name="manual_encargado_44_t">Tu foto de perfil</string>
+    <string name="manual_encargado_44_d">Toma o actualiza tu propia foto con la cámara. También se verá en la lista de Personal.</string>
+    <string name="manual_encargado_45_t">Editar teléfono</string>
+    <string name="manual_encargado_45_d">Actualiza tu número de teléfono.</string>
+    <string name="manual_encargado_46_t">Cambiar contraseña</string>
+    <string name="manual_encargado_46_d">Escribe tu contraseña actual y la nueva. Debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</string>
+    <string name="manual_encargado_47_t">Datos personales</string>
+    <string name="manual_encargado_47_d">Tu nombre, teléfono, correo y fecha de registro.</string>
     <string name="manual_open">Manual de usuario</string>
     <string name="manual_step_counter">Paso %1$d de %2$d</string>
     <string name="manual_prev">Anterior</string>

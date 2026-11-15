@@ -97,14 +97,14 @@ object PersonalRepository {
             .rpc("foto_personal", FotoPersonalParams(gmail.trim()))
             .decodeAs<String?>()
 
-    /** Datos del miembro del personal que inició sesión (perfil de Recepción). */
+    /** Datos del miembro del personal que inició sesión (perfil de Recepción y del Encargado). */
     suspend fun miPerfil(gmail: String): PerfilPersonalRow? =
         SupabaseProvider.client.postgrest
             .rpc("perfil_personal", FotoPersonalParams(gmail.trim()))
             .decodeList<PerfilPersonalRow>()
             .firstOrNull()
 
-    /** Recepción cambia su propio teléfono. */
+    /** Recepción o el Encargado cambia su propio teléfono. */
     suspend fun editarMiTelefono(gmail: String, telefono: String) {
         SupabaseProvider.client.postgrest
             .rpc("editar_mi_telefono", MiTelefonoParams(gmail.trim(), telefono))
