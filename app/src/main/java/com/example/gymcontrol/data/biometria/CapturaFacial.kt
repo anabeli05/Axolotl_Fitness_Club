@@ -45,6 +45,10 @@ data class ZonaEscaneo(val ancho: Float = 0.62f, val alto: Float = 0.78f) {
  * están detrás. Junta varias muestras seguidas del mismo rostro antes de dar el vector.
  * Se usa solo desde el hilo de la cámara.
  *
+ * Prueba de vida: antes de dar el vector se exige que el mismo rostro PARPADEE (ojos
+ * abiertos → cerrados → abiertos). Una foto impresa o en una pantalla no parpadea, así
+ * que no puede usarse para entrar ni para registrar el rostro de otra persona.
+ *
  * @param soloElMasCercano true en el escáner de entrada: nunca se detiene por haber más
  *        personas; escanea al más cercano y, si ya empezó con alguien, lo termina aunque
  *        otro se acerque casi igual (solo cambia si el otro está claramente más cerca).
@@ -55,10 +59,16 @@ class CapturaFacial(
     private val reconocedor: ReconocedorFacial,
     private val muestrasNecesarias: Int,
     private val soloElMasCercano: Boolean = false,
-    private val zona: ZonaEscaneo? = null
+    private val zona: ZonaEscaneo? = null,
+    private val exigirParpadeo: Boolean = true
 ) {
     private var rostroActual: Int? = null
     private val muestras = mutableListOf<FloatArray>()
+
+    // Prueba de vida del rostro actual
+    private var vioOjosAbiertos = false
+    private var vioOjosCerrados = false
+    private var parpadeo = false
 
     // Rostro que ya se procesó: no se vuelve a enviar mientras siga frente a la cámara
     private var rostroProcesado: Int? = null
@@ -66,6 +76,13 @@ class CapturaFacial(
     fun reiniciar() {
         rostroActual = null
         muestras.clear()
+        reiniciarParpadeo()
+    }
+
+    private fun reiniciarParpadeo() {
+        vioOjosAbiertos = false
+        vioOjosCerrados = false
+        parpadeo = false
     }
 
     /** Marca el rostro actual como ya atendido (evita registros duplicados). */
@@ -131,7 +148,29 @@ class CapturaFacial(
         // Cambió la persona: se empieza de nuevo
         if (id != rostroActual) {
             muestras.clear()
+            reiniciarParpadeo()
             rostroActual = id
+        }
+
+        // Prueba de vida: abiertos → cerrados → abiertos, siempre del mismo rostro
+        val izq = cara.leftEyeOpenProbability
+        val der = cara.rightEyeOpenProbability
+        if (exigirParpadeo && (izq == null || der == null)) {
+            return PasoFacial.Indicacion(R.string.facial_prompt_look_camera)
+        }
+        val abiertos = izq == null || der == null || (izq >= OJO_ABIERTO && der >= OJO_ABIERTO)
+        val cerrados = izq != null && der != null && izq <= OJO_CERRADO && der <= OJO_CERRADO
+        if (cerrados && vioOjosAbiertos) vioOjosCerrados = true
+        if (abiertos) {
+            if (vioOjosAbiertos && vioOjosCerrados) parpadeo = true
+            vioOjosAbiertos = true
+        }
+        // Con los ojos cerrados o entrecerrados la muestra sale mala: no se usa
+        if (!abiertos) {
+            return PasoFacial.Indicacion(
+                if (exigirParpadeo && !parpadeo) R.string.facial_prompt_blink else R.string.facial_prompt_look_camera,
+                muestras.size.toFloat() / muestrasNecesarias
+            )
         }
 
         muestras += try {
@@ -142,6 +181,11 @@ class CapturaFacial(
 
         if (muestras.size < muestrasNecesarias) {
             return PasoFacial.Indicacion(R.string.facial_prompt_hold_still, muestras.size.toFloat() / muestrasNecesarias)
+        }
+        // Ya hay muestras suficientes pero falta el parpadeo: se conservan las más recientes
+        if (exigirParpadeo && !parpadeo) {
+            while (muestras.size > muestrasNecesarias) muestras.removeAt(0)
+            return PasoFacial.Indicacion(R.string.facial_prompt_blink, ESPERANDO_PARPADEO)
         }
 
         val vector = ReconocedorFacial.promedio(muestras)
@@ -164,6 +208,12 @@ class CapturaFacial(
     }
 
     companion object {
+        /** Probabilidad de ojo abierto / cerrado de ML Kit (0..1). */
+        private const val OJO_ABIERTO = 0.6f
+        private const val OJO_CERRADO = 0.35f
+        /** Avance que se muestra mientras solo falta el parpadeo. */
+        private const val ESPERANDO_PARPADEO = 0.9f
+
         /** El que ya se está escaneando se conserva mientras tenga al menos este tamaño del más grande. */
         private const val CONSERVAR_ACTUAL = 0.85f
 

@@ -1,6 +1,7 @@
 package com.example.gymcontrol.ui.recepcion.clientes
 
 import android.util.Patterns
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -44,7 +45,7 @@ fun ClientFormDialog(
     onSave: (
         nombre: String, telefono: String, correo: String, plan: String?,
         contactoNombre: String, contactoTelefono: String, metodo: String,
-        salud: DatosSalud
+        salud: DatosSalud, cuentaActiva: Boolean?
     ) -> Unit,
     plans: List<String> = emptyList(),
     error: String? = null,
@@ -58,8 +59,13 @@ fun ClientFormDialog(
     initialContactName: String = "",
     initialContactPhone: String = "",
     // Fecha de nacimiento y datos de salud (al editar se cargan los del cliente)
-    initialSalud: DatosSalud = DatosSalud()
+    initialSalud: DatosSalud = DatosSalud(),
+    // Solo el Encargado al editar: interruptor de cuenta activa / dada de baja (null = no se muestra)
+    initialCuentaActiva: Boolean? = null,
+    // Solo el Encargado al editar: botón para eliminar al cliente (null = no se muestra)
+    onEliminar: (() -> Unit)? = null
 ) {
+    var cuentaActiva by remember(initialCuentaActiva) { mutableStateOf(initialCuentaActiva) }
     var name by remember { mutableStateOf(initialName) }
     var lastName by remember { mutableStateOf(initialLastName) }
     var phone by remember { mutableStateOf(initialPhone) }
@@ -264,6 +270,47 @@ fun ClientFormDialog(
                 }
             }
 
+            cuentaActiva?.let { activa ->
+                Spacer(Modifier.height(14.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            1.dp,
+                            if (activa) ClienteTema.Verde else ClienteTema.Rojo,
+                            RoundedCornerShape(14.dp)
+                        )
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            stringResource(if (activa) R.string.client_form_account_active else R.string.client_form_account_inactive),
+                            color = if (activa) ClienteTema.Verde else ClienteTema.Rojo,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
+                        Text(
+                            stringResource(R.string.client_form_account_hint),
+                            color = ClienteTema.TextoSec,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    Switch(
+                        checked = activa,
+                        onCheckedChange = { cuentaActiva = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = ClienteTema.Verde,
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = ClienteTema.Rojo,
+                            uncheckedBorderColor = ClienteTema.Rojo
+                        )
+                    )
+                }
+            }
+
             error?.let {
                 Spacer(Modifier.height(8.dp))
                 Text(it, color = ClienteTema.Rojo, fontSize = 13.sp)
@@ -281,7 +328,8 @@ fun ClientFormDialog(
                         contactName.trim(),
                         contactPhone,
                         metodo,
-                        salud
+                        salud,
+                        cuentaActiva
                     )
                 },
                 enabled = canSave,
@@ -295,6 +343,19 @@ fun ClientFormDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(if (isEditing) stringResource(R.string.save) else stringResource(R.string.encargado_client_form_create_button), fontWeight = FontWeight.Bold)
+            }
+
+            onEliminar?.let { eliminar ->
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = eliminar,
+                    shape = RoundedCornerShape(50),
+                    border = BorderStroke(1.dp, ClienteTema.Rojo),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.client_form_delete_client), fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

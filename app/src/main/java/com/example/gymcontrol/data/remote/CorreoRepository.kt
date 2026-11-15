@@ -25,6 +25,13 @@ object CorreoRepository {
     suspend fun enviarCodigoContrasena(gmail: String): String? =
         llamar("enviar-codigo-contrasena", JSONObject().put("gmail", gmail.trim()))
 
+    /**
+     * Envía los comunicados pendientes (términos, privacidad, horario) a todos los usuarios
+     * activos (Edge Function enviar-comunicados). null si respondió bien; si no, el motivo.
+     * Lo que no salga hoy se reintenta cada mañana con avisos-diarios.
+     */
+    suspend fun enviarComunicados(): String? = llamar("enviar-comunicados", JSONObject())
+
     /** null si respondió bien; si no, el motivo (campo "motivo" del JSON o el texto/código). */
     private suspend fun llamar(funcion: String, cuerpo: JSONObject): String? = withContext(Dispatchers.IO) {
         try {

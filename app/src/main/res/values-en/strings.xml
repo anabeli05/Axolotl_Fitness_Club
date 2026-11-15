@@ -107,7 +107,7 @@
     <string name="cliente_pago_label_ubicacion">Location:</string>
     <string name="cliente_pago_label_horario">Hours:</string>
     <string name="cliente_pago_label_atencion">Attention:</string>
-    <string name="cliente_pago_val_horario">Monday to Sunday (06:00 - 00:00 hrs)</string>
+    <string name="cliente_pago_val_horario">Monday to Sunday (06:00 - 22:00 hrs)</string>
     <string name="cliente_pago_val_caja">Main register</string>
     <string name="cliente_pago_val_recepcion">Reception - Axolotl Gym</string>
     <string name="cliente_pago_val_concepto">Your Membership number</string>
@@ -339,6 +339,25 @@
     <string name="recepcion_solicitudes_date_prefix">Date: %1$s</string>
     <string name="cliente_asesorias_cancel">Cancel</string>
 
+    <!-- Additional UI Strings -->
+    <string name="encargado_gastos_delete_confirm_message">The expense %1$s will be deleted. This action cannot be undone.</string>
+    <string name="encargado_gastos_card_category">Category: %1$s</string>
+    <string name="encargado_gastos_card_amount">Amount: %1$s</string>
+    <string name="encargado_gastos_card_date">Date: %1$s</string>
+    <string name="encargado_gastos_amount_warning">Numbers only (max. 2 decimals)</string>
+    <string name="encargado_servicios_delete_confirm_message">The service %1$s will be deleted. This action cannot be undone.</string>
+    <string name="encargado_servicios_card_duration">Duration: %1$s</string>
+    <string name="encargado_servicios_card_price">Price: %1$s</string>
+    <string name="encargado_servicios_amount_warning">Numbers only (max. 2 decimals)</string>
+    <string name="encargado_usuarios_delete_confirm_message">%1$s will be permanently removed from the system. This action cannot be undone.</string>
+    <string name="encargado_usuarios_confirm_create">Are you sure you want to register %1$s as %2$s?</string>
+    <string name="encargado_usuarios_confirm_save">Are you sure you want to save changes for %1$s?</string>
+    <string name="encargado_confirm_register_client">Are you sure you want to register %1$s?</string>
+    <string name="encargado_confirm_save_client">Are you sure you want to save changes for %1$s?</string>
+    <string name="encargado_confirm_renew_client">Are you sure you want to renew %1$s with the %2$s plan?</string>
+    <string name="encargado_peak_hour_display">Peak hour today: %1$s (%2$d people). Today\'s entries: %3$d</string>
+    <string name="common_date_placeholder">dd/mm/yyyy</string>
+
     <!-- Legal -->
     <string name="legal_back">Back</string>
     <string name="legal_last_updated">Last updated: November 2026</string>
@@ -462,7 +481,7 @@
     <string name="term_19_content">You may not share your account or password, access the functions of another role, manipulate the system or breach its security, or use the app for unlawful purposes.</string>
 
     <string name="term_20_title">20. Suspension and removal</string>
-    <string name="term_20_content">An account may be suspended for impersonation, breach of these terms, or violent or offensive conduct. An expired membership does not suspend the account; it only denies access to the gym. The manager removes staff members and their data is deleted.</string>
+    <string name="term_20_content">An account may be suspended for impersonation, breach of these terms, or violent or offensive conduct. An expired membership does not suspend the account; it only denies access to the gym. The manager removes staff members and their data is deleted. The manager can also deactivate a client account, which loses gym access until it is reactivated, and only the manager can delete it; deleting it erases their personal data and only payment records are kept.</string>
 
     <string name="term_21_title">21. Health and physical condition</string>
     <string name="term_21_content">Physical activity involves risks. See a doctor before training and tell your instructors about any relevant condition. When you are registered, reception or the manager records your date of birth, blood type, allergies, ailments or injuries and the medication you take, only to deal with an emergency; some of this data may be left unspecified. The app does not replace medical advice or track your physical progress.</string>
@@ -758,4 +777,44 @@
     <string name="reports_request_authorized">Cancellation for %1$s authorized.</string>
     <string name="reports_request_rejected">Request for %1$s rejected.</string>
     <string name="reports_request_failed">The request could not be resolved</string>
+    <string name="btn_register_exit">Record exit</string>
+    <string name="confirm_manual_exit">Record the exit of %1$s? They entered at %2$s and did not scan their exit.</string>
+    <string name="manual_exit_done">Exit of %1$s recorded.</string>
+    <string name="manual_exit_not_inside">%1$s was no longer inside the gym.</string>
+    <string name="client_form_account_active">Account active</string>
+    <string name="client_form_account_inactive">Account deactivated</string>
+    <string name="client_form_account_hint">With a deactivated account, the client cannot enter the gym even if the membership is paid.</string>
+    <string name="tab_notices">Notices</string>
+    <string name="notices_title">Email notices</string>
+    <string name="notices_subtitle">Sent to every user with an active account. The account deletion notice (30 days before) is sent automatically.</string>
+    <string name="notices_new">New notice</string>
+    <string name="notices_empty">No notices have been published yet.</string>
+    <string name="notices_load_failed">The notices could not be loaded: %1$s</string>
+    <string name="notices_type_terms">Change to Terms and Conditions</string>
+    <string name="notices_type_privacy">Change to Privacy Policy</string>
+    <string name="notices_type_schedule">Schedule change or closure</string>
+    <string name="notices_min_days">Your Terms require at least %1$d days of notice.</string>
+    <string name="notices_field_title">Title</string>
+    <string name="notices_field_title_hint">E.g. New weekend hours</string>
+    <string name="notices_field_message">What changes?</string>
+    <string name="notices_field_message_hint_schedule">E.g. On Saturdays and Sundays we will open from 08:00 to 20:00.</string>
+    <string name="notices_field_message_hint_terms">Summarize the main changes.</string>
+    <string name="notices_pick_date">Choose the effective date</string>
+    <string name="notices_effective">Effective from %1$s</string>
+    <string name="notices_recipients_note">Emails are sent from the gym Gmail account. If there are more than 300 recipients, the rest are sent over the following days (Gmail daily limit).</string>
+    <string name="notices_publish">Publish and send</string>
+    <string name="notices_sending">Sending…</string>
+    <string name="notices_publish_failed">The notice could not be published</string>
+    <string name="notices_sent">Notice published and sent by email.</string>
+    <string name="notices_saved_not_sent">The notice was published, but the emails have not gone out yet (%1$s). It will be retried tomorrow.</string>
+    <string name="notices_meta">Published on %1$s by %2$s</string>
+    <string name="notices_progress_done">Sent to %1$d of %2$d users</string>
+    <string name="notices_progress_pending">Sent to %1$d of %2$d users</string>
+    <string name="client_form_delete_client">Delete client</string>
+    <string name="confirm_delete_client">Permanently delete %1$s (%2$s)? Their account, face, access records, memberships and personal data will be erased. Payments are kept for the reports. This cannot be undone. If you only want to block their entry, deactivate the account with the switch instead.</string>
+    <string name="client_deleted">%1$s was deleted from the system.</string>
+    <string name="notices_short_notice_warning">Note: your Terms require %1$d days of notice and this date gives %2$d. You can publish it anyway.</string>
+    <string name="notices_send_pending">Send pending emails</string>
+    <string name="notices_send_failed">The emails could not be sent: %1$s</string>
+    <string name="facial_prompt_blink">Blink slowly to confirm it\'s you</string>
 </resources>

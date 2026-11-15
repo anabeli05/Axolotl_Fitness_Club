@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
+import com.example.gymcontrol.data.model.UserRole
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.ClienteRow
 import com.example.gymcontrol.data.remote.ClientesRepository
@@ -84,6 +86,11 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
     val successEmailFormat = stringResource(R.string.client_registered_success_email, "%s")
     val warningEmailFormat = stringResource(R.string.client_registered_warning_email, "%s")
     val msgRenew = stringResource(R.string.encargado_confirm_renew_client, "%s", "%s")
+    val msgSalida = stringResource(R.string.confirm_manual_exit, "%s", "%s")
+    val msgEliminar = stringResource(R.string.confirm_delete_client, "%s", "%s")
+    val msgEliminado = stringResource(R.string.client_deleted, "%s")
+    val msgSalidaOk = stringResource(R.string.manual_exit_done, "%s")
+    val msgSalidaNoDentro = stringResource(R.string.manual_exit_not_inside, "%s")
 
     suspend fun recargar() {
         try {
@@ -201,6 +208,27 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         },
                         onRenovar = { renovando = client },
                         cancelacionPendiente = client.id in cancelacionPendiente,
+                        // Por si el cliente se fue sin escanear su salida
+                        onSalida = {
+                            confirmar = String.format(
+                                Locale.getDefault(), msgSalida, client.nombre,
+                                horaEntrada(dentro[client.id] ?: "")
+                            ) to {
+                                scope.launch {
+                                    try {
+                                        val r = AccesoFacialRepository.manual(client.id, esEntrada = false)
+                                        errorMsg = null
+                                        info = if (r.resultado == "SALIDA")
+                                            String.format(Locale.getDefault(), msgSalidaOk, client.nombre)
+                                        else String.format(Locale.getDefault(), msgSalidaNoDentro, client.nombre)
+                                    } catch (e: Exception) {
+                                        errorMsg = mensaje(e, "No se pudo registrar la salida")
+                                    }
+                                    try { dentro = AccesoFacialRepository.clientesDentro() } catch (_: Exception) {}
+                                }
+                                Unit
+                            }
+                        },
                         onCancelar = { cancelando = client }
                     )
                 }
@@ -249,12 +277,37 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                     initialContactName = contacto?.nombre ?: "",
                     initialContactPhone = contacto?.telefono ?: "",
                     initialSalud = salud ?: DatosSalud(),
+                    initialCuentaActiva = if (c != null && SesionActual.rol == UserRole.ENCARGADO)
+                        c.estado == "ACTIVO" else null,
+                    onEliminar = if (c != null && SesionActual.rol == UserRole.ENCARGADO) {
+                        {
+                            confirmar = String.format(
+                                Locale.getDefault(), msgEliminar, c.nombre, c.numeroMembresia.ifBlank { "—" }
+                            ) to {
+                                scope.launch {
+                                    try {
+                                        ClientesRepository.eliminar(SesionActual.correo ?: "", c.id)
+                                        FotosClientes.olvidar(c.id)
+                                        showForm = false
+                                        editing = null
+                                        errorForm = null
+                                        errorMsg = null
+                                        info = String.format(Locale.getDefault(), msgEliminado, c.nombre)
+                                        recargar()
+                                    } catch (e: Exception) {
+                                        errorForm = mensaje(e, "No se pudo eliminar al cliente")
+                                    }
+                                }
+                                Unit
+                            }
+                        }
+                    } else null,
                     onDismiss = {
                         showForm = false
                         editing = null
                         errorForm = null
                     },
-                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo, datosSalud ->
+                    onSave = { nombre, telefono, correo, plan, contactoNombre, contactoTelefono, metodo, datosSalud, cuentaActiva ->
                         if (c == null) {
                             confirmar = String.format(Locale.getDefault(), msgRegister, nombre) to {
                                 scope.launch {
@@ -288,6 +341,9 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                     try {
                                         ClientesRepository.editar(c.id, nombre, telefono, correo, c.estado, contactoNombre, contactoTelefono)
                                         ClientesRepository.guardarDatosSalud(SesionActual.correo ?: "", c.id, datosSalud)
+                                        if (cuentaActiva != null && cuentaActiva != (c.estado == "ACTIVO")) {
+                                            ClientesRepository.cambiarEstado(SesionActual.correo ?: "", c.id, cuentaActiva)
+                                        }
                                         showForm = false
                                         editing = null
                                         errorForm = null
@@ -440,114 +496,146 @@ private fun ClientCard(
     onEdit: () -> Unit,
     onRenovar: () -> Unit,
     cancelacionPendiente: Boolean = false,
-    onCancelar: () -> Unit = {}
+    onCancelar: () -> Unit = {},
+    onSalida: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val labelMembership = stringResource(R.string.label_membership)
     val labelRegistration = stringResource(R.string.label_registration)
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, CardBorder, RoundedCornerShape(14.dp))
-            .padding(20.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(20.dp)
     ) {
-        // Borde verde = rostro registrado. Al tocarla: foto en grande o registrar el rostro
-        FotoClienteAvatar(
-            clienteId = clienteId,
-            size = 52.dp,
-            borderWidth = if (tieneRostro) 2.dp else 1.dp,
-            borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
-            recarga = recargaFoto,
-            onClick = onRostro
-        )
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = name,
-                color = ClienteTema.Texto,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Borde verde = rostro registrado. Al tocarla: foto en grande o registrar el rostro
+            FotoClienteAvatar(
+                clienteId = clienteId,
+                size = 52.dp,
+                borderWidth = if (tieneRostro) 2.dp else 1.dp,
+                borderColor = if (tieneRostro) ClienteTema.Verde else ClienteTema.Borde,
+                recarga = recargaFoto,
+                onClick = onRostro
             )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = "$labelMembership: " + membershipNum.ifBlank { "—" },
-                color = ClienteTema.TextoSec,
-                fontSize = 17.sp
-            )
-            if (fechaFin != null) {
-                Spacer(Modifier.height(2.dp))
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(context, fechaFin)),
+                    text = name,
+                    color = ClienteTema.Texto,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "$labelMembership: " + membershipNum.ifBlank { "—" },
                     color = ClienteTema.TextoSec,
                     fontSize = 17.sp
                 )
-            }
-            Spacer(Modifier.height(2.dp))
-            Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
-            Spacer(Modifier.height(6.dp))
-            AccesoBadge(dentroDesde)
-        }
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(horizontalAlignment = Alignment.End) {
-            StatusBadge(isActive = isActive)
-            Spacer(Modifier.height(10.dp))
-
-            // Editar siempre está disponible, aunque el plan no esté vigente
-            IconSquareButton(
-                icon = Icons.Filled.Edit,
-                color = ClienteTema.AzulSel,
-                onClick = onEdit,
-                modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
-            )
-            if (!isActive) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = onRenovar,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.AzulSel),
-                    border = BorderStroke(1.dp, ClienteTema.AzulSel),
-                    modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(stringResource(R.string.encargado_clients_renew_button), fontSize = 17.sp)
-                }
-            } else if (cancelacionPendiente) {
-                // Ya hay una solicitud: espera a que el Encargado la autorice o rechace
-                Spacer(Modifier.height(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(ActionButtonWidth, ActionButtonHeight)
-                        .border(1.dp, ClienteTema.Rojo, RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
+                if (fechaFin != null) {
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        stringResource(R.string.cancel_membership_pending_badge),
-                        color = ClienteTema.Rojo,
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 14.sp
+                        text = stringResource(R.string.label_expires_format, ClientesRepository.fechaApp(context, fechaFin)),
+                        color = ClienteTema.TextoSec,
+                        fontSize = 17.sp
                     )
                 }
-            } else {
-                // Política de cancelación: Recepción solicita, el Encargado autoriza después
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = onCancelar,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
-                    border = BorderStroke(1.dp, ClienteTema.Rojo),
-                    modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(stringResource(R.string.cancel_membership_button), fontSize = 17.sp)
+                Spacer(Modifier.height(2.dp))
+                Text("$labelRegistration: $registrationDate", color = ClienteTema.TextoSec, fontSize = 17.sp)
+                Spacer(Modifier.height(6.dp))
+                AccesoBadge(dentroDesde)
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(horizontalAlignment = Alignment.End) {
+                StatusBadge(isActive = isActive)
+                Spacer(Modifier.height(10.dp))
+
+                // Editar siempre está disponible, aunque el plan no esté vigente
+                IconSquareButton(
+                    icon = Icons.Filled.Edit,
+                    color = ClienteTema.AzulSel,
+                    onClick = onEdit,
+                    modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight)
+                )
+                if (!isActive) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = onRenovar,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.AzulSel),
+                        border = BorderStroke(1.dp, ClienteTema.AzulSel),
+                        modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(stringResource(R.string.encargado_clients_renew_button), fontSize = 17.sp)
+                    }
+                } else if (cancelacionPendiente) {
+                    // Ya hay una solicitud: espera a que el Encargado la autorice o rechace
+                    Spacer(Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(ActionButtonWidth, ActionButtonHeight)
+                            .border(1.dp, ClienteTema.Rojo, RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            stringResource(R.string.cancel_membership_pending_badge),
+                            color = ClienteTema.Rojo,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 14.sp
+                        )
+                    }
+                } else {
+                    // Política de cancelación: Recepción solicita, el Encargado autoriza después
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = onCancelar,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ClienteTema.Rojo),
+                        border = BorderStroke(1.dp, ClienteTema.Rojo),
+                        modifier = Modifier.size(ActionButtonWidth, ActionButtonHeight),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(stringResource(R.string.cancel_membership_button), fontSize = 17.sp)
+                    }
                 }
+            }
+        }
+
+        // Cliente dentro: botón grande para registrar su salida si no la escaneó
+        if (dentroDesde != null) {
+            Spacer(Modifier.height(14.dp))
+            Button(
+                onClick = onSalida,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ClienteTema.Verde,
+                    contentColor = Color.White
+                ),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    stringResource(R.string.btn_register_exit),
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

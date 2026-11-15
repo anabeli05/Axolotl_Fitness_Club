@@ -107,7 +107,7 @@
     <string name="cliente_pago_label_ubicacion">Ubicación:</string>
     <string name="cliente_pago_label_horario">Horario:</string>
     <string name="cliente_pago_label_atencion">Atención:</string>
-    <string name="cliente_pago_val_horario">Lunes a Domingo (06:00 - 00:00 hrs)</string>
+    <string name="cliente_pago_val_horario">Lunes a Domingo (06:00 - 22:00 hrs)</string>
     <string name="cliente_pago_val_caja">Caja principal</string>
     <string name="cliente_pago_val_recepcion">Recepción - Gimnasio Axolotl</string>
     <string name="cliente_pago_val_concepto">Tu número de Membresía</string>
@@ -478,7 +478,7 @@
     <string name="term_19_content">No se permite compartir la cuenta o la contraseña, entrar a funciones de otro rol, manipular el sistema o vulnerar su seguridad, ni usar la aplicación con fines ilícitos.</string>
 
     <string name="term_20_title">20. Suspensión y baja</string>
-    <string name="term_20_content">La cuenta puede suspenderse por suplantación, incumplimiento de estos términos o conducta violenta u ofensiva. Una membresía vencida no suspende la cuenta; solo niega el acceso al gimnasio. El encargado da de baja al personal y sus datos se eliminan.</string>
+    <string name="term_20_content">La cuenta puede suspenderse por suplantación, incumplimiento de estos términos o conducta violenta u ofensiva. Una membresía vencida no suspende la cuenta; solo niega el acceso al gimnasio. El encargado da de baja al personal y sus datos se eliminan. El encargado también puede dar de baja la cuenta de un cliente, que deja de tener acceso al gimnasio hasta que se reactive, y solo el encargado puede eliminarla; al eliminarla se borran sus datos personales y solo se conservan los registros de pagos.</string>
 
     <string name="term_21_title">21. Salud y condición física</string>
     <string name="term_21_content">La actividad física implica riesgos. Consulta a un médico antes de entrenar y avisa a tus instructores de cualquier condición relevante. Al darte de alta, recepción o el encargado registran tu fecha de nacimiento, tu tipo de sangre, tus alergias, padecimientos o lesiones y los medicamentos que tomas, solo para atender una emergencia; algunos de estos datos pueden quedar sin especificar. La aplicación no sustituye la opinión médica ni da seguimiento a tu progreso físico.</string>
@@ -774,4 +774,44 @@
     <string name="reports_request_authorized">Cancelación de %1$s autorizada.</string>
     <string name="reports_request_rejected">Solicitud de %1$s rechazada.</string>
     <string name="reports_request_failed">No se pudo resolver la solicitud</string>
+    <string name="btn_register_exit">Registrar salida</string>
+    <string name="confirm_manual_exit">¿Registrar la salida de %1$s? Entró a las %2$s y no escaneó su salida.</string>
+    <string name="manual_exit_done">Salida de %1$s registrada.</string>
+    <string name="manual_exit_not_inside">%1$s ya no estaba dentro del gimnasio.</string>
+    <string name="client_form_account_active">Cuenta activa</string>
+    <string name="client_form_account_inactive">Cuenta dada de baja</string>
+    <string name="client_form_account_hint">Con la cuenta dada de baja, el cliente no puede entrar al gimnasio aunque tenga su membresía pagada.</string>
+    <string name="tab_notices">Avisos</string>
+    <string name="notices_title">Avisos por correo</string>
+    <string name="notices_subtitle">Se envían a todos los usuarios con cuenta activa. El aviso de eliminación de cuenta (30 días antes) se envía solo.</string>
+    <string name="notices_new">Nuevo aviso</string>
+    <string name="notices_empty">Todavía no se ha publicado ningún aviso.</string>
+    <string name="notices_load_failed">No se pudieron cargar los avisos: %1$s</string>
+    <string name="notices_type_terms">Cambio en Términos y Condiciones</string>
+    <string name="notices_type_privacy">Cambio en Política de Privacidad</string>
+    <string name="notices_type_schedule">Cambio de horario o cierre</string>
+    <string name="notices_min_days">Tus Términos piden avisar con al menos %1$d días de anticipación.</string>
+    <string name="notices_field_title">Título</string>
+    <string name="notices_field_title_hint">Ej. Nuevo horario de fin de semana</string>
+    <string name="notices_field_message">¿Qué cambia?</string>
+    <string name="notices_field_message_hint_schedule">Ej. Sábados y domingos abriremos de 08:00 a 20:00.</string>
+    <string name="notices_field_message_hint_terms">Resume los cambios principales.</string>
+    <string name="notices_pick_date">Elegir fecha en que aplica</string>
+    <string name="notices_effective">Aplica desde el %1$s</string>
+    <string name="notices_recipients_note">Los correos salen de la cuenta de Gmail del gimnasio. Si hay más de 300 destinatarios, el resto se envía en los días siguientes (límite diario de Gmail).</string>
+    <string name="notices_publish">Publicar y enviar</string>
+    <string name="notices_sending">Enviando…</string>
+    <string name="notices_publish_failed">No se pudo publicar el aviso</string>
+    <string name="notices_sent">Aviso publicado y enviado por correo.</string>
+    <string name="notices_saved_not_sent">El aviso quedó publicado, pero los correos no salieron todavía (%1$s). Se reintentará mañana.</string>
+    <string name="notices_meta">Publicado el %1$s por %2$s</string>
+    <string name="notices_progress_done">Enviado a %1$d de %2$d usuarios</string>
+    <string name="notices_progress_pending">Enviado a %1$d de %2$d usuarios</string>
+    <string name="client_form_delete_client">Eliminar cliente</string>
+    <string name="confirm_delete_client">¿Eliminar definitivamente a %1$s (%2$s)? Se borrarán su cuenta, su rostro, sus accesos, sus membresías y sus datos personales. Los pagos se conservan para los reportes. Esta acción no se puede deshacer. Si solo quieres que no pueda entrar, mejor dale de baja con el interruptor.</string>
+    <string name="client_deleted">%1$s fue eliminado del sistema.</string>
+    <string name="notices_short_notice_warning">Atención: tus Términos piden %1$d días de anticipación y con esta fecha se avisa con %2$d. Puedes publicarlo de todos modos.</string>
+    <string name="notices_send_pending">Enviar correos pendientes</string>
+    <string name="notices_send_failed">No se pudieron enviar los correos: %1$s</string>
+    <string name="facial_prompt_blink">Parpadea despacio para confirmar que eres tú</string>
 </resources>

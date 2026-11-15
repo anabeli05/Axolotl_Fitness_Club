@@ -103,6 +103,9 @@ private data class ContactoParams(val p_actor_gmail: String, val p_cliente_id: L
 private data class GmailParams(val p_gmail: String)
 
 @Serializable
+private data class EstadoClienteParams(val p_actor_gmail: String, val p_cliente_id: Long, val p_activo: Boolean)
+
+@Serializable
 private data class MiContactoParams(val p_gmail: String, val p_nombre: String, val p_telefono: String)
 
 @Serializable
@@ -226,6 +229,21 @@ object ClientesRepository {
             "renovar_membresia",
             RenovarParams(clienteId, plan, registradoPor, metodo)
         ).decodeAs<String?>()
+
+    /**
+     * Solo el Encargado: elimina al cliente y sus datos personales (no se puede deshacer).
+     * Los pagos se conservan sin cliente para los reportes.
+     */
+    suspend fun eliminar(actorGmail: String, clienteId: Long) {
+        SupabaseProvider.client.postgrest
+            .rpc("eliminar_cliente", ContactoParams(actorGmail, clienteId))
+    }
+
+    /** Solo el Encargado: activa la cuenta o la da de baja (INACTIVO no puede entrar al gimnasio). */
+    suspend fun cambiarEstado(actorGmail: String, clienteId: Long, activo: Boolean) {
+        SupabaseProvider.client.postgrest
+            .rpc("cambiar_estado_cliente", EstadoClienteParams(actorGmail, clienteId, activo))
+    }
 
     /** Solo Recepción y Encargado (la base lo valida). */
     suspend fun contactoEmergencia(actorGmail: String, clienteId: Long): ContactoEmergencia =
