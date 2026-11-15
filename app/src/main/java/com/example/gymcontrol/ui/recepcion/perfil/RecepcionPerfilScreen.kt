@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.ui.manual.manualTarget
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.FotoPerfil
@@ -118,24 +119,30 @@ fun RecepcionPerfilScreen(onNavigate: (String) -> Unit = {}) {
                     }
 
                     Spacer(Modifier.height(16.dp))
-                    ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_phone)) { showPhoneDialog = true }
+                    Box(modifier = Modifier.manualTarget("perf_editar")) {
+                        ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_phone)) { showPhoneDialog = true }
+                    }
                     Spacer(Modifier.height(8.dp))
-                    ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
+                    Box(modifier = Modifier.manualTarget("perf_pass")) {
+                        ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
+                    }
 
                     Spacer(Modifier.height(12.dp))
 
                     // Datos personales (mismos tonos que el perfil del cliente)
-                    InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
-                        InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
-                        Spacer(Modifier.height(14.dp))
-                        InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), perfil?.telefono?.ifBlank { "—" } ?: "—")
-                        Spacer(Modifier.height(14.dp))
-                        InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), perfil?.gmail ?: correo)
-                        Spacer(Modifier.height(14.dp))
-                        InfoRow(
-                            Icons.Filled.DateRange, "${stringResource(R.string.label_registration)}:",
-                            ClientesRepository.fechaApp(perfil?.fechaRegistro)
-                        )
+                    Box(modifier = Modifier.manualTarget("perf_datos")) {
+                        InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
+                            InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
+                            Spacer(Modifier.height(14.dp))
+                            InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), perfil?.telefono?.ifBlank { "—" } ?: "—")
+                            Spacer(Modifier.height(14.dp))
+                            InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), perfil?.gmail ?: correo)
+                            Spacer(Modifier.height(14.dp))
+                            InfoRow(
+                                Icons.Filled.DateRange, "${stringResource(R.string.label_registration)}:",
+                                ClientesRepository.fechaApp(perfil?.fechaRegistro)
+                            )
+                        }
                     }
                 }
             }

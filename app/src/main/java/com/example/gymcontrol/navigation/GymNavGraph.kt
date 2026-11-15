@@ -45,6 +45,7 @@ import com.example.gymcontrol.ui.recepcion.visitas.VisitasScreen
 import com.example.gymcontrol.ui.recepcion.perfil.RecepcionPerfilScreen
 import com.example.gymcontrol.ui.theme.GymColors
 import com.example.gymcontrol.ui.cliente.Pag.PagHomeScreen
+import com.example.gymcontrol.ui.manual.ManualHost
 
 private const val LEGAL_ACEPTADO = "legal_aceptado"
 
@@ -194,14 +195,52 @@ fun GymNavGraph() {
                 }
             }
 
-            // Menú dev movido al centro-derecha para no tapar la hamburguesa del sidebar
-            //Box(
-            //   modifier = Modifier
-            //       .align(Alignment.CenterEnd)
-            //       .padding(end = 4.dp)
-            //) {
-            //   RoleDevMenu(navController)
-            //}
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+
+            val seccionActual = when (currentRoute) {
+                Routes.CLIENT_HOME -> "Inicio"
+                Routes.CLIENT_ADVISORIES -> "Asesorías"
+                Routes.CLIENT_PAYMENTS -> "Pagos"
+                Routes.CLIENT_PROFILE -> "Perfil"
+
+                Routes.RECEPTION_SCANNER -> "Home"
+                Routes.RECEPTION_CLIENTS -> "Clientes"
+                Routes.RECEPTION_REQUESTS -> "Solicitudes"
+                Routes.RECEPTION_PAYMENTS -> "Pagos"
+                Routes.RECEPTION_VISITS -> "Visitas"
+                Routes.RECEPTION_PROFILE -> "Perfil"
+
+                Routes.INSTRUCTOR_CLIENTS -> "Mis clientes"
+                Routes.INSTRUCTOR_PROFILE -> "Perfil"
+
+                Routes.ADMIN_DASHBOARD -> "Dashboard"
+                Routes.ADMIN_CLIENTS -> "Clientes"
+                Routes.ADMIN_USERS -> "Personal"
+                Routes.ADMIN_SERVICES -> "Servicios"
+                Routes.ADMIN_PAYMENTS -> "Pagos"
+                Routes.ADMIN_VISITS -> "Visitas"
+                Routes.ADMIN_EXPENSES -> "Gastos"
+                Routes.ADMIN_REPORTS -> "Reportes"
+                Routes.ADMIN_NOTICES -> "Avisos"
+                else -> null
+            }
+
+            val navegarManual: (String) -> Unit = { seccion ->
+                when (SesionActual.rol) {
+                    UserRole.CLIENTE -> navigateClient(navController, seccion)
+                    UserRole.RECEPCION -> navigateReception(navController, seccion)
+                    UserRole.INSTRUCTOR -> navigateInstructor(navController, seccion)
+                    UserRole.ENCARGADO -> navigateAdmin(navController, seccion)
+                    null -> {}
+                }
+            }
+
+            ManualHost(
+                rol = SesionActual.rol,
+                seccionActual = seccionActual,
+                navegar = navegarManual
+            )
         }
     }
 }

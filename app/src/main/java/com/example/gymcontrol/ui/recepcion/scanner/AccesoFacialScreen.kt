@@ -52,6 +52,7 @@ import com.example.gymcontrol.data.remote.AccesoFacialRepository
 import com.example.gymcontrol.data.remote.MovimientoRow
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
+import com.example.gymcontrol.ui.manual.manualTarget
 import com.google.mlkit.vision.face.Face
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -229,7 +230,9 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                AforoChip(personas = dentro)
+                Box(modifier = Modifier.manualTarget("rec_aforo")) {
+                    AforoChip(personas = dentro)
+                }
             }
 
             GymCard {
@@ -245,7 +248,8 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(8.dp))
+                        .manualTarget("rec_camara"),
                     contentAlignment = Alignment.Center
                 ) {
                     if (captura != null) {
@@ -277,29 +281,30 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                 )
             }
 
-            GymCard {
-                Text(
-                    stringResource(R.string.client_info_title),
-                    color = ClienteTema.Texto,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = ClienteTema.Borde.copy(alpha = 0.6f))
-                Spacer(Modifier.height(16.dp))
-
-                val actual = cliente
-                if (actual == null) {
+            Box(modifier = Modifier.manualTarget("rec_info")) {
+                GymCard {
                     Text(
-                        stringResource(R.string.scan_face_prompt),
-                        color = ClienteTema.TextoSec,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp)
+                        stringResource(R.string.client_info_title),
+                        color = ClienteTema.Texto,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                } else {
+                    Spacer(Modifier.height(12.dp))
+                    HorizontalDivider(color = ClienteTema.Borde.copy(alpha = 0.6f))
+                    Spacer(Modifier.height(16.dp))
+
+                    val actual = cliente
+                    if (actual == null) {
+                        Text(
+                            stringResource(R.string.scan_face_prompt),
+                            color = ClienteTema.TextoSec,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp)
+                        )
+                    } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -364,6 +369,7 @@ fun AccesoFacialScreen(onNavigate: (String) -> Unit = {}) {
                     AvisoBanner(it)
                     Spacer(Modifier.height(12.dp))
                 }
+            }
             }
         }
     }

@@ -43,6 +43,7 @@ import com.example.gymcontrol.data.remote.InstructorRepository
 import com.example.gymcontrol.data.remote.PersonalRepository
 import com.example.gymcontrol.data.biometria.FotoPerfil
 import com.example.gymcontrol.ui.components.ClienteScaffold
+import com.example.gymcontrol.ui.manual.manualTarget
 import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.components.ScaffoldTab
 import com.example.gymcontrol.ui.components.ClienteTema
@@ -132,7 +133,9 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfileAvatar(name = name, foto = foto)
+                    Box(modifier = Modifier.manualTarget("perf_foto")) {
+                        ProfileAvatar(name = name, foto = foto)
+                    }
 
                     Spacer(Modifier.height(14.dp))
 
@@ -145,7 +148,10 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.manualTarget("perf_estado")
+                    ) {
                         Text(
                             text = stringResource(R.string.perfil_status_label),
                             color = ClienteTema.TextoSec,
@@ -161,11 +167,13 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Spacer(Modifier.height(18.dp))
 
-                    ActionRow(
-                        icon = Icons.Filled.Edit,
-                        label = stringResource(R.string.perfil_action_edit_data),
-                        onClick = { showEditDialog = true }
-                    )
+                    Box(modifier = Modifier.manualTarget("perf_editar")) {
+                        ActionRow(
+                            icon = Icons.Filled.Edit,
+                            label = stringResource(R.string.perfil_action_edit_data),
+                            onClick = { showEditDialog = true }
+                        )
+                    }
 
                     Spacer(Modifier.height(14.dp))
 
@@ -175,6 +183,7 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                             .fillMaxWidth()
                             .background(InnerBackground, RoundedCornerShape(10.dp))
                             .padding(16.dp)
+                            .manualTarget("perf_datos")
                     ) {
                         Text(
                             text = stringResource(R.string.perfil_personal_data_title),
@@ -202,7 +211,9 @@ fun InstructorPerfilScreen(onNavigate: (String) -> Unit = {}) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .manualTarget("inst_cupo")
                         ) {
                             Icon(
                                 Icons.Filled.Group,

@@ -36,6 +36,8 @@ import com.example.gymcontrol.ui.components.CalendarioDialog
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.manual.manualTarget
+import com.example.gymcontrol.ui.manual.rememberManualLista
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -84,6 +86,7 @@ fun AvisosScreen(onNavigate: (String) -> Unit = {}) {
 
     GymScaffold(currentSection = "Avisos", onNavigate = onNavigate) {
         LazyColumn(
+            state = rememberManualLista(),
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
@@ -114,7 +117,10 @@ fun AvisosScreen(onNavigate: (String) -> Unit = {}) {
                         containerColor = ClienteTema.AzulSel,
                         contentColor = ClienteTema.SobreDorado
                     ),
-                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .manualTarget("avi_nuevo")
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
@@ -205,6 +211,7 @@ private fun ComunicadoCard(c: ComunicadoRow, enviando: Boolean, onEnviarPendient
             .background(ClienteTema.Beige, RoundedCornerShape(14.dp))
             .border(1.5.dp, ClienteTema.Borde, RoundedCornerShape(14.dp))
             .padding(16.dp)
+            .manualTarget("avi_card")
     ) {
         Text(
             etiquetaTipo(c.tipo).uppercase(),
@@ -251,7 +258,9 @@ private fun ComunicadoCard(c: ComunicadoRow, enviando: Boolean, onEnviarPendient
                     containerColor = ClienteTema.AzulSel,
                     contentColor = ClienteTema.SobreDorado
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .manualTarget("avi_enviar")
             ) {
                 Text(
                     stringResource(if (enviando) R.string.notices_sending else R.string.notices_send_pending),

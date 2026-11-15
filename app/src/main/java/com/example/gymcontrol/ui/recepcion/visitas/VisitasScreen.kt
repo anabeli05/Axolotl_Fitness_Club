@@ -27,6 +27,7 @@ import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.dinero
 import com.example.gymcontrol.ui.components.metodoPagoLocalizado
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.launch
 
 private val METODOS = listOf("Efectivo", "Tarjeta")
@@ -89,23 +90,25 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             item {
-                Text(
-                    stringResource(R.string.visits_title),
-                    color = ClienteTema.Texto,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    when {
-                        cargando -> stringResource(R.string.common_loading)
-                        !precioFijado -> stringResource(R.string.visits_no_price)
-                        !disponible -> stringResource(R.string.visits_not_for_reception)
-                        else -> stringResource(R.string.visits_price, dinero(precio ?: 0.0))
-                    },
-                    color = if (cargando || disponible) ClienteTema.AzulSel else ClienteTema.Rojo,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                Column(modifier = Modifier.manualTarget("vis_precio")) {
+                    Text(
+                        stringResource(R.string.visits_title),
+                        color = ClienteTema.Texto,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        when {
+                            cargando -> stringResource(R.string.common_loading)
+                            !precioFijado -> stringResource(R.string.visits_no_price)
+                            !disponible -> stringResource(R.string.visits_not_for_reception)
+                            else -> stringResource(R.string.visits_price, dinero(precio ?: 0.0))
+                        },
+                        color = if (cargando || disponible) ClienteTema.AzulSel else ClienteTema.Rojo,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
 
             mensaje?.let { item { Text(it, color = ClienteTema.Verde, fontSize = 14.sp) } }
@@ -113,7 +116,9 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
 
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("vis_form"),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = ClienteTema.Beige),
                     border = BorderStroke(1.5.dp, ClienteTema.Borde)
@@ -155,7 +160,9 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
                             enabled = disponible && formValido && !procesando,
                             colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Verde),
                             shape = RoundedCornerShape(12.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .manualTarget("vis_cobrar")
                         ) {
                             Text(
                                 stringResource(R.string.visits_charge, dinero(precio ?: 0.0)),
@@ -172,7 +179,8 @@ fun VisitasScreen(onNavigate: (String) -> Unit = {}) {
                     stringResource(R.string.visits_today, visitas.size),
                     color = ClienteTema.Texto,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.manualTarget("vis_hoy")
                 )
             }
 

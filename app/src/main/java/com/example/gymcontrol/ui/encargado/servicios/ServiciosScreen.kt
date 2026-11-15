@@ -36,6 +36,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.gymcontrol.R
 import com.example.gymcontrol.ui.components.GymScaffold
 import com.example.gymcontrol.ui.components.ClienteTema
+import com.example.gymcontrol.ui.manual.manualTarget
 import kotlinx.coroutines.launch
 import com.example.gymcontrol.data.remote.ServicioRow
 import com.example.gymcontrol.data.remote.ServiciosRepository
@@ -120,7 +121,8 @@ fun ServiciosScreen(onNavigate: (String) -> Unit = {}) {
                         shape = com.example.gymcontrol.ui.components.GymButtonShape,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight),
+                            .defaultMinSize(minHeight = com.example.gymcontrol.ui.components.GymButtonMinHeight)
+                            .manualTarget("serv_nuevo"),
                         contentPadding = com.example.gymcontrol.ui.components.GymButtonPadding
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -303,7 +305,8 @@ private fun ServiceCard(
             .fillMaxWidth()
             .background(ClienteTema.Beige, com.example.gymcontrol.ui.components.GymCardShape)
             .border(1.5.dp, borderBrush, com.example.gymcontrol.ui.components.GymCardShape)
-            .padding(20.dp),
+            .padding(20.dp)
+            .manualTarget("serv_card"),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -353,7 +356,10 @@ private fun ServiceCard(
 
         Spacer(Modifier.width(12.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.manualTarget("serv_acciones")
+        ) {
             IconCircleButton(
                 icon = Icons.Filled.Edit,
                 color = ClienteTema.AzulSel,

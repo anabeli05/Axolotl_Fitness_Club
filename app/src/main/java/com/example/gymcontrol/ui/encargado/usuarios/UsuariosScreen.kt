@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.gymcontrol.ui.manual.manualTarget
 import androidx.compose.ui.window.DialogProperties
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.Status
@@ -155,7 +156,9 @@ fun UsuariosScreen(
                     onClick = { showNewForm = true },
                     colors = ButtonDefaults.buttonColors(containerColor = ClienteTema.Azul),
                     shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .manualTarget("per_nuevo")
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
@@ -457,19 +460,25 @@ private fun StaffCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Foto de perfil: al tocarla se ve en grande, o se toma si aún no tiene
-        FotoClienteAvatar(
-            clienteId = item.id,
-            size = 52.dp,
-            borderWidth = 2.dp,
-            borderColor = ClienteTema.AzulSel,
-            recarga = recargaFoto,
-            cache = FotosPersonal,
-            onClick = onFoto
-        )
+        Box(modifier = Modifier.manualTarget("per_foto")) {
+            FotoClienteAvatar(
+                clienteId = item.id,
+                size = 52.dp,
+                borderWidth = 2.dp,
+                borderColor = ClienteTema.AzulSel,
+                recarga = recargaFoto,
+                cache = FotosPersonal,
+                onClick = onFoto
+            )
+        }
 
         Spacer(Modifier.width(14.dp))
 
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .manualTarget("per_info")
+        ) {
             Text(
                 text = item.name,
                 color = ClienteTema.Texto,
@@ -511,7 +520,10 @@ private fun StaffCard(
 
         Spacer(Modifier.width(8.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.manualTarget("per_acciones")
+        ) {
             IconCircleButton(icon = Icons.Filled.Edit, color = ClienteTema.AzulSel, onClick = onEdit)
             IconCircleButton(icon = Icons.Filled.Close, color = ClienteTema.Rojo, onClick = onDelete)
         }

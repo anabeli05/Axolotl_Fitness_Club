@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.model.UserRole
+import com.example.gymcontrol.ui.manual.manualTarget
 
 fun seccionesPara(rol: UserRole): List<String> = when (rol) {
     UserRole.RECEPCION -> listOf("Home", "Clientes", "Visitas", "Solicitudes", "Pagos", "Perfil")
@@ -161,45 +162,47 @@ fun GymSidebar(
                 Spacer(Modifier.height(16.dp))
 
                 // ---------- Secciones ----------
-                secciones.forEach { section ->
-                    val selected = section == currentSection
-                    val shape = RoundedCornerShape(12.dp)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 3.dp)
-                            .clip(shape)
-                            .then(
-                                if (selected) Modifier
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            listOf(
-                                                ClienteTema.AzulSel.copy(alpha = 0.30f),
-                                                ClienteTema.AzulSel.copy(alpha = 0.05f)
-                                            )
-                                        ),
-                                        shape
-                                    )
-                                    .border(BorderStroke(1.dp, ClienteTema.AzulSel), shape)
-                                else Modifier
+                Column(modifier = Modifier.manualTarget("lateral_secciones")) {
+                    secciones.forEach { section ->
+                        val selected = section == currentSection
+                        val shape = RoundedCornerShape(12.dp)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 3.dp)
+                                .clip(shape)
+                                .then(
+                                    if (selected) Modifier
+                                        .background(
+                                            Brush.horizontalGradient(
+                                                listOf(
+                                                    ClienteTema.AzulSel.copy(alpha = 0.30f),
+                                                    ClienteTema.AzulSel.copy(alpha = 0.05f)
+                                                )
+                                            ),
+                                            shape
+                                        )
+                                        .border(BorderStroke(1.dp, ClienteTema.AzulSel), shape)
+                                    else Modifier
+                                )
+                                .clickable { onNavigate(section) }
+                                .padding(horizontal = 14.dp, vertical = 13.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                iconoPara(section),
+                                contentDescription = null,
+                                tint = if (selected) ClienteTema.AzulSel else ClienteTema.TextoSec,
+                                modifier = Modifier.size(22.dp)
                             )
-                            .clickable { onNavigate(section) }
-                            .padding(horizontal = 14.dp, vertical = 13.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            iconoPara(section),
-                            contentDescription = null,
-                            tint = if (selected) ClienteTema.AzulSel else ClienteTema.TextoSec,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(Modifier.width(14.dp))
-                        Text(
-                            text = translatedSection(section),
-                            color = if (selected) ClienteTema.Texto else ClienteTema.TextoSec,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                            fontSize = 15.sp
-                        )
+                            Spacer(Modifier.width(14.dp))
+                            Text(
+                                text = translatedSection(section),
+                                color = if (selected) ClienteTema.Texto else ClienteTema.TextoSec,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 15.sp
+                            )
+                        }
                     }
                 }
 
@@ -215,7 +218,9 @@ fun GymSidebar(
                         unselectedIconColor = ClienteTema.TextoSec
                     ),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.padding(vertical = 3.dp)
+                    modifier = Modifier
+                        .padding(vertical = 3.dp)
+                        .manualTarget("lateral_idioma")
                 )
 
                 // Cambiar tema: en oscuro muestra el sol (pasar a claro), en claro la luna (pasar a oscuro)
@@ -244,7 +249,9 @@ fun GymSidebar(
                         unselectedIconColor = ClienteTema.TextoSec
                     ),
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.padding(vertical = 3.dp)
+                    modifier = Modifier
+                        .padding(vertical = 3.dp)
+                        .manualTarget("lateral_tema")
                 )
 
             }
@@ -262,7 +269,8 @@ fun GymSidebar(
                     .border(1.dp, rojo.copy(alpha = 0.7f), shape)
                     .clickable(onClick = onLogout)
                     .heightIn(min = 48.dp)
-                    .padding(horizontal = 14.dp, vertical = 13.dp),
+                    .padding(horizontal = 14.dp, vertical = 13.dp)
+                    .manualTarget("lateral_logout"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(

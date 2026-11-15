@@ -30,6 +30,8 @@ import com.example.gymcontrol.data.remote.InstructorRow
 import com.example.gymcontrol.ui.components.ClienteScaffoldClaro
 import com.example.gymcontrol.ui.components.ClienteTema
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.manual.manualTarget
+import com.example.gymcontrol.ui.manual.rememberManualLista
 import kotlinx.coroutines.launch
 
 private fun formatPrice(cost: Double): String =
@@ -63,6 +65,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
         logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
+            state = rememberManualLista(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
@@ -117,7 +120,8 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                         .fillMaxWidth()
                         .background(ClienteTema.Beige, forma)
                         .border(1.dp, ClienteTema.Borde, forma)
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .manualTarget("ases_card"),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -163,7 +167,8 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.manualTarget("ases_accion")
                     ) {
                         when {
                             isApproved -> EstadoChip(stringResource(R.string.cliente_asesorias_status_approved), ClienteTema.Verde, Color.White)

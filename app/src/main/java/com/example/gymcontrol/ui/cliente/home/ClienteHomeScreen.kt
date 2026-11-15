@@ -38,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.gymcontrol.ui.manual.manualTarget
+import com.example.gymcontrol.ui.manual.rememberManualLista
 import androidx.compose.ui.unit.sp
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.remote.AccesoFacialRepository
@@ -103,6 +105,7 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
         logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
+            state = rememberManualLista(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
@@ -122,7 +125,10 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
             }
 
             item {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.manualTarget("home_facial")
+                ) {
                     AccesoFacialCard(personasDentro = personasDentro)
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -134,13 +140,19 @@ fun ClienteHomeScreen(onNavigate: (String) -> Unit = {}) {
             }
 
             item {
-                BarrasClaro(
-                    titulo = stringResource(R.string.cliente_clients_now_title),
-                    datos = datosHora
-                )
+                Box(modifier = Modifier.manualTarget("home_chart")) {
+                    BarrasClaro(
+                        titulo = stringResource(R.string.cliente_clients_now_title),
+                        datos = datosHora
+                    )
+                }
             }
 
-            item { MenorAfluencia(afluencia) }
+            item {
+                Box(modifier = Modifier.manualTarget("home_dias")) {
+                    MenorAfluencia(afluencia)
+                }
+            }
 
             item {
                 Text(

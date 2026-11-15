@@ -28,6 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.example.gymcontrol.ui.manual.BotonManual
+import com.example.gymcontrol.ui.manual.manualTarget
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -140,7 +142,7 @@ fun BotonTema(modifier: Modifier = Modifier) {
     }
 }
 
-/** Parte izquierda de la barra superior: idioma + tema. */
+/** Parte izquierda de la barra superior: idioma + tema + manual. */
 @Composable
 private fun BarraIzquierda(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -148,7 +150,10 @@ private fun BarraIzquierda(modifier: Modifier = Modifier) {
         modifier = modifier.padding(start = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { LocaleHelper.toggleLanguage(context) }) {
+        IconButton(
+            onClick = { LocaleHelper.toggleLanguage(context) },
+            modifier = Modifier.manualTarget("barra_idioma")
+        ) {
             Icon(
                 imageVector = Icons.Filled.Language,
                 contentDescription = stringResource(R.string.change_language),
@@ -156,7 +161,8 @@ private fun BarraIzquierda(modifier: Modifier = Modifier) {
                 modifier = Modifier.size(26.dp)
             )
         }
-        BotonTema()
+        BotonTema(modifier = Modifier.manualTarget("barra_tema"))
+        BotonManual()
     }
 }
 
@@ -185,7 +191,9 @@ private fun BarraInferior(
                 .navigationBarsPadding()
         ) {
             NavigationBar(
-                modifier = Modifier.height(64.dp),
+                modifier = Modifier
+                    .height(64.dp)
+                    .manualTarget("barra_tabs"),
                 containerColor = ClienteTema.Navy,
                 tonalElevation = 0.dp,
                 windowInsets = WindowInsets(0, 0, 0, 0)
@@ -249,6 +257,7 @@ fun ClienteScaffoldClaro(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 4.dp)
+                    .manualTarget("barra_logout")
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ExitToApp,
@@ -319,6 +328,7 @@ fun ClienteScaffold(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 4.dp)
+                    .manualTarget("barra_logout")
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ExitToApp,

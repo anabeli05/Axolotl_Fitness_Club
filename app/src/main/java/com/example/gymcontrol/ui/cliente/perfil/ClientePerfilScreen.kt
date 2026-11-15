@@ -38,6 +38,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.ui.manual.manualTarget
+import com.example.gymcontrol.ui.manual.rememberManualLista
 import androidx.compose.ui.window.Dialog
 import com.example.gymcontrol.R
 import com.example.gymcontrol.data.biometria.FotoPerfil
@@ -93,6 +95,7 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
         logoRes = R.drawable.logo_final
     ) {
         LazyColumn(
+            state = rememberManualLista(),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
@@ -120,14 +123,19 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
                         .padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ProfileAvatar(name = name, foto = foto)
+                    Box(modifier = Modifier.manualTarget("perf_foto")) {
+                        ProfileAvatar(name = name, foto = foto)
+                    }
 
                     Spacer(Modifier.height(12.dp))
                     Text(name, color = ClienteTema.Texto, fontSize = 22.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(2.dp))
                     Text("${stringResource(R.string.label_membership)} : $membership", color = ClienteTema.Texto, fontSize = 15.sp)
                     Spacer(Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.manualTarget("perf_estado")
+                    ) {
                         Text(stringResource(R.string.perfil_status_label), color = ClienteTema.Texto, fontSize = 15.sp)
                         Spacer(Modifier.width(8.dp))
                         StatusBadge(isActive = cliente?.let { it.activa && it.estado == "ACTIVO" } ?: true)
@@ -146,21 +154,29 @@ fun ClientePerfilScreen(onNavigate: (String) -> Unit = {}) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_data)) { showEditDialog = true }
+                    Box(modifier = Modifier.manualTarget("perf_editar")) {
+                        ActionRow(Icons.Filled.Edit, stringResource(R.string.perfil_action_edit_data)) { showEditDialog = true }
+                    }
                     Spacer(Modifier.height(8.dp))
-                    ActionRow(Icons.Filled.ContactPhone, stringResource(R.string.perfil_action_edit_contact)) { showContactDialog = true }
+                    Box(modifier = Modifier.manualTarget("perf_contacto")) {
+                        ActionRow(Icons.Filled.ContactPhone, stringResource(R.string.perfil_action_edit_contact)) { showContactDialog = true }
+                    }
                     Spacer(Modifier.height(8.dp))
-                    ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
+                    Box(modifier = Modifier.manualTarget("perf_pass")) {
+                        ActionRow(Icons.Filled.Lock, stringResource(R.string.perfil_action_change_password)) { showPasswordDialog = true }
+                    }
 
                     Spacer(Modifier.height(12.dp))
 
                     // Datos personales
-                    InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
-                        InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
-                        Spacer(Modifier.height(14.dp))
-                        InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
-                        Spacer(Modifier.height(14.dp))
-                        InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), email)
+                    Box(modifier = Modifier.manualTarget("perf_datos")) {
+                        InfoCard(title = stringResource(R.string.perfil_personal_data_title)) {
+                            InfoRow(Icons.Filled.Person, stringResource(R.string.perfil_label_name), name)
+                            Spacer(Modifier.height(14.dp))
+                            InfoRow(Icons.Filled.Phone, stringResource(R.string.perfil_label_phone), phone)
+                            Spacer(Modifier.height(14.dp))
+                            InfoRow(Icons.Filled.Email, stringResource(R.string.perfil_label_email), email)
+                        }
                     }
 
                     Spacer(Modifier.height(12.dp))
