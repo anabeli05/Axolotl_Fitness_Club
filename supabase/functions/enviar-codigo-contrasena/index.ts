@@ -7,9 +7,10 @@
 //  igual aunque no lo esté.
 //
 //  Usa los mismos secretos que avisos-diarios / enviar-recibo:
-//    RESEND_API_KEY, CORREO_REMITENTE
+//    GMAIL_USER, GMAIL_APP_PASSWORD
 // =====================================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import nodemailer from "npm:nodemailer@6.9.16";
 
 type Codigo = { r_nombre: string; r_gmail: string; r_codigo: string };
 
@@ -33,25 +34,37 @@ function plantilla(c: Codigo): { asunto: string; html: string } {
   };
 }
 
-/** null si salió; si no, el motivo. */
-async function enviarCorreo(para: string, asunto: string, html: string): Promise<string | null> {
-  if (!Deno.env.get("RESEND_API_KEY")) return "Falta el secreto RESEND_API_KEY en Edge Functions → Secrets";
-  if (!Deno.env.get("CORREO_REMITENTE")) return "Falta el secreto CORREO_REMITENTE en Edge Functions → Secrets";
-  const r = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from: Deno.env.get("CORREO_REMITENTE"), to: [para], subject: asunto, html }),
+// ---- Correo por Gmail (secretos GMAIL_USER y GMAIL_APP_PASSWORD) -------------------
+// GMAIL_APP_PASSWORD es una "contraseña de aplicación" de Google (16 letras), no la
+// contraseña normal de la cuenta. Se usa el puerto 465: Supabase bloquea el 25 y el 587.
+const gmailUser = () => Deno.env.get("GMAIL_USER") ?? Deno.env.get("gmail_user") ?? "";
+const gmailPass = () => (Deno.env.get("GMAIL_APP_PASSWORD") ?? Deno.env.get("gmail_app_password") ?? "").replace(/\s/g, "");
+
+let transporte: ReturnType<typeof nodemailer.createTransport> | null = null;
+function smtp() {
+  transporte ??= nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: { user: gmailUser(), pass: gmailPass() },
   });
-  if (r.ok) return null;
-  const texto = await r.text();
-  console.error("Código no enviado", para, r.status, texto);
-  let detalle = texto;
-  try { detalle = JSON.parse(texto).message ?? texto; } catch { /* texto plano */ }
-  return `Resend ${r.status}: ${detalle}`.slice(0, 300);
+  return transporte;
 }
+
+/** null si salió; si no, el motivo. */
+async function enviarGmail(para: string, asunto: string, html: string): Promise<string | null> {
+  if (!gmailUser()) return "Falta el secreto GMAIL_USER en Edge Functions → Secrets";
+  if (!gmailPass()) return "Falta el secreto GMAIL_APP_PASSWORD en Edge Functions → Secrets";
+  try {
+    await smtp().sendMail({ from: `"Axolotl Fitness Club" <${gmailUser()}>`, to: para, subject: asunto, html });
+    return null;
+  } catch (e) {
+    console.error("Correo no enviado", para, e);
+    return `Gmail: ${e instanceof Error ? e.message : String(e)}`.slice(0, 300);
+  }
+}
+
+const enviarCorreo = enviarGmail;
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Método no permitido", { status: 405 });

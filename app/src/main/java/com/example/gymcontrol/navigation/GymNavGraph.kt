@@ -26,6 +26,7 @@ import com.example.gymcontrol.ui.cliente.home.ClienteHomeScreen
 import com.example.gymcontrol.ui.cliente.perfil.ClientePerfilScreen
 import com.example.gymcontrol.ui.components.LocalOnLogout
 import com.example.gymcontrol.ui.components.SesionActual
+import com.example.gymcontrol.ui.encargado.avisos.AvisosScreen
 import com.example.gymcontrol.ui.encargado.dashboard.DashboardScreen
 import com.example.gymcontrol.ui.encargado.gastos.GastosScreen
 import com.example.gymcontrol.ui.encargado.pagos.PagosScreen
@@ -188,6 +189,9 @@ fun GymNavGraph() {
                 composable(Routes.ADMIN_REPORTS) {
                     ReportesScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
+                composable(Routes.ADMIN_NOTICES) {
+                    AvisosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
+                }
             }
 
             // Menú dev movido al centro-derecha para no tapar la hamburguesa del sidebar
@@ -275,6 +279,7 @@ private fun navigateAdmin(navController: NavHostController, section: String) {
         "Visitas" -> Routes.ADMIN_VISITS
         "Gastos" -> Routes.ADMIN_EXPENSES
         "Reportes" -> Routes.ADMIN_REPORTS
+        "Avisos" -> Routes.ADMIN_NOTICES
         else -> null
     }
     if (route != null) {

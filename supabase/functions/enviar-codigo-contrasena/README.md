@@ -6,7 +6,7 @@ Solo envía si el correo está registrado (con la cuenta activa o inactiva), per
 
 ```bash
 # 1. Supabase → SQL Editor: correr sql/restablecer_contrasena.sql
-# 2. Desplegar (usa los secretos RESEND_API_KEY y CORREO_REMITENTE)
+# 2. Desplegar (usa los secretos GMAIL_USER y GMAIL_APP_PASSWORD)
 supabase functions deploy enviar-codigo-contrasena
 ```
 
