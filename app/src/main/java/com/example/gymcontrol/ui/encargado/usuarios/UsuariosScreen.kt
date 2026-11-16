@@ -658,19 +658,28 @@ private fun NewStaffDialog(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))
-        Row(
+        // Recepción, Instructor y Encargado, uno debajo de otro y a todo lo ancho
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            listOf(
-                UserRole.RECEPCION,
-                UserRole.INSTRUCTOR
-            ).forEach { value ->
+            STAFF_ROLES.forEach { value ->
                 val label = value.toTranslatedString()
                 FilterChip(
                     selected = role == value,
                     onClick = { role = value },
-                    label = { Text(label, fontWeight = if (role == value) FontWeight.Bold else FontWeight.Normal) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    label = {
+                        Text(
+                            label,
+                            fontWeight = if (role == value) FontWeight.Bold else FontWeight.Normal,
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
                     colors = FilterChipDefaults.filterChipColors(
                         containerColor = ClienteTema.Navy,
                         labelColor = ClienteTema.Texto,
