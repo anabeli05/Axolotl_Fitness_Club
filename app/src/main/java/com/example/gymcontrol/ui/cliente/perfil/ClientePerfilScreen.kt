@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymcontrol.ui.components.translatedPlanName
 import com.example.gymcontrol.ui.manual.manualTarget
 import com.example.gymcontrol.ui.manual.rememberManualLista
 import androidx.compose.ui.window.Dialog
@@ -686,14 +687,4 @@ private fun GymTextField(
             disabledLabelColor = ClienteTema.TextoSec.copy(alpha = 0.5f)
         )
     )
-}
-
-@Composable
-private fun translatedPlanName(plan: String?): String {
-    return when (plan?.lowercase()?.trim()) {
-        "trimestral", "quarterly" -> stringResource(R.string.plan_quarterly)
-        "mensual", "mensualidad", "monthly" -> stringResource(R.string.plan_monthly)
-        "visita", "día", "day", "day pass" -> stringResource(R.string.plan_day)
-        else -> plan ?: "—"
-    }
 }

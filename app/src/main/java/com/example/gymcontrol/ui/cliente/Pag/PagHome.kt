@@ -1,5 +1,6 @@
 package com.example.gymcontrol.ui.cliente.Pag
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,6 +38,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.example.gymcontrol.ui.components.translatedPlanName
+import com.example.gymcontrol.ui.components.translatedPlanNameContext
 import com.example.gymcontrol.ui.manual.manualTarget
 import com.example.gymcontrol.ui.manual.rememberManualLista
 import androidx.compose.ui.text.style.TextAlign
@@ -201,7 +204,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
             }
         } else {
             // ---------- PASO 2: métodos de pago ----------
-            val concepto = buildConcepto(plan, nombreUsuario, numeroMembresia)
+            val concepto = buildConcepto(context, plan, nombreUsuario, numeroMembresia)
 
             LazyColumn(
                 modifier = Modifier
@@ -234,7 +237,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = stringResource(R.string.plan_selected_format, plan.nombre),
+                                text = stringResource(R.string.plan_selected_format, translatedPlanName(plan.nombre)),
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = ClienteTema.Texto
@@ -340,7 +343,7 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
                                 mensaje = context.resources.getString(R.string.receipt_sent_message)
                                 cargarUltimo()
                             } catch (e: Exception) {
-                                error = "No se pudo enviar: ${e.message?.substringBefore("\nCode:")?.substringAfterLast("ERROR: ")}"
+                                error = context.applicationContext.getString(R.string.error_send_failed_format, e.message?.substringBefore("\nCode:")?.substringAfterLast("ERROR: ").orEmpty())
                             } finally {
                                 enviando = false
                             }
@@ -352,10 +355,13 @@ fun PagHomeScreen(onNavigate: (String) -> Unit = {}) {
     }
 }
 
-private fun buildConcepto(plan: PlanPago, nombre: String, membresia: String): String {
-    val partes = mutableListOf("Pago plan ${plan.nombre} (${dinero(plan.precio)})")
+private fun buildConcepto(context: Context, plan: PlanPago, nombre: String, membresia: String): String {
+    val planNombre = translatedPlanNameContext(context, plan.nombre)
+    val labelPagoPlan = context.applicationContext.getString(R.string.label_concept_payment_plan)
+    val labelMembresia = context.applicationContext.getString(R.string.label_membership)
+    val partes = mutableListOf("$labelPagoPlan $planNombre (${dinero(plan.precio)})")
     if (nombre.isNotBlank()) partes += nombre
-    if (membresia.isNotBlank()) partes += "Membresía $membresia"
+    if (membresia.isNotBlank()) partes += "$labelMembresia $membresia"
     return partes.joinToString(" - ")
 }
 
@@ -389,7 +395,7 @@ private fun PlanCard(
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = plan.nombre,
+                    text = translatedPlanName(plan.nombre),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = ClienteTema.Texto

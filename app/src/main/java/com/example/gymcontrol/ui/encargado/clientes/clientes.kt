@@ -70,7 +70,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             todos = ClientesRepository.listar()
             errorMsg = null
         } catch (e: Exception) {
-            errorMsg = "No se pudo cargar: ${e.message}"
+            errorMsg = "${context.applicationContext.getString(R.string.perfil_load_error)}: ${e.message}"
         }
     }
 
@@ -221,11 +221,11 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                         errorForm = null
                                         recargar()
                                         val enviado = CorreoRepository.enviarBienvenida(correo)
-                                        info = if (enviado) "Cliente ${nuevo.numero} registrado. Se envió su membresía y contraseña al correo."
-                                        else "Cliente ${nuevo.numero} registrado, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026"
+                                        info = if (enviado) String.format(Locale.getDefault(), context.applicationContext.getString(R.string.client_registered_success_email), nuevo.numero)
+                                        else String.format(Locale.getDefault(), context.applicationContext.getString(R.string.client_registered_warning_email), nuevo.numero)
                                         if (!saludGuardada) info = "$info\n$msgSaludFallo"
                                     } catch (e: Exception) {
-                                        errorForm = mensaje(e, "No se pudo registrar")
+                                        errorForm = mensaje(e, context.applicationContext.getString(R.string.perfil_load_error))
                                     }
                                 }
                                 Unit
@@ -241,7 +241,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                         errorForm = null
                                         recargar()
                                     } catch (e: Exception) {
-                                        errorForm = mensaje(e, "No se pudo guardar")
+                                        errorForm = mensaje(e, context.applicationContext.getString(R.string.error_change_failed))
                                     }
                                 }
                                 Unit
@@ -267,19 +267,19 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 try {
                                     val vence = ClientesRepository.renovar(cl.id, plan, SesionActual.correo ?: "")
                                     recargar()
-                                    val renovada = "Membresía de ${cl.nombre} renovada hasta ${ClientesRepository.fechaApp(vence)}. Pago registrado."
+                                    val renovada = String.format(Locale.getDefault(), context.applicationContext.getString(R.string.client_renewed_success), cl.nombre, ClientesRepository.fechaApp(vence))
                                     info = renovada
                                     // Pago en efectivo ya aceptado: el comprobante va al correo registrado del cliente
                                     if (vence != null) {
                                         val falla = CorreoRepository.enviarRecibo(cl.id)
-                                        if (falla == null) info = "$renovada Comprobante enviado a ${cl.gmail}."
+                                        if (falla == null) info = "$renovada " + String.format(Locale.getDefault(), context.applicationContext.getString(R.string.receipt_sent_to_email), cl.gmail)
                                         else {
                                             info = null
-                                            errorMsg = "$renovada No se pudo enviar el comprobante por correo: $falla"
+                                            errorMsg = "$renovada " + String.format(Locale.getDefault(), context.applicationContext.getString(R.string.receipt_send_email_failed), falla)
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    errorMsg = mensaje(e, "No se pudo renovar")
+                                    errorMsg = mensaje(e, context.applicationContext.getString(R.string.error_change_failed))
                                 }
                             }
                             Unit

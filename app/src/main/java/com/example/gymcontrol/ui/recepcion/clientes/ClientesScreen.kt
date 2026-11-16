@@ -98,7 +98,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
             todos = ClientesRepository.listar()
             errorMsg = null
         } catch (e: Exception) {
-            errorMsg = "No se pudo cargar: ${e.message}"
+            errorMsg = "${context.applicationContext.getString(R.string.perfil_load_error)}: ${e.message}"
         }
         try { conRostro = AccesoFacialRepository.clientesConRostro() } catch (_: Exception) {}
         try { cancelacionPendiente = ClientesRepository.clientesConCancelacionPendiente() } catch (_: Exception) {}
@@ -376,19 +376,19 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                                 try {
                                     val vence = ClientesRepository.renovar(cl.id, plan, SesionActual.correo ?: "")
                                     recargar()
-                                    val renovada = "Membresía de ${cl.nombre} renovada hasta ${ClientesRepository.fechaApp(vence)}. Pago registrado."
+                                    val renovada = String.format(Locale.getDefault(), context.applicationContext.getString(R.string.client_renewed_success), cl.nombre, ClientesRepository.fechaApp(vence))
                                     info = renovada
                                     // Pago en efectivo ya aceptado: el comprobante va al correo registrado del cliente
                                     if (vence != null) {
                                         val falla = CorreoRepository.enviarRecibo(cl.id)
-                                        if (falla == null) info = "$renovada Comprobante enviado a ${cl.gmail}."
+                                        if (falla == null) info = "$renovada " + String.format(Locale.getDefault(), context.applicationContext.getString(R.string.receipt_sent_to_email), cl.gmail)
                                         else {
                                             info = null
-                                            errorMsg = "$renovada No se pudo enviar el comprobante por correo: $falla"
+                                            errorMsg = "$renovada " + String.format(Locale.getDefault(), context.applicationContext.getString(R.string.receipt_send_email_failed), falla)
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    errorMsg = mensaje(e, "No se pudo renovar")
+                                    errorMsg = mensaje(e, context.applicationContext.getString(R.string.error_change_failed))
                                 }
                             }
                             Unit
@@ -432,7 +432,7 @@ fun ClientesScreen(onNavigate: (String) -> Unit = {}) {
                         versionFoto = versionFoto + (cl.id to ((versionFoto[cl.id] ?: 0) + 1))
                         conRostro = conRostro + cl.id
                         registrandoRostro = null
-                        info = "Rostro de ${cl.nombre} registrado para el acceso"
+                        info = String.format(Locale.getDefault(), context.applicationContext.getString(R.string.face_registered_for_access), cl.nombre)
                     }
                 )
             }

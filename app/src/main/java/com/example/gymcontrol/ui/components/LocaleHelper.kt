@@ -20,6 +20,33 @@ fun metodoPagoLocalizado(metodo: String): String {
     }
 }
 
+@Composable
+fun translatedPlanName(plan: String?): String {
+    if (plan.isNullOrBlank()) return "—"
+    val p = plan.trim().lowercase(Locale.ROOT)
+    return when {
+        "anual" in p || "annual" in p -> stringResource(R.string.plan_annual)
+        "semestral" in p || "semi" in p -> stringResource(R.string.plan_semi_annual)
+        "trimestral" in p || "quarterly" in p -> stringResource(R.string.plan_quarterly)
+        "mensual" in p || "monthly" in p -> stringResource(R.string.plan_monthly)
+        "visita" in p || "día" in p || "dia" in p || "day" in p -> stringResource(R.string.plan_day)
+        else -> plan
+    }
+}
+
+fun translatedPlanNameContext(context: Context, plan: String?): String {
+    if (plan.isNullOrBlank()) return "—"
+    val p = plan.trim().lowercase(Locale.ROOT)
+    return when {
+        "anual" in p || "annual" in p -> context.getString(R.string.plan_annual)
+        "semestral" in p || "semi" in p -> context.getString(R.string.plan_semi_annual)
+        "trimestral" in p || "quarterly" in p -> context.getString(R.string.plan_quarterly)
+        "mensual" in p || "monthly" in p -> context.getString(R.string.plan_monthly)
+        "visita" in p || "día" in p || "dia" in p || "day" in p -> context.getString(R.string.plan_day)
+        else -> plan
+    }
+}
+
 object LocaleHelper {
     private const val PREFS_NAME = "app_lang_prefs"
     private const val KEY_LANG = "selected_language"

@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -241,12 +243,12 @@ private fun parsearDias(texto: String, dias: List<String>): Set<String> {
     return limpio.split(",").map { it.trim() }.filter { it in dias }.toSet()
 }
 
-private fun formatearDias(seleccionados: Set<String>, dias: List<String>): String {
+private fun formatearDias(seleccionados: Set<String>, dias: List<String>, context: Context): String {
     val ordenados = dias.filter { it in seleccionados }
     val indices = ordenados.map { dias.indexOf(it) }
     val consecutivos = indices.zipWithNext().all { (a, b) -> b == a + 1 }
     return if (ordenados.size >= 3 && consecutivos) {
-        "${ordenados.first()} a ${ordenados.last()}"
+        String.format(java.util.Locale.getDefault(), context.applicationContext.getString(R.string.to_day_range), ordenados.first(), ordenados.last())
     } else {
         ordenados.joinToString(", ")
     }
@@ -260,6 +262,7 @@ private fun EditarClienteDialog(
     onDismiss: () -> Unit,
     onGuardar: (dias: String, objetivo: String) -> Unit
 ) {
+    val context = LocalContext.current
     var seleccionados by remember { mutableStateOf(parsearDias(diasInicial, diasList)) }
     var objetivo by remember { mutableStateOf(objetivoInicial) }
     val esValido = seleccionados.isNotEmpty() && objetivo.isNotBlank()
@@ -306,7 +309,7 @@ private fun EditarClienteDialog(
                 Spacer(Modifier.height(28.dp))
 
                 Button(
-                    onClick = { onGuardar(formatearDias(seleccionados, diasList), objetivo.trim()) },
+                    onClick = { onGuardar(formatearDias(seleccionados, diasList, context), objetivo.trim()) },
                     enabled = esValido,
                     modifier = Modifier.size(width = 160.dp, height = 44.dp),
                     colors = ButtonDefaults.buttonColors(
