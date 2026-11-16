@@ -284,7 +284,7 @@
     <string name="encargado_usuarios_new_staff_title">New staff member</string>
     <string name="encargado_usuarios_edit_staff_title">Edit staff member</string>
     <string name="encargado_usuarios_email_assigned">Assigned email</string>
-    <string name="encargado_usuarios_initial_pwd_notice">Initial password is Axolotl2026 and was sent to user\'s email.</string>
+    <string name="encargado_usuarios_initial_pwd_notice">Initial password is Axolotl2026 and is sent to the user\'s email. They must change it from their Profile in the app.</string>
     <string name="encargado_usuarios_role_label">Role</string>
     <string name="encargado_usuarios_advisory_cost_label">Advisory cost</string>
     <string name="encargado_usuarios_max_capacity_label">Max capacity</string>
@@ -440,7 +440,7 @@
     <string name="term_4_content">Only people aged 18 or older may use the app and the facilities. Reception or the manager checks this with an official ID (INE), and no copy or data from it is kept. If the person is not old enough, service is denied.</string>
 
     <string name="term_5_title">5. Account, password and lockout</string>
-    <string name="term_5_content">Accounts are created by staff; there is no self-registration. All roles log in with email and password. The initial password is sent to the user\'s email. The account and password are personal and non-transferable, and you are responsible for anything done with them. The password must have at least 8 characters, with an uppercase letter, a lowercase letter, a number and a symbol. You can change it from the login screen; if you do not remember the current one, the app sends a code to your email to confirm your identity. After 5 failed attempts, the account is locked for 15 minutes, and the counter resets when you log in successfully.</string>
+    <string name="term_5_content">Accounts are created by staff; there is no self-registration. All roles log in with email and password. The initial password is sent to the user\'s email. The account and password are personal and non-transferable, and you are responsible for anything done with them. The password must have at least 8 characters, with an uppercase letter, a lowercase letter, a number and a symbol. You can change it from the Profile section inside the app; if you do not remember the current one, the app sends a code to your email to confirm your identity. After 5 failed attempts, the account is locked for 15 minutes, and the counter resets when you log in successfully.</string>
 
     <string name="term_6_title">6. Inactivity and account deletion</string>
     <string name="term_6_content">If a client goes 365 days without entering or using the app, their account is deleted automatically along with their personal data. They are notified by email 30 days beforehand. This applies to clients only. When an account is deleted, no personal data is kept; only payment records are retained, for accounting and tax purposes.</string>
@@ -572,8 +572,8 @@
 
     <!-- Encargado: Personal -->
     <string name="confirm_add_staff">Are you sure you want to register %1$s as %2$s?</string>
-    <string name="staff_added_success">Staff registered successfully. Password sent to email.</string>
-    <string name="staff_added_warning">Staff registered, but email could not be sent. Initial password: Axolotl2026</string>
+    <string name="staff_added_success">Staff registered successfully. Temporary password sent to email; they must change it in their Profile.</string>
+    <string name="staff_added_warning">Staff registered, but email could not be sent. Initial password: Axolotl2026 (must be changed in their Profile).</string>
 
     <!-- Servicios -->
     <string name="duration_days_format">%1$d %2$s</string>

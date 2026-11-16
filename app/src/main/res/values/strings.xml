@@ -284,7 +284,7 @@
     <string name="encargado_usuarios_new_staff_title">Nuevo personal</string>
     <string name="encargado_usuarios_edit_staff_title">Editar personal</string>
     <string name="encargado_usuarios_email_assigned">Correo asignado</string>
-    <string name="encargado_usuarios_initial_pwd_notice">La contraseña inicial es Axolotl2026 y se envía al correo del usuario.</string>
+    <string name="encargado_usuarios_initial_pwd_notice">La contraseña inicial es Axolotl2026 y se envía al correo del usuario. Debe cambiarla entrando a su Perfil en la app.</string>
     <string name="encargado_usuarios_role_label">Rol</string>
     <string name="encargado_usuarios_advisory_cost_label">Costo asesoría</string>
     <string name="encargado_usuarios_max_capacity_label">Capacidad máxima</string>
@@ -437,7 +437,7 @@
     <string name="term_4_content">Solo pueden usar la aplicación y las instalaciones personas de 18 años o más. Recepción o el encargado lo verifican con una identificación oficial (INE) y no se guarda copia ni dato alguno de ella. Si la persona no tiene la edad, se le niega el servicio.</string>
 
     <string name="term_5_title">5. Cuenta, contraseña y bloqueo</string>
-    <string name="term_5_content">Las cuentas las da de alta el personal; no hay autorregistro. Todos los roles inician sesión con correo y contraseña. La contraseña inicial se envía al correo del usuario. La cuenta y la contraseña son personales e intransferibles, y eres responsable de lo que se haga con ellas. La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo. Puedes cambiarla desde la pantalla de inicio de sesión; si no recuerdas la actual, la aplicación envía un código a tu correo para confirmar tu identidad. Tras 5 intentos fallidos, la cuenta se bloquea durante 15 minutos, y el contador se reinicia cuando entras correctamente.</string>
+    <string name="term_5_content">Las cuentas las da de alta el personal; no hay autorregistro. Todos los roles inician sesión con correo y contraseña. La contraseña inicial se envía al correo del usuario. La cuenta y la contraseña son personales e intransferibles, y eres responsable de lo que se haga con ellas. La contraseña debe tener mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo. Puedes cambiarla entrando a la sección Perfil dentro de la aplicación; si no recuerdas la actual, la aplicación envía un código a tu correo para confirmar tu identidad. Tras 5 intentos fallidos, la cuenta se bloquea durante 15 minutos, y el contador se reinicia cuando entras correctamente.</string>
 
     <string name="term_6_title">6. Inactividad y eliminación de la cuenta</string>
     <string name="term_6_content">Si un cliente pasa 365 días sin ingresar ni usar la aplicación, su cuenta se elimina de forma automática junto con sus datos personales. Se le avisa por correo 30 días antes. Esto solo aplica a clientes. Al eliminar la cuenta no se conserva ningún dato personal; solo se mantienen los registros de pagos, con fines contables y fiscales.</string>
@@ -569,8 +569,8 @@
 
     <!-- Encargado: Personal -->
     <string name="confirm_add_staff">¿Estás seguro de dar de alta a %1$s como %2$s?</string>
-    <string name="staff_added_success">Alta realizada. Se envió la contraseña al correo.</string>
-    <string name="staff_added_warning">Alta realizada, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026</string>
+    <string name="staff_added_success">Alta realizada. Se envió la contraseña temporal al correo; el usuario debe cambiarla en su Perfil.</string>
+    <string name="staff_added_warning">Alta realizada, pero no se pudo enviar el correo. Contraseña inicial: Axolotl2026 (debe cambiarla en su Perfil).</string>
 
     <!-- Servicios -->
     <string name="duration_days_format">%1$d %2$s</string>
