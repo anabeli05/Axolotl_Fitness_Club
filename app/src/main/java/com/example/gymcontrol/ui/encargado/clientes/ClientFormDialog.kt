@@ -198,7 +198,7 @@ fun ClientFormDialog(
                 warningText = stringResource(R.string.encargado_client_form_phone_warning),
                 keyboardType = KeyboardType.Number,
                 errorText = if (contactPhone.isNotEmpty() && contactPhone.length < 10) {
-                    "Deben ser 10 dígitos (${contactPhone.length}/10)"
+                    stringResource(R.string.perfil_phone_length, contactPhone.length)
                 } else null
             )
             Spacer(Modifier.height(14.dp))

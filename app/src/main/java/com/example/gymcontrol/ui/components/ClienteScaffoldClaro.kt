@@ -114,6 +114,7 @@ fun translatedTabLabel(label: String): String {
         "Asesorías" -> stringResource(R.string.tab_advisories)
         "Pagos" -> stringResource(R.string.tab_payments)
         "Perfil" -> stringResource(R.string.tab_profile)
+        "Mis clientes" -> stringResource(R.string.tab_my_clients)
         else -> label
     }
 }

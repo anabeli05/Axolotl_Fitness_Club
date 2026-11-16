@@ -376,7 +376,11 @@
     <string name="plan_day">Day Pass</string>
     <string name="plan_monthly">Monthly</string>
     <string name="plan_quarterly">Quarterly</string>
+    <string name="plan_semi_annual">Semi-Annual</string>
+    <string name="plan_annual">Annual</string>
     <string name="label_plan_prefix">Plan: %s</string>
+    <string name="label_concept_payment_plan">Plan payment</string>
+    <string name="error_send_failed_format">Could not send: %s</string>
     <string name="bank_title">Bank</string>
 
     <!-- Recepción / Scanner / Facial -->
@@ -817,4 +821,19 @@
     <string name="notices_send_pending">Send pending emails</string>
     <string name="notices_send_failed">The emails could not be sent: %1$s</string>
     <string name="facial_prompt_blink">Blink slowly to confirm it\'s you</string>
+    <string name="reset_password_check_email_title">Check your email</string>
+    <string name="reset_password_code_sent_desc">If %1$s is registered, a 6-digit code was sent. Enter it here (expires in 15 minutes). Also check your spam folder.</string>
+    <string name="reset_password_code_label">Code</string>
+    <string name="reset_password_change_info">Change details</string>
+    <string name="reset_password_resend_countdown">Resend in %d s</string>
+    <string name="reset_password_resend_code">Resend code</string>
+    <string name="reset_password_send_code_error">Could not send the code</string>
+    <string name="reset_password_change_error">Could not change the password</string>
+    <string name="client_renewed_success">Membership of %1$s renewed until %2$s. Payment registered.</string>
+    <string name="receipt_sent_to_email">Receipt sent to %1$s.</string>
+    <string name="receipt_send_email_failed">Could not send receipt by email: %1$s</string>
+    <string name="cliente_asesorias_request_error">Could not request advisory</string>
+    <string name="cliente_asesorias_cancel_error">Could not cancel request</string>
+    <string name="tab_my_clients">My clients</string>
+    <string name="to_day_range">%1$s to %2$s</string>
 </resources>

@@ -382,7 +382,11 @@
     <string name="plan_day">Visita / Día</string>
     <string name="plan_monthly">Mensual</string>
     <string name="plan_quarterly">Trimestral</string>
+    <string name="plan_semi_annual">Semestral</string>
+    <string name="plan_annual">Anual</string>
     <string name="label_plan_prefix">Plan: %s</string>
+    <string name="label_concept_payment_plan">Pago plan</string>
+    <string name="error_send_failed_format">No se pudo enviar: %s</string>
     <string name="bank_title">Banco</string>
 
     <!-- Recepción / Scanner / Facial -->
@@ -814,4 +818,19 @@
     <string name="notices_send_pending">Enviar correos pendientes</string>
     <string name="notices_send_failed">No se pudieron enviar los correos: %1$s</string>
     <string name="facial_prompt_blink">Parpadea despacio para confirmar que eres tú</string>
+    <string name="reset_password_check_email_title">Revisa tu correo</string>
+    <string name="reset_password_code_sent_desc">Si %1$s está registrado, te llegó un código de 6 dígitos. Escríbelo aquí (vence en 15 minutos). Revisa también la carpeta de spam.</string>
+    <string name="reset_password_code_label">Código</string>
+    <string name="reset_password_change_info">Cambiar datos</string>
+    <string name="reset_password_resend_countdown">Reenviar en %d s</string>
+    <string name="reset_password_resend_code">Reenviar código</string>
+    <string name="reset_password_send_code_error">No se pudo enviar el código</string>
+    <string name="reset_password_change_error">No se pudo cambiar la contraseña</string>
+    <string name="client_renewed_success">Membresía de %1$s renovada hasta %2$s. Pago registrado.</string>
+    <string name="receipt_sent_to_email">Comprobante enviado a %1$s.</string>
+    <string name="receipt_send_email_failed">No se pudo enviar el comprobante por correo: %1$s</string>
+    <string name="cliente_asesorias_request_error">No se pudo solicitar la asesoría</string>
+    <string name="cliente_asesorias_cancel_error">No se pudo cancelar la solicitud</string>
+    <string name="tab_my_clients">Mis clientes</string>
+    <string name="to_day_range">%1$s a %2$s</string>
 </resources>

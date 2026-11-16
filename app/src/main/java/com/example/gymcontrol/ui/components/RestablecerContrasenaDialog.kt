@@ -100,7 +100,7 @@ fun RestablecerContrasenaDialog(
                     val minutos = Regex("""(\d+)""").find(msg)?.groupValues?.get(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
                     context.applicationContext.getString(R.string.account_locked_minutes, minutos)
                 } else {
-                    msg.ifBlank { "No se pudo enviar el código" }
+                    msg.ifBlank { context.applicationContext.getString(R.string.reset_password_send_code_error) }
                 }
             }
             finally {
@@ -163,7 +163,7 @@ fun RestablecerContrasenaDialog(
         shape = RoundedCornerShape(20.dp),
         title = {
             Text(
-                if (codigoEnviado) "Revisa tu correo" else stringResource(R.string.forgot_password_title),
+                if (codigoEnviado) stringResource(R.string.reset_password_check_email_title) else stringResource(R.string.forgot_password_title),
                 color = colores.texto,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -195,12 +195,12 @@ fun RestablecerContrasenaDialog(
                     }
                 } else {
                     Text(
-                        "Si $correo está registrado, te llegó un código de 6 dígitos. Escríbelo aquí (vence en 15 minutos). Revisa también la carpeta de spam.",
+                        stringResource(R.string.reset_password_code_sent_desc, correo),
                         color = colores.textoSec,
                         style = MaterialTheme.typography.bodySmall
                     )
                     Spacer(Modifier.height(10.dp))
-                    campo(codigo, { v -> codigo = v.filter { it.isDigit() }.take(6) }, "Código", KeyboardType.NumberPassword)
+                    campo(codigo, { v -> codigo = v.filter { it.isDigit() }.take(6) }, stringResource(R.string.reset_password_code_label), KeyboardType.NumberPassword)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -209,13 +209,13 @@ fun RestablecerContrasenaDialog(
                         TextButton(
                             enabled = !cargando,
                             onClick = { codigoEnviado = false; error = null }
-                        ) { Text("Cambiar datos", color = colores.textoSec) }
+                        ) { Text(stringResource(R.string.reset_password_change_info), color = colores.textoSec) }
                         TextButton(
                             enabled = !cargando && espera == 0,
                             onClick = { enviarCodigo() }
                         ) {
                             Text(
-                                if (espera > 0) "Reenviar en $espera s" else "Reenviar código",
+                                if (espera > 0) stringResource(R.string.reset_password_resend_countdown, espera) else stringResource(R.string.reset_password_resend_code),
                                 color = if (espera > 0) colores.textoSec else colores.acento
                             )
                         }
@@ -264,7 +264,7 @@ fun RestablecerContrasenaDialog(
                                     val minutos = Regex("""(\d+)""").find(msg)?.groupValues?.get(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
                                     context.applicationContext.getString(R.string.account_locked_minutes, minutos)
                                 } else {
-                                    msg.ifBlank { "No se pudo cambiar la contraseña" }
+                                    msg.ifBlank { context.applicationContext.getString(R.string.reset_password_change_error) }
                                 }
                             } finally {
                                 cargando = false

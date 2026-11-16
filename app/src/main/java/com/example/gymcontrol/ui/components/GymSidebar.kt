@@ -60,6 +60,7 @@ fun translatedSection(section: String): String = when (section) {
     "Home" -> stringResource(R.string.tab_home)
     "Dashboard" -> stringResource(R.string.tab_dashboard)
     "Clientes" -> stringResource(R.string.tab_clients)
+    "Mis clientes" -> stringResource(R.string.tab_my_clients)
     "Solicitudes" -> stringResource(R.string.tab_requests)
     "Visitas" -> stringResource(R.string.tab_visits)
     "Personal" -> stringResource(R.string.tab_staff)

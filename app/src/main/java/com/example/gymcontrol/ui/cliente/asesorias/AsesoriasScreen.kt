@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +42,7 @@ private class CancelTarget(val instructorId: Long, val instructorName: String)
 
 @Composable
 fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var instructors by remember { mutableStateOf<List<InstructorRow>>(emptyList()) }
     var estados by remember { mutableStateOf<Map<Long, String>>(emptyMap()) }
@@ -53,7 +55,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
             instructors = AsesoriasRepository.instructores()
             estados = AsesoriasRepository.misSolicitudes(correo).associate { it.instructorId to it.estado }
         } catch (e: Exception) {
-            mensaje = "No se pudo cargar: ${e.message?.substringBefore("\nCode:")}"
+            mensaje = "${context.applicationContext.getString(R.string.perfil_load_error)}: ${e.message?.substringBefore("\nCode:")}"
         }
     }
 
@@ -195,7 +197,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                             recargar()
                                         } catch (e: Exception) {
                                             mensaje = e.message?.substringBefore("\nCode:")
-                                                ?: "No se pudo solicitar"
+                                                ?: context.applicationContext.getString(R.string.cliente_asesorias_request_error)
                                         }
                                     }
                                 },
@@ -270,7 +272,7 @@ fun AsesoriasScreen(onNavigate: (String) -> Unit = {}) {
                                     mensaje = null
                                     recargar()
                                 } catch (e: Exception) {
-                                    mensaje = e.message?.substringBefore("\nCode:") ?: "No se pudo cancelar"
+                                    mensaje = e.message?.substringBefore("\nCode:") ?: context.applicationContext.getString(R.string.cliente_asesorias_cancel_error)
                                 }
                             }
                         },
