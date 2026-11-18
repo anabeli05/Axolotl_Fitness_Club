@@ -11,6 +11,21 @@ Comunicación: correos de bienvenida, recibos, vencimientos y avisos generales.
 
 La app está en español e inglés y tiene tema claro y oscuro. Incluye un manual de usuario interactivo dentro de la app.
 
+## Tecnologías
+
+| Capa | Tecnología |
+|:---|:---|
+| **Lenguaje** | Kotlin (JDK 17) |
+| **UI** | Jetpack Compose + Material 3 |
+| **Navegación** | Navigation Compose 2.10.0 |
+| **Backend / BD** | Supabase (PostgreSQL, RPC, Realtime) con `supabase-kt` 3.5.0 |
+| **Cliente HTTP** | Ktor + OkHttp |
+| **Cámara** | CameraX 1.4.1 |
+| **Detección de rostro** | ML Kit Face Detection |
+| **Reconocimiento** | TensorFlow Lite 2.16.1 (FaceNet, vectores de 512 dimensiones) |
+| **Correos** | Supabase Edge Functions (Deno/TypeScript) + Gmail |
+| **Build** | Gradle 9.5.0 · `compileSdk` / `targetSdk` 37 · `minSdk` 26 |
+
 ## Qué incluye
 
 ### Cliente
@@ -109,16 +124,6 @@ Cuando termines la app, elimina `RoleDevMenu()` de `GymNavGraph.kt` y crea la na
 - Compose BOM 2026.08.00.
 - Navigation Compose 2.10.0.
 
-## Siguiente etapa recomendada
-
-1. Diseñar cada pantalla.
-2. Crear ViewModels.
-3. Definir contrato real del backend.
-4. Implementar autenticación.
-5. Implementar reconocimiento facial/cámara (ver `sql/reconocimiento_facial.sql`).
-6. Conectar CRUD de com.example.gymcontrol.ui.encargado.clientes, usuarios, servicios y gastos.
-7. Implementar solicitudes y reportes.
-
 ## Reconocimiento facial
 
 - Base de datos: correr una vez `sql/reconocimiento_facial.sql` en Supabase (SQL Editor).
@@ -128,28 +133,7 @@ Cuando termines la app, elimina `RoleDevMenu()` de `GymNavGraph.kt` y crea la na
 - Movimientos en `registros_acceso` (`es_entrada`: TRUE = entrada, FALSE = salida) y estado en `clientes.dentro`.
 - Umbral de similitud: `_umbral_rostro()` en el SQL (0.70).
 
-## Inversión en equipo
+## Aviso legal y privacidad
 
-| Equipo                    | Cantidad | Costo (MXN) |
-|---------------------------|:--------:|------------:|
-| Laptop ASUS ExpertBook    | 6        | 66,000      |
-| OPPO Reno 14 Pro          | 1        | 9,000       |
-| POCO M7 Pro               | 1        | 4,000       |
-| Redmi 13 Pro 5G           | 1        | 8,000       |
-| Samsung Galaxy A55 5G     | 1        | 8,000       |
-| Samsung Galaxy A56 5G     | 1        | 8,000       |
-| Samsung Galaxy A54 5G     | 1        | 10,000      |
-| **Total inversión en equipo** |      | **113,000** |
-
-## Mano de obra
-
-| Integrante | Rol                             | Horas | Tarifa/hora (MXN) | Subtotal (MXN) |
-|------------|---------------------------------|:-----:|:-----------------:|---------------:|
-| Fernando   |  Desarrollo Android             | 120   | 250               | 30,000         |
-| Axel       |  Desarrollo Android             | 120   | 250               | 30,000         |
-| Anabeli    |  Base de datos / Supabase       | 100   | 250               | 25,000         |
-| Yureni     |  Interfaz y diseño              | 90    | 250               | 22,500         |
-| Isabela    |  Interfaz y diseño              | 90    | 250               | 22,500         |
-| Sahid      |  Traducción y manual            | 60    | 250               | 15,000         |
-|            | **Total mano de obra**          | **580** |                 | **145,000**    |
+La app incluye Términos y Condiciones y Política de Privacidad (aceptación obligatoria en el login), con tratamiento de datos biométricos y de salud, derechos ARCO, reembolsos y retención de datos (eliminación automática tras 365 días de inactividad de un cliente).
 
