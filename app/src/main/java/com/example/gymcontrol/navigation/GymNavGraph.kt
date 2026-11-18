@@ -29,6 +29,7 @@ import com.example.gymcontrol.ui.components.SesionActual
 import com.example.gymcontrol.ui.encargado.avisos.AvisosScreen
 import com.example.gymcontrol.ui.encargado.dashboard.DashboardScreen
 import com.example.gymcontrol.ui.encargado.gastos.GastosScreen
+import com.example.gymcontrol.ui.encargado.movimientos.MovimientosScreen
 import com.example.gymcontrol.ui.encargado.pagos.PagosScreen
 import com.example.gymcontrol.ui.encargado.perfil.EncargadoPerfilScreen
 import com.example.gymcontrol.ui.encargado.reportes.ReportesScreen
@@ -194,6 +195,9 @@ fun GymNavGraph() {
                 composable(Routes.ADMIN_NOTICES) {
                     AvisosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
+                composable(Routes.ADMIN_MOVEMENTS) {
+                    MovimientosScreen(onNavigate = { section -> navigateAdmin(navController, section) })
+                }
                 composable(Routes.ADMIN_PROFILE) {
                     EncargadoPerfilScreen(onNavigate = { section -> navigateAdmin(navController, section) })
                 }
@@ -227,6 +231,7 @@ fun GymNavGraph() {
                 Routes.ADMIN_EXPENSES -> "Gastos"
                 Routes.ADMIN_REPORTS -> "Reportes"
                 Routes.ADMIN_NOTICES -> "Avisos"
+                Routes.ADMIN_MOVEMENTS -> "Movimientos"
                 Routes.ADMIN_PROFILE -> "Perfil"
                 else -> null
             }
@@ -324,6 +329,7 @@ private fun navigateAdmin(navController: NavHostController, section: String) {
         "Gastos" -> Routes.ADMIN_EXPENSES
         "Reportes" -> Routes.ADMIN_REPORTS
         "Avisos" -> Routes.ADMIN_NOTICES
+        "Movimientos" -> Routes.ADMIN_MOVEMENTS
         "Perfil" -> Routes.ADMIN_PROFILE
         else -> null
     }

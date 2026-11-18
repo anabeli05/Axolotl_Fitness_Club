@@ -836,4 +836,27 @@
     <string name="cliente_asesorias_cancel_error">Could not cancel request</string>
     <string name="tab_my_clients">My clients</string>
     <string name="to_day_range">%1$s to %2$s</string>
+    <string name="tab_movements">Activity</string>
+    <string name="movements_title">Activity by role</string>
+    <string name="movements_search">Search who made the change</string>
+    <string name="movements_clear_search">Clear search</string>
+    <string name="movements_all">All</string>
+    <string name="movements_no_role">No role</string>
+    <string name="movements_empty">No activity recorded yet.</string>
+    <string name="movements_no_match">No activity matches your search.</string>
+    <string name="movements_load_failed">Could not load the activity: %1$s</string>
+    <string name="movements_retry">Retry</string>
+    <string name="movements_show_more">Show more</string>
+    <string name="movements_view_detail">View details</string>
+    <string name="movements_detail_title">Activity details</string>
+    <string name="movements_before">Before</string>
+    <string name="movements_after">After</string>
+    <string name="movements_action_insert">Created</string>
+    <string name="movements_action_update">Edited</string>
+    <string name="movements_action_delete">Deleted</string>
+    <string name="movements_action_permission">Permission change</string>
+    <string name="movements_action_login">Sign-in</string>
+    <string name="movements_action_cancel">Cancellation</string>
+    <string name="movements_action_payment">Payment</string>
+    <string name="movements_action_other">Other</string>
 </resources>
