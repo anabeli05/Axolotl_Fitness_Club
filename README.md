@@ -2,6 +2,15 @@
 
 Proyecto base para Android Studio creado en Kotlin + Jetpack Compose.
 
+GymControl es la app de Axolotl Fitness Club. Resuelve cuatro problemas de un gimnasio:
+
+Acceso: entrada y salida automáticas con la cámara de recepción (sin tarjetas ni QR).
+Cobros: membresías, visitas de un día y asesorías, con validación de transferencias/depósitos por el encargado.
+Control: aforo en tiempo real, horarios de menor afluencia, ingresos, gastos y reembolsos.
+Comunicación: correos de bienvenida, recibos, vencimientos y avisos generales.
+
+La app está en español e inglés y tiene tema claro y oscuro. Incluye un manual de usuario interactivo dentro de la app.
+
 ## Qué incluye
 
 ### Cliente
@@ -118,3 +127,29 @@ Cuando termines la app, elimina `RoleDevMenu()` de `GymNavGraph.kt` y crea la na
 - Solo se guarda un vector de 192 números por cliente (`rostros_clientes`), nunca fotos.
 - Movimientos en `registros_acceso` (`es_entrada`: TRUE = entrada, FALSE = salida) y estado en `clientes.dentro`.
 - Umbral de similitud: `_umbral_rostro()` en el SQL (0.70).
+
+## Inversión en equipo
+
+| Equipo                    | Cantidad | Costo (MXN) |
+|---------------------------|:--------:|------------:|
+| Laptop ASUS ExpertBook    | 6        | 66,000      |
+| OPPO Reno 14 Pro          | 1        | 9,000       |
+| POCO M7 Pro               | 1        | 4,000       |
+| Redmi 13 Pro 5G           | 1        | 8,000       |
+| Samsung Galaxy A55 5G     | 1        | 8,000       |
+| Samsung Galaxy A56 5G     | 1        | 8,000       |
+| Samsung Galaxy A54 5G     | 1        | 10,000      |
+| **Total inversión en equipo** |      | **113,000** |
+
+## Mano de obra
+
+| Integrante | Rol                             | Horas | Tarifa/hora (MXN) | Subtotal (MXN) |
+|------------|---------------------------------|:-----:|:-----------------:|---------------:|
+| Fernando   |  Desarrollo Android             | 120   | 250               | 30,000         |
+| Axel       |  Desarrollo Android             | 120   | 250               | 30,000         |
+| Anabeli    |  Base de datos / Supabase       | 100   | 250               | 25,000         |
+| Yureni     |  Interfaz y diseño              | 90    | 250               | 22,500         |
+| Isabela    |  Interfaz y diseño              | 90    | 250               | 22,500         |
+| Sahid      |  Traducción y manual            | 60    | 250               | 15,000         |
+|            | **Total mano de obra**          | **580** |                 | **145,000**    |
+
