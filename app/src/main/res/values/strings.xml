@@ -833,4 +833,27 @@
     <string name="cliente_asesorias_cancel_error">No se pudo cancelar la solicitud</string>
     <string name="tab_my_clients">Mis clientes</string>
     <string name="to_day_range">%1$s a %2$s</string>
+    <string name="tab_movements">Movimientos</string>
+    <string name="movements_title">Movimientos por rol</string>
+    <string name="movements_search">Buscar quién hizo el movimiento</string>
+    <string name="movements_clear_search">Borrar búsqueda</string>
+    <string name="movements_all">Todos</string>
+    <string name="movements_no_role">Sin rol</string>
+    <string name="movements_empty">Aún no hay movimientos registrados.</string>
+    <string name="movements_no_match">Ningún movimiento coincide con la búsqueda.</string>
+    <string name="movements_load_failed">No se pudieron cargar los movimientos: %1$s</string>
+    <string name="movements_retry">Reintentar</string>
+    <string name="movements_show_more">Mostrar más</string>
+    <string name="movements_view_detail">Ver detalle</string>
+    <string name="movements_detail_title">Detalle del movimiento</string>
+    <string name="movements_before">Antes</string>
+    <string name="movements_after">Después</string>
+    <string name="movements_action_insert">Alta</string>
+    <string name="movements_action_update">Edición</string>
+    <string name="movements_action_delete">Eliminación</string>
+    <string name="movements_action_permission">Cambio de permiso</string>
+    <string name="movements_action_login">Inicio de sesión</string>
+    <string name="movements_action_cancel">Cancelación</string>
+    <string name="movements_action_payment">Pago</string>
+    <string name="movements_action_other">Otro</string>
 </resources>
